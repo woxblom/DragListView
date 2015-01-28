@@ -22,6 +22,7 @@ public class DragItemRecyclerView extends RecyclerView {
 
     public interface Callback {
         public void onDragStarted(int itemPosition);
+
         public void onDragEnded(int newItemPosition);
     }
 
@@ -97,7 +98,7 @@ public class DragItemRecyclerView extends RecyclerView {
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        if (mDragState == DragState.DRAGGING) {
+        if (mDragState != DragState.DRAG_ENDED) {
             mDragItemImage.draw(canvas);
         }
     }
@@ -164,20 +165,21 @@ public class DragItemRecyclerView extends RecyclerView {
         mDragState = DragState.DRAG_STARTED;
         mDragItem = (DragItemAdapter.DragItem) event.getLocalState();
         mDragItemImage.createBitmap(mDragItem.mItemView);
+        mDragItemImage.setCenterX(mDragItem.mItemView.getX() + mDragItem.mItemView.getWidth() / 2);
+        mDragItemImage.setCenterY(mDragItem.mItemView.getY() + mDragItem.mItemView.getHeight() / 2);
+        mDragItemImage.startStartAnimation();
 
         mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
+        mAdapter.setDragItem(mDragItem);
+        mAdapter.notifyItemChanged(mItemPosition);
         if (mCallback != null) {
             mCallback.onDragStarted(mItemPosition);
         }
+
+        invalidate();
     }
 
     private void onDragging(DragEvent event) {
-        if(mDragState == DragState.DRAG_STARTED) {
-            mDragItemImage.startStartAnimation();
-            mAdapter.setDragItem(mDragItem);
-            mAdapter.notifyItemChanged(mItemPosition);
-        }
-
         mDragState = DragState.DRAGGING;
         mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
         mDragItemImage.setCenterX(event.getX());
@@ -248,7 +250,7 @@ public class DragItemRecyclerView extends RecyclerView {
                 final float bottom = top + mBitmap.getHeight();
                 final float left = mIsGrid ? mCenterX - mBitmap.getWidth() / 2 : 0;
 
-                if(mDrawBackgroundColor) {
+                if (mDrawBackgroundColor) {
                     mPaint.setColor(mColor);
                     mPaint.setAlpha((int) (Color.alpha(mColor) * mAlphaValue));
                     canvas.drawRect(left, top, left + mBitmap.getWidth(), bottom, mPaint);
