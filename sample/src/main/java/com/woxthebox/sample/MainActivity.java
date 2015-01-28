@@ -1,39 +1,73 @@
 package com.woxthebox.sample;
 
+import android.graphics.Color;
+import android.support.v4.util.Pair;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.woxthebox.dragitemrecyclerview.DragItemRecyclerView;
+
+import java.util.ArrayList;
+
 
 public class MainActivity extends ActionBarActivity {
+
+    private ArrayList<Pair<Long, String>> mItemArray;
+    private DragItemRecyclerView mRecyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    }
 
+        mRecyclerView = (DragItemRecyclerView) findViewById(R.id.recycle_view);
+
+        mItemArray = new ArrayList<>();
+        for (int i = 0; i < 40; i++) {
+            mItemArray.add(new Pair<>(Long.valueOf(i), "Item " + i));
+        }
+
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setDragItemBackgroundColor(Color.parseColor("#AACCCCCC"));
+
+        setupListRecyclerView();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_list:
+                setupListRecyclerView();
+                return true;
+            case R.id.action_grid:
+                setupGridRecyclerView();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setupListRecyclerView() {
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.item_layout);
+        mRecyclerView.setAdapter(listAdapter);
+    }
+
+    private void setupGridRecyclerView() {
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 4));
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout);
+        mRecyclerView.setAdapter(listAdapter);
     }
 }
