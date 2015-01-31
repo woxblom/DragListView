@@ -10,7 +10,7 @@ Youtube demo video<br>
 * Get a callback when a drag is started and ended with the position
 
 ## Usage
-**NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager is supported.
+**NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager are supported.
 List and Grid layouts are used as example in the sample project.
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -25,7 +25,7 @@ List and Grid layouts are used as example in the sample project.
             }
         });
   
-  For you adapter, extend DragItemAdapter and implement the following methods.
+  For your adapter, extend DragItemAdapter and implement the methods below.
   You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
 
     private ArrayList<Pair<Long, String>> mItemList;  
@@ -47,7 +47,7 @@ List and Grid layouts are used as example in the sample project.
         notifyDataSetChanged();
     }
   
-  Your ViewHolder should extend DragItemAdapter.ViewHolder and supply a the id of the view that should respond to a drag.
+  Your ViewHolder should extend DragItemAdapter.ViewHolder and you must supply an id of the view that should respond to a drag.
   
     public class ViewHolder extends DragItemAdapter.ViewHolder {
         public TextView mText;
@@ -63,7 +63,7 @@ List and Grid layouts are used as example in the sample project.
 If you use DragItemRecyclerView code in your application you should inform the author about it (*email: woxthebox@gmail.com*) like this:
 > **Subject:** DragItemRecyclerView usage notification<br />
 > **Text:** I use DragItemRecyclerView in {application_name} - {http://link_to_google_play}.
-> I [allow | don't allow] to mention my app in section "Applications using DragItemRecyclerView" on GitHub.
+> I [allow | don't allow] you to mention my app in section "Applications using DragItemRecyclerView" on GitHub.
 
     Copyright 2014 Magnus Woxblom
 
