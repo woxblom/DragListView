@@ -7,7 +7,8 @@ DragItemRecyclerView can be used when you want to be able to re-order items in a
 * Get a callback when a drag is started and ended with the position
 
 ## Usage
-**NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager is supported. List and Grid layouts are used as example in the sample project.
+**NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager is supported.
+List and Grid layouts are used as example in the sample project.
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setDragItemBackgroundColor(Color.parseColor("#AACCCCCC"));
@@ -21,7 +22,8 @@ DragItemRecyclerView can be used when you want to be able to re-order items in a
             }
         });
   
-  For you adapter, extend DragItemAdapter and implement the following methods<br>
+  For you adapter, extend DragItemAdapter and implement the following methods.
+  You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
 
     private ArrayList<Pair<Long, String>> mItemList;  
     
