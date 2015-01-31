@@ -9,6 +9,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.woxthebox.dragitemrecyclerview.DragItemRecyclerView;
 
@@ -35,6 +36,17 @@ public class MainActivity extends ActionBarActivity {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setDragItemBackgroundColor(Color.parseColor("#AACCCCCC"));
+        mRecyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
+            @Override
+            public void onDragStarted(int itemPosition) {
+                Toast.makeText(MainActivity.this, "Drag started on pos: "+itemPosition, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onDragEnded(int newItemPosition) {
+                Toast.makeText(MainActivity.this, "Drag ended on pos: "+newItemPosition, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         setupListRecyclerView();
     }

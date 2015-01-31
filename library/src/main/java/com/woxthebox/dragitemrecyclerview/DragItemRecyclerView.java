@@ -20,7 +20,7 @@ import android.view.animation.DecelerateInterpolator;
 
 public class DragItemRecyclerView extends RecyclerView {
 
-    public interface Callback {
+    public interface DragItemListener {
         public void onDragStarted(int itemPosition);
 
         public void onDragEnded(int newItemPosition);
@@ -38,7 +38,7 @@ public class DragItemRecyclerView extends RecyclerView {
     private DragItemAdapter mAdapter;
     private DragItemAdapter.DragItem mDragItem;
     private DragItemImage mDragItemImage;
-    private Callback mCallback;
+    private DragItemListener mListener;
     private int mItemPosition;
     private boolean mAutoScrollEnabled;
     private boolean mIsGrid;
@@ -63,8 +63,8 @@ public class DragItemRecyclerView extends RecyclerView {
         mDragItemImage = new DragItemImage();
     }
 
-    public void setCallback(Callback callback) {
-        mCallback = callback;
+    public void setDragItemListener(DragItemListener listener) {
+        mListener = listener;
     }
 
     public void setDragItemBackgroundColor(int color) {
@@ -172,8 +172,8 @@ public class DragItemRecyclerView extends RecyclerView {
         mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
         mAdapter.setDragItem(mDragItem);
         mAdapter.notifyItemChanged(mItemPosition);
-        if (mCallback != null) {
-            mCallback.onDragStarted(mItemPosition);
+        if (mListener != null) {
+            mListener.onDragStarted(mItemPosition);
         }
 
         invalidate();
@@ -214,8 +214,8 @@ public class DragItemRecyclerView extends RecyclerView {
                     @Override
                     public void run() {
                         mDragState = DragState.DRAG_ENDED;
-                        if (mCallback != null) {
-                            mCallback.onDragEnded(mItemPosition);
+                        if (mListener != null) {
+                            mListener.onDragEnded(mItemPosition);
                         }
 
                         mDragItem = null;
