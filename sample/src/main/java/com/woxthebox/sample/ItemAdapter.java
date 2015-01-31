@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.woxthebox.dragitemrecyclerview.DragItemAdapter;
 
@@ -32,8 +33,8 @@ public class ItemAdapter extends DragItemAdapter<ItemAdapter.ViewHolder> {
     private int mLayoutId;
     private int mGrabHandleId;
 
-    public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId) {
-        super(true);
+    public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
+        super(dragOnLongPress);
         mItemList = list;
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
@@ -87,6 +88,12 @@ public class ItemAdapter extends DragItemAdapter<ItemAdapter.ViewHolder> {
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId);
             mText = (TextView) itemView.findViewById(R.id.text);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(view.getContext(), "Item clicked", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
 }

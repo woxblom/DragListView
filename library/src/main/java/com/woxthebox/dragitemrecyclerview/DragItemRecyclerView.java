@@ -183,7 +183,10 @@ public class DragItemRecyclerView extends RecyclerView {
         mDragItemImage.createBitmap(mDragItem.mItemView);
         mDragItemImage.setCenterX(mDragItem.mItemView.getX() + mDragItem.mItemView.getWidth() / 2);
         mDragItemImage.setCenterY(mDragItem.mItemView.getY() + mDragItem.mItemView.getHeight() / 2);
-        mDragItemImage.startStartAnimation();
+
+        if (!mAdapter.isDragOnLongPress()) {
+            mDragItemImage.startStartAnimation();
+        }
 
         mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
         mAdapter.setDragItem(mDragItem);
@@ -236,6 +239,7 @@ public class DragItemRecyclerView extends RecyclerView {
 
                         mDragItem = null;
                         mDragItemImage.clearBitmap();
+                        mDragItemImage.setAlphaValue(1);
                         setEnabled(true);
                         invalidate();
                     }

@@ -51,7 +51,7 @@ public class MainActivity extends ActionBarActivity {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.setDragItemBackgroundColor(Color.parseColor("#AACCCCCC"));
+        mRecyclerView.setDragItemBackgroundColor(getResources().getColor(R.color.list_item_background));
         mRecyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             @Override
             public void onDragStarted(int itemPosition) {
@@ -89,13 +89,13 @@ public class MainActivity extends ActionBarActivity {
 
     private void setupListRecyclerView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.item_layout);
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
         mRecyclerView.setAdapter(listAdapter);
     }
 
     private void setupGridRecyclerView() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(this, 4));
-        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout);
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
         mRecyclerView.setAdapter(listAdapter);
     }
 }

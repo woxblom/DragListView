@@ -45,6 +45,10 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
         mDragItem = dragItem;
     }
 
+    boolean isDragOnLongPress() {
+        return mDragOnLongPress;
+    }
+
     public abstract class ViewHolder extends RecyclerView.ViewHolder {
         public View mGrabHandle;
         public long mItemId;
