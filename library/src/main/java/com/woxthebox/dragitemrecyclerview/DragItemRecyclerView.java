@@ -30,7 +30,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.DragEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -75,7 +75,6 @@ public class DragItemRecyclerView extends RecyclerView {
     }
 
     private void init() {
-        setOnDragListener(new DragListener());
         mDragItemImage = new DragItemImage();
     }
 
@@ -98,6 +97,7 @@ public class DragItemRecyclerView extends RecyclerView {
 
         super.setAdapter(adapter);
         mAdapter = (DragItemAdapter) adapter;
+        mAdapter.setRecyclerView(this);
     }
 
     @Override
@@ -177,9 +177,9 @@ public class DragItemRecyclerView extends RecyclerView {
         }
     }
 
-    private void onDragStarted(DragEvent event) {
+    void onDragStarted(DragItemAdapter.DragItem dragItem) {
         mDragState = DragState.DRAG_STARTED;
-        mDragItem = (DragItemAdapter.DragItem) event.getLocalState();
+        mDragItem = dragItem;
         mDragItemImage.createBitmap(mDragItem.mItemView);
         mDragItemImage.setCenterX(mDragItem.mItemView.getX() + mDragItem.mItemView.getWidth() / 2);
         mDragItemImage.setCenterY(mDragItem.mItemView.getY() + mDragItem.mItemView.getHeight() / 2);
@@ -198,11 +198,11 @@ public class DragItemRecyclerView extends RecyclerView {
         invalidate();
     }
 
-    private void onDragging(DragEvent event) {
+    void onDragging(float x, float y) {
         mDragState = DragState.DRAGGING;
         mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
-        mDragItemImage.setCenterX(event.getX());
-        mDragItemImage.setCenterY(event.getY());
+        mDragItemImage.setCenterX(x);
+        mDragItemImage.setCenterY(y);
 
         if (!mAutoScrollEnabled) {
             updateDragPositionAndScroll();
@@ -246,6 +246,31 @@ public class DragItemRecyclerView extends RecyclerView {
                 });
             }
         });
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        if(mDragState != DragState.DRAG_ENDED) {
+            return true;
+        }
+        return super.onInterceptTouchEvent(event);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(mDragState != DragState.DRAG_ENDED) {
+            switch(event.getAction()) {
+                case MotionEvent.ACTION_MOVE:
+                    onDragging(event.getX(), event.getY());
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    onDragEnded();
+                    break;
+            }
+            return true;
+        }
+        return super.onTouchEvent(event);
     }
 
     private class DragItemImage {
@@ -359,24 +384,6 @@ public class DragItemRecyclerView extends RecyclerView {
         public void setTranslationY(float y) {
             mTranslationY = y;
             invalidate();
-        }
-    }
-
-    private class DragListener implements View.OnDragListener {
-        @Override
-        public boolean onDrag(View v, DragEvent event) {
-            switch (event.getAction()) {
-                case DragEvent.ACTION_DRAG_STARTED:
-                    onDragStarted(event);
-                    break;
-                case DragEvent.ACTION_DRAG_LOCATION:
-                    onDragging(event);
-                    break;
-                case DragEvent.ACTION_DRAG_ENDED:
-                    onDragEnded();
-                    break;
-            }
-            return true;
         }
     }
 }

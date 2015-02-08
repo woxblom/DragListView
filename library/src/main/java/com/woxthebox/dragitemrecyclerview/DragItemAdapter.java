@@ -16,13 +16,13 @@
 
 package com.woxthebox.dragitemrecyclerview;
 
-import android.graphics.Canvas;
 import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
 
 public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
+    private DragItemRecyclerView mRecyclerView;
     private DragItem mDragItem;
     private boolean mDragOnLongPress;
 
@@ -39,6 +39,10 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
         long itemId = getItemId(position);
         holder.mItemId = itemId;
         holder.itemView.setVisibility(mDragItem != null && mDragItem.mItemId == itemId ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    void setRecyclerView(DragItemRecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
     }
 
     void setDragItem(DragItem dragItem) {
@@ -61,8 +65,7 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
                 mGrabHandle.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        DragItem dragItem = new DragItem(itemView, mItemId);
-                        itemView.startDrag(null, new EmptyDragShadowBuilder(itemView), dragItem, 0);
+                        mRecyclerView.onDragStarted(new DragItem(itemView, mItemId));
                         return true;
                     }
                 });
@@ -71,8 +74,7 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            DragItem dragItem = new DragItem(itemView, mItemId);
-                            itemView.startDrag(null, new EmptyDragShadowBuilder(itemView), dragItem, 0);
+                            mRecyclerView.onDragStarted(new DragItem(itemView, mItemId));
                             return true;
                         }
                         return false;
@@ -89,16 +91,6 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
         public DragItem(View itemView, long id) {
             mItemView = itemView;
             mItemId = id;
-        }
-    }
-
-    private static class EmptyDragShadowBuilder extends View.DragShadowBuilder {
-        public EmptyDragShadowBuilder(View v) {
-            super(v);
-        }
-
-        @Override
-        public void onDrawShadow(Canvas canvas) {
         }
     }
 }
