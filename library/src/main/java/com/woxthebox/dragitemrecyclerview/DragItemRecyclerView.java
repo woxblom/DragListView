@@ -250,7 +250,7 @@ public class DragItemRecyclerView extends RecyclerView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        if(mDragState != DragState.DRAG_ENDED) {
+        if (mDragState != DragState.DRAG_ENDED) {
             return true;
         }
         return super.onInterceptTouchEvent(event);
@@ -258,8 +258,8 @@ public class DragItemRecyclerView extends RecyclerView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(mDragState != DragState.DRAG_ENDED) {
-            switch(event.getAction()) {
+        if (mDragState != DragState.DRAG_ENDED) {
+            switch (event.getAction()) {
                 case MotionEvent.ACTION_MOVE:
                     onDragging(event.getX(), event.getY());
                     break;

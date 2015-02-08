@@ -61,7 +61,7 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
             super(itemView);
             mGrabHandle = itemView.findViewById(handleResId);
 
-            if(mDragOnLongPress) {
+            if (mDragOnLongPress) {
                 mGrabHandle.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
