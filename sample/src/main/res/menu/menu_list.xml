@@ -13,12 +13,16 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-
-    <string name="app_name">DragItemRecyclerView</string>
-    <string name="action_lists">Test lists</string>
-    <string name="action_board">Test board </string>
-    <string name="action_list">List (drag on touch image icon)</string>
-    <string name="action_grid">Grid (drag on long press)</string>
-
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".MainActivity">
+    <item
+        android:id="@+id/action_list"
+        android:title="@string/action_list"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_grid"
+        android:title="@string/action_grid"
+        app:showAsAction="never"/>
+</menu>

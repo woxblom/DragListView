@@ -18,13 +18,8 @@ package com.woxthebox.dragitemrecyclerview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Handler;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,12 +27,13 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 
 public class DragItemRecyclerView extends RecyclerView {
 
     public interface DragItemListener {
         public void onDragStarted(int itemPosition);
+
+        public void onDragging(int itemPosition, float x, float y);
 
         public void onDragEnded(int newItemPosition);
     }
@@ -55,9 +51,10 @@ public class DragItemRecyclerView extends RecyclerView {
     private DragItemAdapter.DragItem mDragItem;
     private DragItemImage mDragItemImage;
     private DragItemListener mListener;
-    private int mItemPosition;
+    private int mDragItemPosition;
     private boolean mAutoScrollEnabled;
-    private boolean mIsGrid;
+    private boolean mExternalDragItemImage;
+
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -75,15 +72,28 @@ public class DragItemRecyclerView extends RecyclerView {
     }
 
     private void init() {
-        mDragItemImage = new DragItemImage();
+        mDragItemImage = new DragItemImage(this);
     }
 
     public void setDragItemListener(DragItemListener listener) {
         mListener = listener;
     }
 
+    public void setDragItemImage(DragItemImage itemImage) {
+        mDragItemImage = itemImage;
+        mExternalDragItemImage = true;
+    }
+
     public void setDragItemBackgroundColor(int color) {
         mDragItemImage.setColor(color);
+    }
+
+    public boolean isDragging() {
+        return mDragState != DragState.DRAG_ENDED;
+    }
+
+    public long getDragItemId() {
+        return mDragItem != null ? mDragItem.mItemId : -1;
     }
 
     @Override
@@ -107,14 +117,14 @@ public class DragItemRecyclerView extends RecyclerView {
             throw new RuntimeException("Layout must be an instance of LinearLayoutManager");
         }
 
-        mIsGrid = (layout instanceof GridLayoutManager);
+        mDragItemImage.setIsGrid(layout instanceof GridLayoutManager);
     }
 
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        if (mDragState != DragState.DRAG_ENDED) {
+        if (!mExternalDragItemImage && mDragState != DragState.DRAG_ENDED) {
             mDragItemImage.draw(canvas);
         }
     }
@@ -159,9 +169,9 @@ public class DragItemRecyclerView extends RecyclerView {
         View view = findChildView(mDragItemImage.getCenterX(), mDragItemImage.getCenterY());
         if (view != null) {
             int newPos = getChildPosition(view);
-            if (mItemPosition != -1 && mItemPosition != newPos) {
-                mAdapter.changeItemPosition(mItemPosition, newPos);
-                mItemPosition = newPos;
+            if (mDragItemPosition != -1 && mDragItemPosition != newPos) {
+                mAdapter.changeItemPosition(mDragItemPosition, newPos);
+                mDragItemPosition = newPos;
             }
 
             int listBottom = getHeight();
@@ -188,11 +198,11 @@ public class DragItemRecyclerView extends RecyclerView {
             mDragItemImage.startStartAnimation();
         }
 
-        mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
+        mDragItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
         mAdapter.setDragItem(mDragItem);
-        mAdapter.notifyItemChanged(mItemPosition);
+        mAdapter.notifyItemChanged(mDragItemPosition);
         if (mListener != null) {
-            mListener.onDragStarted(mItemPosition);
+            mListener.onDragStarted(mDragItemPosition);
         }
 
         invalidate();
@@ -200,17 +210,20 @@ public class DragItemRecyclerView extends RecyclerView {
 
     void onDragging(float x, float y) {
         mDragState = DragState.DRAGGING;
-        mItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
+        mDragItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
         mDragItemImage.setCenterX(x);
         mDragItemImage.setCenterY(y);
 
         if (!mAutoScrollEnabled) {
             updateDragPositionAndScroll();
         }
+        if (mListener != null) {
+            mListener.onDragging(mDragItemPosition, x, y);
+        }
         invalidate();
     }
 
-    private void onDragEnded() {
+    void onDragEnded() {
         // Need check because sometimes the framework calls drag end twice in a row
         if (mDragState == DragState.DRAG_ENDED) {
             return;
@@ -218,7 +231,7 @@ public class DragItemRecyclerView extends RecyclerView {
 
         stopAutoScroll();
 
-        final RecyclerView.ViewHolder holder = findViewHolderForPosition(mItemPosition);
+        final RecyclerView.ViewHolder holder = findViewHolderForPosition(mDragItemPosition);
         getItemAnimator().endAnimation(holder);
         setEnabled(false);
         mDragItemImage.startEndAnimation(holder.itemView, new AnimatorListenerAdapter() {
@@ -226,7 +239,7 @@ public class DragItemRecyclerView extends RecyclerView {
             public void onAnimationEnd(Animator animation) {
                 holder.itemView.setAlpha(1);
                 mAdapter.setDragItem(null);
-                mAdapter.notifyItemChanged(mItemPosition);
+                mAdapter.notifyItemChanged(mDragItemPosition);
 
                 // Need to postpone the end to avoid flicker
                 mHandler.post(new Runnable() {
@@ -234,7 +247,7 @@ public class DragItemRecyclerView extends RecyclerView {
                     public void run() {
                         mDragState = DragState.DRAG_ENDED;
                         if (mListener != null) {
-                            mListener.onDragEnded(mItemPosition);
+                            mListener.onDragEnded(mDragItemPosition);
                         }
 
                         mDragItem = null;
@@ -246,6 +259,43 @@ public class DragItemRecyclerView extends RecyclerView {
                 });
             }
         });
+    }
+
+    void addDragItemAndStart(float y, Object item, long itemId) {
+        View child = findChildView(0, y);
+        int pos = getChildPosition(child);
+
+        mDragState = DragState.DRAG_STARTED;
+        mDragItem = new DragItemAdapter.DragItem(null, itemId);
+        mAdapter.setDragItem(mDragItem);
+        mAdapter.addItem(pos, item);
+        mDragItemPosition = pos;
+
+        if (mListener != null) {
+            mListener.onDragStarted(mDragItemPosition);
+        }
+
+        invalidate();
+    }
+
+    Object removeDragItemAndEnd() {
+        stopAutoScroll();
+        Object item = mAdapter.removeItem(mDragItemPosition);
+        mAdapter.setDragItem(null);
+        mDragState = DragState.DRAG_ENDED;
+        mDragItem = null;
+
+        if (!mExternalDragItemImage) {
+            mDragItemImage.clearBitmap();
+            mDragItemImage.setAlphaValue(1);
+        }
+
+        if (mListener != null) {
+            mListener.onDragEnded(mDragItemPosition);
+        }
+
+        invalidate();
+        return item;
     }
 
     @Override
@@ -271,119 +321,5 @@ public class DragItemRecyclerView extends RecyclerView {
             return true;
         }
         return super.onTouchEvent(event);
-    }
-
-    private class DragItemImage {
-
-        private static final int ANIMATION_DURATION = 250;
-        private float mTranslationX;
-        private float mTranslationY;
-        private float mCenterY;
-        private float mCenterX;
-        private float mAlphaValue = 1;
-        private int mColor = Color.parseColor("#55FFFFFF");
-        private Paint mPaint = new Paint();
-        private Bitmap mBitmap;
-        private boolean mDrawBackgroundColor;
-
-        public void draw(Canvas canvas) {
-            if (mBitmap != null) {
-                canvas.save();
-                canvas.translate(mTranslationX, mTranslationY);
-
-                final float top = mCenterY - mBitmap.getHeight() / 2;
-                final float bottom = top + mBitmap.getHeight();
-                final float left = mIsGrid ? mCenterX - mBitmap.getWidth() / 2 : 0;
-
-                if (mDrawBackgroundColor) {
-                    mPaint.setColor(mColor);
-                    mPaint.setAlpha((int) (Color.alpha(mColor) * mAlphaValue));
-                    canvas.drawRect(left, top, left + mBitmap.getWidth(), bottom, mPaint);
-                }
-                canvas.drawBitmap(mBitmap, left, top, null);
-                canvas.restore();
-            }
-        }
-
-        public void createBitmap(View view) {
-            mDrawBackgroundColor = !view.isSelected();
-            mBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(mBitmap);
-            view.draw(canvas);
-        }
-
-        public void clearBitmap() {
-            if (mBitmap != null) {
-                mBitmap.recycle();
-                mBitmap = null;
-            }
-        }
-
-        public void startStartAnimation() {
-            Animator alpha = ObjectAnimator.ofFloat(this, "alphaValue", 0, 1);
-            alpha.setInterpolator(new DecelerateInterpolator());
-            alpha.setDuration(ANIMATION_DURATION);
-            alpha.start();
-        }
-
-        public void startEndAnimation(View itemView, AnimatorListenerAdapter listener) {
-            if (mBitmap != null) {
-                float translationX = mCenterX - itemView.getX() - mBitmap.getWidth() / 2;
-                float translationY = mCenterY - itemView.getY() - mBitmap.getHeight() / 2;
-                setCenterX(itemView.getX() + mBitmap.getWidth() / 2);
-                setCenterY(itemView.getY() + mBitmap.getHeight() / 2);
-
-                Animator animatorX = ObjectAnimator.ofFloat(this, "translationX", mIsGrid ? translationX : 0, 0);
-                Animator animatorY = ObjectAnimator.ofFloat(this, "translationY", translationY, 0);
-                Animator alpha = ObjectAnimator.ofFloat(this, "alphaValue", mAlphaValue, 0);
-
-                AnimatorSet set = new AnimatorSet();
-                set.setInterpolator(new DecelerateInterpolator());
-                set.playTogether(animatorX, animatorY, alpha);
-                set.setDuration(ANIMATION_DURATION);
-                set.addListener(listener);
-                set.start();
-            } else {
-                listener.onAnimationEnd(null);
-            }
-        }
-
-        public void setColor(int color) {
-            mColor = color;
-            invalidate();
-        }
-
-        public void setAlphaValue(float alphaValue) {
-            mAlphaValue = alphaValue;
-            invalidate();
-        }
-
-        public void setCenterX(float x) {
-            mCenterX = x;
-            invalidate();
-        }
-
-        public void setCenterY(float y) {
-            mCenterY = y;
-            invalidate();
-        }
-
-        public float getCenterX() {
-            return mCenterX;
-        }
-
-        public float getCenterY() {
-            return mCenterY;
-        }
-
-        public void setTranslationX(float x) {
-            mTranslationX = x;
-            invalidate();
-        }
-
-        public void setTranslationY(float y) {
-            mTranslationY = y;
-            invalidate();
-        }
     }
 }

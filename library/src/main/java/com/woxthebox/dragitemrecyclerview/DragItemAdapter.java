@@ -26,6 +26,10 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
     private DragItem mDragItem;
     private boolean mDragOnLongPress;
 
+    public abstract Object removeItem(int pos);
+
+    public abstract void addItem(int pos, Object item);
+
     public abstract int getPositionForItemId(long id);
 
     public abstract void changeItemPosition(int fromPos, int toPos);

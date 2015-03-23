@@ -18,11 +18,11 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".MainActivity">
     <item
-        android:id="@+id/action_list"
-        android:title="@string/action_list"
+        android:id="@+id/action_lists"
+        android:title="@string/action_lists"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_grid"
-        android:title="@string/action_grid"
+        android:id="@+id/action_board"
+        android:title="@string/action_board"
         app:showAsAction="never"/>
 </menu>

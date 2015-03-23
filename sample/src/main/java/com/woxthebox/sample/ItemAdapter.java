@@ -48,6 +48,19 @@ public class ItemAdapter extends DragItemAdapter<ItemAdapter.ViewHolder> {
     }
 
     @Override
+    public Object removeItem(int pos) {
+        Object item = mItemList.remove(pos);
+        notifyItemRemoved(pos);
+        return item;
+    }
+
+    @Override
+    public void addItem(int pos, Object item) {
+        mItemList.add(pos, (Pair<Long, String>) item);
+        notifyItemInserted(pos);
+    }
+
+    @Override
     public int getPositionForItemId(long id) {
         for (int i = 0; i < mItemList.size(); i++) {
             if (id == mItemList.get(i).first) {
