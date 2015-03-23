@@ -32,8 +32,8 @@ public class BoardView extends HorizontalScrollView {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return mDragging;
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        return mDragging || super.onInterceptTouchEvent(event);
     }
 
     private DragItemRecyclerView getCurrentRecyclerView(float x, float y) {
@@ -50,6 +50,8 @@ public class BoardView extends HorizontalScrollView {
         if (mDragging) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_MOVE:
+                    // Updated event to scrollview coordinates
+                    event.setLocation(getScrollX() + event.getX(), event.getY());
                     DragItemRecyclerView currentList = getCurrentRecyclerView(event.getX(), event.getY());
                     if (mCurrentRecyclerView != currentList) {
                         long itemId = mCurrentRecyclerView.getDragItemId();
@@ -57,6 +59,7 @@ public class BoardView extends HorizontalScrollView {
                         mCurrentRecyclerView = currentList;
                         mCurrentRecyclerView.addDragItemAndStart(event.getY(), item, itemId);
                     }
+                    // Updated event to list coordinates
                     event.setLocation(event.getX() - mCurrentRecyclerView.getX(), event.getY());
                     mCurrentRecyclerView.onDragging(event.getX(), event.getY());
                     invalidate();
