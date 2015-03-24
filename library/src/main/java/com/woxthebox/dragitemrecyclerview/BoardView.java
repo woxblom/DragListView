@@ -11,13 +11,15 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
-public class BoardView extends HorizontalScrollView {
+public class BoardView extends HorizontalScrollView implements AutoScroller.AutoScrollListener {
 
     private LinearLayout mLayout;
     private ArrayList<DragItemRecyclerView> mLists = new ArrayList<>();
     private DragItemRecyclerView mCurrentRecyclerView;
     private DragItemImage mDragItemImage;
-    private boolean mDragging;
+    private AutoScroller mAutoScroller;
+    private float mTouchX;
+    private float mTouchY;
 
     public BoardView(Context context) {
         super(context);
@@ -31,12 +33,29 @@ public class BoardView extends HorizontalScrollView {
         super(context, attrs, defStyleAttr);
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mDragging || super.onInterceptTouchEvent(event);
+    private void updateScrollPosition() {
+        // Updated event to scrollview coordinates
+        DragItemRecyclerView currentList = getCurrentRecyclerView(mTouchX + getScrollX());
+        if (mCurrentRecyclerView != currentList) {
+            long itemId = mCurrentRecyclerView.getDragItemId();
+            Object item = mCurrentRecyclerView.removeDragItemAndEnd();
+            mCurrentRecyclerView = currentList;
+            mCurrentRecyclerView.addDragItemAndStart(mTouchY, item, itemId);
+        }
+        // Updated event to list coordinates
+        mCurrentRecyclerView.onDragging(mTouchX + getScrollX() - mCurrentRecyclerView.getX(), mTouchY);
+
+        if (mTouchX > getWidth() - 200 && getScrollX() < mLayout.getWidth()) {
+            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
+        } else if (mTouchX < 200 && getScrollX() > 0) {
+            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
+        } else {
+            mAutoScroller.stopAutoScroll();
+        }
+        invalidate();
     }
 
-    private DragItemRecyclerView getCurrentRecyclerView(float x, float y) {
+    private DragItemRecyclerView getCurrentRecyclerView(float x) {
         for (DragItemRecyclerView list : mLists) {
             if (list.getLeft() <= x && list.getRight() > x) {
                 return list;
@@ -45,29 +64,36 @@ public class BoardView extends HorizontalScrollView {
         return mCurrentRecyclerView;
     }
 
+    private boolean isDragging() {
+        return mCurrentRecyclerView != null && mCurrentRecyclerView.isDragging();
+    }
+
+    @Override
+    public void onAutoScroll(int dx, int dy) {
+        scrollBy(dx, dy);
+        updateScrollPosition();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        return isDragging() || super.onInterceptTouchEvent(event);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (mDragging) {
+        if (isDragging()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_MOVE:
-                    // Updated event to scrollview coordinates
-                    event.setLocation(getScrollX() + event.getX(), event.getY());
-                    DragItemRecyclerView currentList = getCurrentRecyclerView(event.getX(), event.getY());
-                    if (mCurrentRecyclerView != currentList) {
-                        long itemId = mCurrentRecyclerView.getDragItemId();
-                        Object item = mCurrentRecyclerView.removeDragItemAndEnd();
-                        mCurrentRecyclerView = currentList;
-                        mCurrentRecyclerView.addDragItemAndStart(event.getY(), item, itemId);
+                    mTouchX = event.getX();
+                    mTouchY = event.getY();
+                    if (!mAutoScroller.isAutoScrolling()) {
+                        updateScrollPosition();
                     }
-                    // Updated event to list coordinates
-                    event.setLocation(event.getX() - mCurrentRecyclerView.getX(), event.getY());
-                    mCurrentRecyclerView.onDragging(event.getX(), event.getY());
-                    invalidate();
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    mAutoScroller.stopAutoScroll();
                     mCurrentRecyclerView.onDragEnded();
-                    mDragging = false;
                     invalidate();
                     break;
             }
@@ -92,6 +118,7 @@ public class BoardView extends HorizontalScrollView {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mAutoScroller = new AutoScroller(getContext(), this);
         mDragItemImage = new DragItemImage(this);
         mLayout = new LinearLayout(getContext());
         mLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -113,8 +140,7 @@ public class BoardView extends HorizontalScrollView {
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             @Override
             public void onDragStarted(int itemPosition) {
-                if (!mDragging) {
-                    mDragging = true;
+                if (!isDragging()) {
                     mCurrentRecyclerView = recyclerView;
                     invalidate();
                 }
