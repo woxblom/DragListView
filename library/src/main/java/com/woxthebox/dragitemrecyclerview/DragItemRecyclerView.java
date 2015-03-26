@@ -20,12 +20,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -52,6 +52,9 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     private AutoScroller mAutoScroller;
     private int mDragItemPosition;
     private boolean mExternalDragItemImage;
+    private boolean mHoldChangePosition;
+    private float mTouchX;
+    private float mTouchY;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -82,7 +85,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         mExternalDragItemImage = true;
     }
 
-    public void setDragItemBackgroundColor(int color) {
+    public void setDragItemBackgroundColor(ColorDrawable color) {
         mDragItemImage.setColor(color);
     }
 
@@ -155,18 +158,17 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItemImage.getCenterX(), mDragItemImage.getCenterY());
         if (view != null) {
-            DragItemAdapter.ViewHolder holder = (DragItemAdapter.ViewHolder)getChildViewHolder(view);
             int newPos = getChildPosition(view);
-            if (!test && mDragItemPosition != -1 && mDragItemPosition != newPos) {
+            if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
                 mAdapter.changeItemPosition(mDragItemPosition, newPos);
                 mDragItemPosition = newPos;
             }
 
             LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager();
-            if (mDragItemImage.getCenterY() > getHeight() - view.getHeight() && layout.findLastCompletelyVisibleItemPosition() !=
+            if (mDragItemImage.getCenterY() > getHeight() - view.getHeight() / 3 && layout.findLastCompletelyVisibleItemPosition() !=
                     mAdapter.getItemCount() - 1) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-            } else if (mDragItemImage.getCenterY() < view.getHeight() && layout.findFirstCompletelyVisibleItemPosition() != 0) {
+            } else if (mDragItemImage.getCenterY() < view.getHeight() / 3 && layout.findFirstCompletelyVisibleItemPosition() != 0) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
             } else {
                 mAutoScroller.stopAutoScroll();
@@ -178,12 +180,9 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         mDragState = DragState.DRAG_STARTED;
         mDragItem = dragItem;
         mDragItemImage.createBitmap(mDragItem.mItemView);
-        mDragItemImage.setCenterX(mDragItem.mItemView.getX() + mDragItem.mItemView.getWidth() / 2);
-        mDragItemImage.setCenterY(mDragItem.mItemView.getY() + mDragItem.mItemView.getHeight() / 2);
-
-        if (!mAdapter.isDragOnLongPress()) {
-            mDragItemImage.startStartAnimation();
-        }
+        mDragItemImage.setCenterX(mTouchX);
+        mDragItemImage.setCenterY(mTouchY);
+        mDragItemImage.startStartAnimation(mDragItem.mItemView);
 
         mDragItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
         mAdapter.setDragItem(mDragItem);
@@ -249,11 +248,9 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         });
     }
 
-    private boolean test;
     void addDragItemAndStart(float y, Object item, long itemId) {
         View child = findChildView(0, y);
         int pos = getChildPosition(child);
-        Log.d("RUNE", "pos: " + pos + " child: " + child + " y: " + y);
 
         mDragState = DragState.DRAG_STARTED;
         mDragItem = new DragItemAdapter.DragItem(null, itemId);
@@ -261,11 +258,11 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         mAdapter.addItem(pos, item);
         mDragItemPosition = pos;
 
-        test = true;
+        mHoldChangePosition = true;
         postDelayed(new Runnable() {
             @Override
             public void run() {
-                test = false;
+                mHoldChangePosition = false;
             }
         }, getItemAnimator().getMoveDuration());
         invalidate();
@@ -289,6 +286,12 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mTouchX = event.getX();
+                mTouchY = event.getY();
+                break;
+        }
         if (mDragState != DragState.DRAG_ENDED) {
             return true;
         }
@@ -300,6 +303,8 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         if (mDragState != DragState.DRAG_ENDED) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_MOVE:
+                    mTouchX = event.getX();
+                    mTouchY = event.getY();
                     onDragging(event.getX(), event.getY());
                     break;
                 case MotionEvent.ACTION_UP:

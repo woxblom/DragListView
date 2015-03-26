@@ -6,6 +6,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
@@ -43,11 +44,13 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             mCurrentRecyclerView.addDragItemAndStart(mTouchY, item, itemId);
         }
         // Updated event to list coordinates
-        mCurrentRecyclerView.onDragging(mTouchX + getScrollX() - mCurrentRecyclerView.getX(), mTouchY);
+        mCurrentRecyclerView.onDragging(mTouchX + getScrollX() - ((View) mCurrentRecyclerView.getParent()).getX(),
+                mTouchY - mCurrentRecyclerView.getY());
 
-        if (mTouchX > getWidth() - 200 && getScrollX() < mLayout.getWidth()) {
+        float scrollEdge = getResources().getDisplayMetrics().widthPixels*0.15f;
+        if (mTouchX > getWidth() - scrollEdge && getScrollX() < mLayout.getWidth()) {
             mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
-        } else if (mTouchX < 200 && getScrollX() > 0) {
+        } else if (mTouchX < scrollEdge && getScrollX() > 0) {
             mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
         } else {
             mAutoScroller.stopAutoScroll();
@@ -57,7 +60,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     private DragItemRecyclerView getCurrentRecyclerView(float x) {
         for (DragItemRecyclerView list : mLists) {
-            if (list.getLeft() <= x && list.getRight() > x) {
+            View parent = (View) list.getParent();
+            if (parent.getLeft() <= x && parent.getRight() > x) {
                 return list;
             }
         }
@@ -109,7 +113,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
         if (mCurrentRecyclerView != null && mCurrentRecyclerView.isDragging()) {
             canvas.save();
-            canvas.translate(mCurrentRecyclerView.getX(), 0);
+            canvas.translate(((View) mCurrentRecyclerView.getParent()).getX(), mCurrentRecyclerView.getY());
             mDragItemImage.draw(canvas);
             canvas.restore();
         }
@@ -122,17 +126,15 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mDragItemImage = new DragItemImage(this);
         mLayout = new LinearLayout(getContext());
         mLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-        mLayout.setLayoutParams(params);
+        mLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         addView(mLayout);
     }
 
-    public DragItemRecyclerView addColumnList(final DragItemAdapter adapter) {
+    public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, View header) {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
         recyclerView.setDragItemImage(mDragItemImage);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(720 / 2, LinearLayout.LayoutParams.MATCH_PARENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 
         recyclerView.setLayoutParams(params);
         recyclerView.setHasFixedSize(true);
@@ -158,7 +160,17 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setAdapter(adapter);
 
         mLists.add(recyclerView);
-        mLayout.addView(recyclerView);
+
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setLayoutParams(new LayoutParams((int) (getResources().getDisplayMetrics().widthPixels * 0.86), LayoutParams.MATCH_PARENT));
+
+        if (header != null) {
+            layout.addView(header);
+        }
+
+        layout.addView(recyclerView);
+        mLayout.addView(layout);
 
         return recyclerView;
     }

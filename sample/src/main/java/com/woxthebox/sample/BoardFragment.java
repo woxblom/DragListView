@@ -4,15 +4,16 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.woxthebox.dragitemrecyclerview.BoardView;
-import com.woxthebox.dragitemrecyclerview.DragItemRecyclerView;
 
 import java.util.ArrayList;
 
@@ -41,6 +42,18 @@ public class BoardFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle("Board");
+
+        addColumnList();
+        addColumnList();
+        addColumnList();
+        addColumnList();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_board, menu);
@@ -58,15 +71,17 @@ public class BoardFragment extends Fragment {
 
     private void addColumnList() {
         ArrayList mItemArray = new ArrayList<>();
-        int addItems = 40;
+        int addItems = 20;
         for (int i = 0; i < addItems; i++) {
             long id = i + mColumns * addItems;
             mItemArray.add(new Pair<>(id, "Item " + id));
         }
-        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.item_layout, true);
 
-        DragItemRecyclerView recyclerView = mBoardView.addColumnList(listAdapter);
-        recyclerView.setDragItemBackgroundColor(getResources().getColor(R.color.list_item_background));
+        View header = View.inflate(getActivity(), R.layout.column_header, null);
+        ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
+
+        mBoardView.addColumnList(listAdapter, header);
         mColumns++;
     }
 }

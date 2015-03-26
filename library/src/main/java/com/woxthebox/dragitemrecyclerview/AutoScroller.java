@@ -12,7 +12,7 @@ public class AutoScroller {
         public void onAutoScroll(int dx, int dy);
     }
 
-    private static final int SCROLL_SPEED_DP = 6;
+    private static final int SCROLL_SPEED_DP = 8;
     private static final int AUTO_SCROLL_UPDATE_DELAY = 12;
 
     private Handler mHandler = new Handler();

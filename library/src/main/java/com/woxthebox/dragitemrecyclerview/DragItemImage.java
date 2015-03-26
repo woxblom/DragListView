@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
@@ -19,10 +20,9 @@ public class DragItemImage {
     private float mCenterY;
     private float mCenterX;
     private float mAlphaValue = 1;
-    private int mColor = Color.parseColor("#55FFFFFF");
+    private ColorDrawable mColor;
     private Paint mPaint = new Paint();
     private Bitmap mBitmap;
-    private boolean mDrawBackgroundColor;
     private boolean mIsGrid;
     private View mParent;
 
@@ -43,9 +43,9 @@ public class DragItemImage {
             final float bottom = top + mBitmap.getHeight();
             final float left = mIsGrid ? mCenterX - mBitmap.getWidth() / 2 : 0;
 
-            if (mDrawBackgroundColor) {
-                mPaint.setColor(mColor);
-                mPaint.setAlpha((int) (Color.alpha(mColor) * mAlphaValue));
+            if (mColor != null) {
+                mPaint.setColor(mColor.getColor());
+                mPaint.setAlpha((int) (Color.alpha(mColor.getColor()) * mAlphaValue));
                 canvas.drawRect(left, top, left + mBitmap.getWidth(), bottom, mPaint);
             }
 
@@ -55,7 +55,6 @@ public class DragItemImage {
     }
 
     public void createBitmap(View view) {
-        mDrawBackgroundColor = !view.isSelected();
         mBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(mBitmap);
         view.draw(canvas);
@@ -68,11 +67,21 @@ public class DragItemImage {
         }
     }
 
-    public void startStartAnimation() {
-        Animator alpha = ObjectAnimator.ofFloat(this, "alphaValue", 0, 1);
-        alpha.setInterpolator(new DecelerateInterpolator());
-        alpha.setDuration(ANIMATION_DURATION);
-        alpha.start();
+    public void startStartAnimation(View itemView) {
+        if (mBitmap != null) {
+            float translationX = itemView.getX() + mBitmap.getWidth() / 2 - mCenterX;
+            float translationY = itemView.getY() + mBitmap.getHeight() / 2 - mCenterY;
+
+            Animator animatorX = ObjectAnimator.ofFloat(this, "translationX", mIsGrid ? translationX : 0, 0);
+            Animator animatorY = ObjectAnimator.ofFloat(this, "translationY", translationY, 0);
+            Animator alpha = ObjectAnimator.ofFloat(this, "alphaValue", 0, 1);
+
+            AnimatorSet set = new AnimatorSet();
+            set.setInterpolator(new DecelerateInterpolator());
+            set.playTogether(animatorX, animatorY, alpha);
+            set.setDuration(ANIMATION_DURATION);
+            set.start();
+        }
     }
 
     public void startEndAnimation(View itemView, AnimatorListenerAdapter listener) {
@@ -97,7 +106,7 @@ public class DragItemImage {
         }
     }
 
-    public void setColor(int color) {
+    public void setColor(ColorDrawable color) {
         mColor = color;
         mParent.invalidate();
     }

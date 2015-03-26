@@ -1,9 +1,11 @@
 package com.woxthebox.sample;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -47,11 +49,12 @@ public class ListFragment extends Fragment {
 
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        mRecyclerView.setDragItemBackgroundColor(getResources().getColor(R.color.list_item_background));
         mRecyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             @Override
             public void onDragStarted(int itemPosition) {
-                Toast.makeText(getActivity(), "Drag started on pos: " + itemPosition, Toast.LENGTH_SHORT).show();
+                if(isAdded()) {
+                    Toast.makeText(getActivity(), "Drag started on pos: " + itemPosition, Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -61,13 +64,22 @@ public class ListFragment extends Fragment {
 
             @Override
             public void onDragEnded(int newItemPosition) {
-                Toast.makeText(getActivity(), "Drag ended on pos: " + newItemPosition, Toast.LENGTH_SHORT).show();
+                if(isAdded()) {
+                    Toast.makeText(getActivity(), "Drag ended on pos: " + newItemPosition, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         setupListRecyclerView();
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle("List and Grid");
     }
 
     @Override
@@ -91,12 +103,14 @@ public class ListFragment extends Fragment {
 
     private void setupListRecyclerView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setDragItemBackgroundColor(new ColorDrawable(getResources().getColor(R.color.list_item_background)));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
         mRecyclerView.setAdapter(listAdapter);
     }
 
     private void setupGridRecyclerView() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
+        mRecyclerView.setDragItemBackgroundColor(null);
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
         mRecyclerView.setAdapter(listAdapter);
     }
