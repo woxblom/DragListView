@@ -20,7 +20,7 @@
               android:orientation="horizontal"
               android:gravity="center_vertical"
               android:padding="16dp"
-              android:background="@drawable/selector_list_item">
+              android:background="@drawable/list_item_selector">
 
     <ImageView
         android:id="@+id/image"

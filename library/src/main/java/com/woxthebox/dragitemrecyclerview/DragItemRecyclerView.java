@@ -251,21 +251,22 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     void addDragItemAndStart(float y, Object item, long itemId) {
         View child = findChildView(0, y);
         int pos = getChildPosition(child);
+        if(pos != -1) {
+            mDragState = DragState.DRAG_STARTED;
+            mDragItem = new DragItemAdapter.DragItem(null, itemId);
+            mAdapter.setDragItem(mDragItem);
+            mAdapter.addItem(pos, item);
+            mDragItemPosition = pos;
 
-        mDragState = DragState.DRAG_STARTED;
-        mDragItem = new DragItemAdapter.DragItem(null, itemId);
-        mAdapter.setDragItem(mDragItem);
-        mAdapter.addItem(pos, item);
-        mDragItemPosition = pos;
-
-        mHoldChangePosition = true;
-        postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mHoldChangePosition = false;
-            }
-        }, getItemAnimator().getMoveDuration());
-        invalidate();
+            mHoldChangePosition = true;
+            postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mHoldChangePosition = false;
+                }
+            }, getItemAnimator().getMoveDuration());
+            invalidate();
+        }
     }
 
     Object removeDragItemAndEnd() {

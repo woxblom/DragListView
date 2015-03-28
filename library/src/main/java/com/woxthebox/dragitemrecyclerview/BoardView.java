@@ -80,11 +80,17 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return isDragging() || super.onInterceptTouchEvent(event);
+        boolean retValue = handleTouchEvent(event);
+        return retValue || super.onInterceptTouchEvent(event);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        boolean retValue = handleTouchEvent(event);
+        return retValue || super.onTouchEvent(event);
+    }
+
+    private boolean handleTouchEvent(MotionEvent event) {
         if (isDragging()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_MOVE:
@@ -103,14 +109,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
             return true;
         }
-
-        return super.onTouchEvent(event);
+        return false;
     }
 
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-
         if (mCurrentRecyclerView != null && mCurrentRecyclerView.isDragging()) {
             canvas.save();
             canvas.translate(((View) mCurrentRecyclerView.getParent()).getX(), mCurrentRecyclerView.getY());

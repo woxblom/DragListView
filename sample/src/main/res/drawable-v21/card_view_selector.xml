@@ -13,7 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
-    <color name="list_item_background">#AACCCCCC</color>
-    <color name="app_color">#8EAE3C</color>
-</resources>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <inset android:insetLeft="4dp" android:insetBottom="5dp" android:insetRight="4dp" android:insetTop="5dp">
+            <shape>
+                <stroke android:color="@color/app_color" android:width="2dp"/>
+                <corners android:radius="4dp"/>
+            </shape>
+        </inset>
+    </item>
+</selector>

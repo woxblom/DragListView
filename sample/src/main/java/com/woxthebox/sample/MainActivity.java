@@ -16,7 +16,6 @@
 
 package com.woxthebox.sample;
 
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -37,7 +36,7 @@ public class MainActivity extends ActionBarActivity {
             showFragment(BoardFragment.newInstance());
         }
 
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#8EAE3C")));
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.app_color)));
     }
 
     private void showFragment(Fragment fragment) {

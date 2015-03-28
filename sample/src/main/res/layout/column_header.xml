@@ -6,6 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    card_view:cardPreventCornerOverlap="true"
+    card_view:cardUseCompatPadding="true"
     card_view:cardElevation="1dp"
     card_view:cardCornerRadius="0dp"
     card_view:cardBackgroundColor="#ffffff">
