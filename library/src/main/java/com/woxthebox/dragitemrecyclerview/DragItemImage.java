@@ -7,14 +7,16 @@ import android.animation.ObjectAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 
-public class DragItemImage {
+public class DragItemImage extends Drawable {
 
-    private static final int ANIMATION_DURATION = 250;
+    public static final int ANIMATION_DURATION = 250;
     private float mTranslationX;
     private float mTranslationY;
     private float mCenterY;
@@ -22,7 +24,7 @@ public class DragItemImage {
     private float mAlphaValue = 1;
     private ColorDrawable mColor;
     private Paint mPaint = new Paint();
-    private Bitmap mBitmap;
+    public Bitmap mBitmap;
     private boolean mIsGrid;
     private View mParent;
 
@@ -34,6 +36,7 @@ public class DragItemImage {
         mIsGrid = isGrid;
     }
 
+    @Override
     public void draw(Canvas canvas) {
         if (mBitmap != null) {
             canvas.save();
@@ -52,6 +55,28 @@ public class DragItemImage {
             canvas.drawBitmap(mBitmap, left, top, null);
             canvas.restore();
         }
+    }
+
+    @Override
+    public void setAlpha(int alpha) {
+    }
+
+    @Override
+    public void setColorFilter(ColorFilter cf) {
+
+    }
+
+    @Override
+    public int getOpacity() {
+        return 0;
+    }
+
+    public int getIntrinsicWidth() {
+        return mBitmap.getWidth();
+    }
+
+    public int getIntrinsicHeight() {
+        return mBitmap.getHeight();
     }
 
     public void createBitmap(View view) {

@@ -51,7 +51,7 @@ public class ListFragment extends Fragment {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             @Override
-            public void onDragStarted(int itemPosition) {
+            public void onDragStarted(int itemPosition, float x, float y) {
                 if(isAdded()) {
                     Toast.makeText(getActivity(), "Drag started on pos: " + itemPosition, Toast.LENGTH_SHORT).show();
                 }
@@ -67,6 +67,11 @@ public class ListFragment extends Fragment {
                 if(isAdded()) {
                     Toast.makeText(getActivity(), "Drag ended on pos: " + newItemPosition, Toast.LENGTH_SHORT).show();
                 }
+            }
+
+            @Override
+            public void onDragEndedStarted(View view) {
+
             }
         });
 

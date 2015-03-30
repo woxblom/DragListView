@@ -32,11 +32,13 @@ import android.view.View;
 public class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
 
     public interface DragItemListener {
-        public void onDragStarted(int itemPosition);
+        public void onDragStarted(int itemPosition, float x, float y);
 
         public void onDragging(int itemPosition, float x, float y);
 
         public void onDragEnded(int newItemPosition);
+
+        public void onDragEndedStarted(View view);
     }
 
     private enum DragState {
@@ -46,7 +48,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     private Handler mHandler = new Handler();
     private DragState mDragState = DragState.DRAG_ENDED;
     private DragItemAdapter mAdapter;
-    private DragItemAdapter.DragItem mDragItem;
+    public DragItemAdapter.DragItem mDragItem;
     private DragItemImage mDragItemImage;
     private DragItemListener mListener;
     private AutoScroller mAutoScroller;
@@ -188,7 +190,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         mAdapter.setDragItem(mDragItem);
         mAdapter.notifyItemChanged(mDragItemPosition);
         if (mListener != null) {
-            mListener.onDragStarted(mDragItemPosition);
+            mListener.onDragStarted(mDragItemPosition, mTouchX, mTouchY);
         }
 
         invalidate();
@@ -221,6 +223,9 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         final RecyclerView.ViewHolder holder = findViewHolderForPosition(mDragItemPosition);
         getItemAnimator().endAnimation(holder);
         setEnabled(false);
+        if (mListener != null) {
+            mListener.onDragEndedStarted(holder.itemView);
+        }
         mDragItemImage.startEndAnimation(holder.itemView, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
