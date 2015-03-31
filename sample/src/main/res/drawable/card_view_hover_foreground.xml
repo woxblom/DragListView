@@ -15,10 +15,10 @@
 -->
 
 <inset
-    android:insetLeft="15dp"
-    android:insetBottom="22dp"
-    android:insetRight="15dp"
-    android:insetTop="22dp"
+    android:insetLeft="20dp"
+    android:insetBottom="30dp"
+    android:insetRight="20dp"
+    android:insetTop="30dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <shape>
         <stroke
