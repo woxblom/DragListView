@@ -37,8 +37,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         public void onDragging(int itemPosition, float x, float y);
 
         public void onDragEnded(int newItemPosition);
-
-        public void onDragEndedStarted(View view);
     }
 
     private enum DragState {
@@ -48,8 +46,9 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     private Handler mHandler = new Handler();
     private DragState mDragState = DragState.DRAG_ENDED;
     private DragItemAdapter mAdapter;
-    public DragItemAdapter.DragItem mDragItem;
     private DragItemImage mDragItemImage;
+    private DragItem mDragItem;
+    private long mDragItemId = -1;
     private DragItemListener mListener;
     private AutoScroller mAutoScroller;
     private int mDragItemPosition;
@@ -74,12 +73,17 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     }
 
     private void init() {
+        mDragItem = new DragItemImpl(getContext());
         mDragItemImage = new DragItemImage(this);
         mAutoScroller = new AutoScroller(getContext(), this);
     }
 
     public void setDragItemListener(DragItemListener listener) {
         mListener = listener;
+    }
+
+    public void setDragItem(DragItem dragItem) {
+        mDragItem = dragItem;
     }
 
     public void setDragItemImage(DragItemImage itemImage) {
@@ -96,7 +100,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     }
 
     public long getDragItemId() {
-        return mDragItem != null ? mDragItem.mItemId : -1;
+        return mDragItemId;
     }
 
     @Override
@@ -178,16 +182,17 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         }
     }
 
-    void onDragStarted(DragItemAdapter.DragItem dragItem) {
+    void onDragStarted(View itemView, long itemId) {
         mDragState = DragState.DRAG_STARTED;
-        mDragItem = dragItem;
-        mDragItemImage.createBitmap(mDragItem.mItemView);
+        mDragItemId = itemId;
+        mDragItem.startDrag(itemView, mTouchX, mTouchY);
+        mDragItemImage.createBitmap(itemView);
         mDragItemImage.setCenterX(mTouchX);
         mDragItemImage.setCenterY(mTouchY);
-        mDragItemImage.startStartAnimation(mDragItem.mItemView);
+        mDragItemImage.startStartAnimation(itemView);
 
-        mDragItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
-        mAdapter.setDragItem(mDragItem);
+        mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
+        mAdapter.setDragItemId(mDragItemId);
         mAdapter.notifyItemChanged(mDragItemPosition);
         if (mListener != null) {
             mListener.onDragStarted(mDragItemPosition, mTouchX, mTouchY);
@@ -198,9 +203,10 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
     void onDragging(float x, float y) {
         mDragState = DragState.DRAGGING;
-        mDragItemPosition = mAdapter.getPositionForItemId(mDragItem.mItemId);
+        mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
         mDragItemImage.setCenterX(x);
         mDragItemImage.setCenterY(y);
+        mDragItem.setPosition(x, y);
 
         if (!mAutoScroller.isAutoScrolling()) {
             updateDragPositionAndScroll();
@@ -223,14 +229,11 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         final RecyclerView.ViewHolder holder = findViewHolderForPosition(mDragItemPosition);
         getItemAnimator().endAnimation(holder);
         setEnabled(false);
-        if (mListener != null) {
-            mListener.onDragEndedStarted(holder.itemView);
-        }
-        mDragItemImage.startEndAnimation(holder.itemView, new AnimatorListenerAdapter() {
+        mDragItem.endDrag(holder.itemView, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 holder.itemView.setAlpha(1);
-                mAdapter.setDragItem(null);
+                mAdapter.setDragItemId(-1);
                 mAdapter.notifyItemChanged(mDragItemPosition);
 
                 // Need to postpone the end to avoid flicker
@@ -242,9 +245,10 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
                             mListener.onDragEnded(mDragItemPosition);
                         }
 
-                        mDragItem = null;
+                        mDragItemId = -1;
                         mDragItemImage.clearBitmap();
                         mDragItemImage.setAlphaValue(1);
+                        mDragItem.hide();
                         setEnabled(true);
                         invalidate();
                     }
@@ -258,8 +262,8 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         int pos = getChildPosition(child);
         if(pos != -1) {
             mDragState = DragState.DRAG_STARTED;
-            mDragItem = new DragItemAdapter.DragItem(null, itemId);
-            mAdapter.setDragItem(mDragItem);
+            mDragItemId = itemId;
+            mAdapter.setDragItemId(mDragItemId);
             mAdapter.addItem(pos, item);
             mDragItemPosition = pos;
 
@@ -277,11 +281,12 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     Object removeDragItemAndEnd() {
         mAutoScroller.stopAutoScroll();
         Object item = mAdapter.removeItem(mDragItemPosition);
-        mAdapter.setDragItem(null);
+        mAdapter.setDragItemId(-1);
         mDragState = DragState.DRAG_ENDED;
-        mDragItem = null;
+        mDragItemId = -1;
 
         if (!mExternalDragItemImage) {
+            mDragItem.hide();
             mDragItemImage.clearBitmap();
             mDragItemImage.setAlphaValue(1);
         }
@@ -298,10 +303,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
                 mTouchY = event.getY();
                 break;
         }
-        if (mDragState != DragState.DRAG_ENDED) {
-            return true;
-        }
-        return super.onInterceptTouchEvent(event);
+        return mDragState != DragState.DRAG_ENDED || super.onInterceptTouchEvent(event);
     }
 
     @Override

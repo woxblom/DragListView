@@ -68,11 +68,6 @@ public class ListFragment extends Fragment {
                     Toast.makeText(getActivity(), "Drag ended on pos: " + newItemPosition, Toast.LENGTH_SHORT).show();
                 }
             }
-
-            @Override
-            public void onDragEndedStarted(View view) {
-
-            }
         });
 
         setupListRecyclerView();

@@ -1,7 +1,5 @@
 package com.woxthebox.dragitemrecyclerview;
 
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -9,7 +7,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
@@ -23,19 +20,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private ArrayList<DragItemRecyclerView> mLists = new ArrayList<>();
     private DragItemRecyclerView mCurrentRecyclerView;
     private DragItemImage mDragItemImage;
+    private DragItem mDragItem;
     private AutoScroller mAutoScroller;
-    private HoverListener mHoverListener;
-    private View mHoverView;
     private float mTouchX;
     private float mTouchY;
-
-    public interface HoverListener {
-        public void bindHoverView(View clickedView, View hoverView);
-
-        public void startHoverAnimation(View hoverView);
-
-        public void endHoverAnimation(View hoverView);
-    }
 
     public BoardView(Context context) {
         super(context);
@@ -50,8 +38,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     private void updateScrollPosition() {
-        updateHoverPosition();
-
         // Updated event to scrollview coordinates
         DragItemRecyclerView currentList = getCurrentRecyclerView(mTouchX + getScrollX());
         if (mCurrentRecyclerView != currentList) {
@@ -59,7 +45,9 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             Object item = mCurrentRecyclerView.removeDragItemAndEnd();
             mCurrentRecyclerView = currentList;
             mCurrentRecyclerView.addDragItemAndStart(mTouchY, item, itemId);
+            mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getX(), mCurrentRecyclerView.getY());
         }
+
         // Updated event to list coordinates
         mCurrentRecyclerView.onDragging(mTouchX + getScrollX() - ((View) mCurrentRecyclerView.getParent()).getX(),
                 mTouchY - mCurrentRecyclerView.getY());
@@ -73,11 +61,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             mAutoScroller.stopAutoScroll();
         }
         invalidate();
-    }
-
-    private void updateHoverPosition() {
-        mHoverView.setX(mTouchX + getScrollX() - mHoverView.getMeasuredWidth() / 2);
-        mHoverView.setY(mTouchY - mHoverView.getMeasuredHeight() / 2);
     }
 
     private DragItemRecyclerView getCurrentRecyclerView(float x) {
@@ -150,6 +133,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         super.onFinishInflate();
         mAutoScroller = new AutoScroller(getContext(), this);
         mDragItemImage = new DragItemImage(this);
+        mDragItem = new DragItemImpl(getContext());
 
         mRootLayout = new FrameLayout(getContext());
         mRootLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
@@ -159,49 +143,30 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mColumnLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         mRootLayout.addView(mColumnLayout);
+        mRootLayout.addView(mDragItem.getDragItemView());
         addView(mRootLayout);
     }
 
-    public void setCustomHoverView(View view, HoverListener hoverListener) {
-        mHoverListener = hoverListener;
-        mHoverView = view;
-        mHoverView.setVisibility(View.INVISIBLE);
-        mHoverView.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-        mRootLayout.addView(mHoverView);
+    public void setCustomDragItem(DragItem dragItem) {
+        mDragItem = dragItem;
+        mRootLayout.removeViewAt(1);
+        mRootLayout.addView(dragItem.getDragItemView());
     }
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header) {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
         recyclerView.setDragItemImage(mDragItemImage);
+        recyclerView.setDragItem(mDragItem);
         recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
-            private float mNewX;
-            private float mNewY;
 
             @Override
             public void onDragStarted(int itemPosition, float x, float y) {
                 mCurrentRecyclerView = recyclerView;
+                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getX(), mCurrentRecyclerView.getY());
                 invalidate();
-                mHoverView.setVisibility(View.VISIBLE);
-                mHoverListener.bindHoverView(mCurrentRecyclerView.mDragItem.mItemView, mHoverView);
-                mHoverListener.startHoverAnimation(mHoverView);
-
-                mNewX = mTouchX + getScrollX() - mHoverView.getMeasuredWidth() / 2;
-                mNewY = mTouchY - mHoverView.getMeasuredHeight() / 2;
-                float startX = ((View) mCurrentRecyclerView.getParent()).getX() + mCurrentRecyclerView.mDragItem.mItemView.getX();
-                float startY = mCurrentRecyclerView.getY() + mCurrentRecyclerView.mDragItem.mItemView.getY();
-                mHoverView.setX(startX - (mHoverView.getMeasuredWidth() - mCurrentRecyclerView.mDragItem.mItemView.getMeasuredWidth()) / 2);
-                mHoverView.setY(startY - (mHoverView.getMeasuredHeight() - mCurrentRecyclerView.mDragItem.mItemView.getMeasuredHeight())
-                        / 2);
-
-                PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("x", mHoverView.getX(), mNewX);
-                PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("y", mHoverView.getY(), mNewY);
-                ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(this, pvhX, pvhY);
-                anim.setInterpolator(new DecelerateInterpolator());
-                anim.setDuration(DragItemImage.ANIMATION_DURATION);
-                anim.start();
             }
 
             @Override
@@ -210,29 +175,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
             @Override
             public void onDragEnded(int newItemPosition) {
-                mHoverView.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onDragEndedStarted(View view) {
-                mHoverListener.endHoverAnimation(mHoverView);
-
-                mNewX = view.getX() + ((View) mCurrentRecyclerView.getParent()).getX() - (mHoverView.getMeasuredWidth() - view.getMeasuredWidth()) / 2;
-                mNewY = view.getY() + mCurrentRecyclerView.getY() - (mHoverView.getMeasuredHeight() - view.getMeasuredHeight()) / 2;
-                mHoverView.animate().setInterpolator(new DecelerateInterpolator()).setDuration(DragItemImage.ANIMATION_DURATION).x(mNewX)
-                        .y(mNewY).start();
-            }
-
-            void setX(float x) {
-                float moveDx = mTouchX + getScrollX() - mNewX;
-                mHoverView.setX(x + moveDx - mHoverView.getMeasuredWidth() / 2);
-                mHoverView.invalidate();
-            }
-
-            void setY(float y) {
-                float moveDy = mTouchY - mNewY;
-                mHoverView.setY(y + moveDy - mHoverView.getMeasuredHeight() / 2);
-                mHoverView.invalidate();
             }
         });
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));

@@ -23,15 +23,12 @@ import android.view.View;
 public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private DragItemRecyclerView mRecyclerView;
-    private DragItem mDragItem;
+    private long mDragItemId = -1;
     private boolean mDragOnLongPress;
 
     public abstract Object removeItem(int pos);
-
     public abstract void addItem(int pos, Object item);
-
     public abstract int getPositionForItemId(long id);
-
     public abstract void changeItemPosition(int fromPos, int toPos);
 
     public DragItemAdapter(boolean dragOnLongPress) {
@@ -42,15 +39,15 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
     public void onBindViewHolder(VH holder, int position) {
         long itemId = getItemId(position);
         holder.mItemId = itemId;
-        holder.itemView.setVisibility(mDragItem != null && mDragItem.mItemId == itemId ? View.INVISIBLE : View.VISIBLE);
+        holder.itemView.setVisibility(mDragItemId == itemId ? View.INVISIBLE : View.VISIBLE);
     }
 
     void setRecyclerView(DragItemRecyclerView recyclerView) {
         mRecyclerView = recyclerView;
     }
 
-    void setDragItem(DragItem dragItem) {
-        mDragItem = dragItem;
+    void setDragItemId(long dragItemId) {
+        mDragItemId = dragItemId;
     }
 
     boolean isDragOnLongPress() {
@@ -69,7 +66,7 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
                 mGrabHandle.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        mRecyclerView.onDragStarted(new DragItem(itemView, mItemId));
+                        mRecyclerView.onDragStarted(itemView, mItemId);
                         return true;
                     }
                 });
@@ -78,23 +75,13 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            mRecyclerView.onDragStarted(new DragItem(itemView, mItemId));
+                            mRecyclerView.onDragStarted(itemView, mItemId);
                             return true;
                         }
                         return false;
                     }
                 });
             }
-        }
-    }
-
-    static class DragItem {
-        public View mItemView;
-        public long mItemId;
-
-        public DragItem(View itemView, long id) {
-            mItemView = itemView;
-            mItemId = id;
         }
     }
 }
