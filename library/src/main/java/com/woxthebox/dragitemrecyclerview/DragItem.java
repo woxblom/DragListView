@@ -17,6 +17,7 @@ public abstract class DragItem {
     private float mPosY;
     private float mAnimationDx;
     private float mAnimationDy;
+    private boolean mCanDragHorizontally = true;
 
     public abstract View createDragView(Context context);
     public abstract void bindDragView(View clickedView, View dragView);
@@ -26,6 +27,10 @@ public abstract class DragItem {
     public DragItem(Context context) {
         mDragView = createDragView(context);
         hide();
+    }
+
+    void setCanDragHorizontally(boolean canDragHorizontally) {
+        mCanDragHorizontally = canDragHorizontally;
     }
 
     View getDragItemView() {
@@ -97,6 +102,14 @@ public abstract class DragItem {
         updatePosition();
     }
 
+    float getX() {
+        return mPosX;
+    }
+
+    float getY() {
+        return mPosY;
+    }
+
     void setPosition(float x, float y) {
         mPosX = x;
         mPosY = y;
@@ -110,7 +123,10 @@ public abstract class DragItem {
     }
 
     void updatePosition() {
-        mDragView.setX(mPosX + mOffsetX + mAnimationDx - mDragView.getMeasuredWidth() / 2);
+        if(mCanDragHorizontally) {
+            mDragView.setX(mPosX + mOffsetX + mAnimationDx - mDragView.getMeasuredWidth() / 2);
+        }
+
         mDragView.setY(mPosY + mOffsetY + mAnimationDy - mDragView.getMeasuredHeight() / 2);
         mDragView.invalidate();
     }

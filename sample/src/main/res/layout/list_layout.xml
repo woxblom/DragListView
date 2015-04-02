@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.woxthebox.dragitemrecyclerview.DragItemRecyclerView
+<com.woxthebox.dragitemrecyclerview.DragListView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/recycle_view"
+    android:id="@+id/drag_list_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"/>

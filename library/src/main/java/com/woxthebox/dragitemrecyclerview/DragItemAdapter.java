@@ -22,7 +22,11 @@ import android.view.View;
 
 public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-    private DragItemRecyclerView mRecyclerView;
+    interface DragStartedListener {
+        public void onDragStarted(View itemView, long itemId);
+    }
+
+    private DragStartedListener mDragStartedListener;
     private long mDragItemId = -1;
     private boolean mDragOnLongPress;
 
@@ -42,16 +46,12 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
         holder.itemView.setVisibility(mDragItemId == itemId ? View.INVISIBLE : View.VISIBLE);
     }
 
-    void setRecyclerView(DragItemRecyclerView recyclerView) {
-        mRecyclerView = recyclerView;
+    void setDragStartedListener(DragStartedListener dragStartedListener) {
+        mDragStartedListener = dragStartedListener;
     }
 
     void setDragItemId(long dragItemId) {
         mDragItemId = dragItemId;
-    }
-
-    boolean isDragOnLongPress() {
-        return mDragOnLongPress;
     }
 
     public abstract class ViewHolder extends RecyclerView.ViewHolder {
@@ -66,7 +66,7 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
                 mGrabHandle.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        mRecyclerView.onDragStarted(itemView, mItemId);
+                        mDragStartedListener.onDragStarted(itemView, mItemId);
                         return true;
                     }
                 });
@@ -75,7 +75,7 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
                         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                            mRecyclerView.onDragStarted(itemView, mItemId);
+                            mDragStartedListener.onDragStarted(itemView, mItemId);
                             return true;
                         }
                         return false;

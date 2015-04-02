@@ -19,14 +19,9 @@ package com.woxthebox.dragitemrecyclerview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Handler;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 
 public class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
@@ -43,19 +38,14 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         DRAG_STARTED, DRAGGING, DRAG_ENDED
     }
 
-    private Handler mHandler = new Handler();
+    private AutoScroller mAutoScroller;
+    private DragItemListener mListener;
     private DragState mDragState = DragState.DRAG_ENDED;
     private DragItemAdapter mAdapter;
-    private DragItemImage mDragItemImage;
     private DragItem mDragItem;
     private long mDragItemId = -1;
-    private DragItemListener mListener;
-    private AutoScroller mAutoScroller;
     private int mDragItemPosition;
-    private boolean mExternalDragItemImage;
     private boolean mHoldChangePosition;
-    private float mTouchX;
-    private float mTouchY;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -73,8 +63,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     }
 
     private void init() {
-        mDragItem = new DragItemImpl(getContext());
-        mDragItemImage = new DragItemImage(this);
         mAutoScroller = new AutoScroller(getContext(), this);
     }
 
@@ -84,15 +72,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
     public void setDragItem(DragItem dragItem) {
         mDragItem = dragItem;
-    }
-
-    public void setDragItemImage(DragItemImage itemImage) {
-        mDragItemImage = itemImage;
-        mExternalDragItemImage = true;
-    }
-
-    public void setDragItemBackgroundColor(ColorDrawable color) {
-        mDragItemImage.setColor(color);
     }
 
     public boolean isDragging() {
@@ -114,7 +93,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
         super.setAdapter(adapter);
         mAdapter = (DragItemAdapter) adapter;
-        mAdapter.setRecyclerView(this);
     }
 
     @Override
@@ -122,17 +100,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         super.setLayoutManager(layout);
         if (!(layout instanceof LinearLayoutManager)) {
             throw new RuntimeException("Layout must be an instance of LinearLayoutManager");
-        }
-
-        mDragItemImage.setIsGrid(layout instanceof GridLayoutManager);
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-
-        if (!mExternalDragItemImage && mDragState != DragState.DRAG_ENDED) {
-            mDragItemImage.draw(canvas);
         }
     }
 
@@ -162,7 +129,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     }
 
     private void updateDragPositionAndScroll() {
-        View view = findChildView(mDragItemImage.getCenterX(), mDragItemImage.getCenterY());
+        View view = findChildView(mDragItem.getX(), mDragItem.getY());
         if (view != null) {
             int newPos = getChildPosition(view);
             if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
@@ -171,10 +138,10 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
             }
 
             LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager();
-            if (mDragItemImage.getCenterY() > getHeight() - view.getHeight() / 3 && layout.findLastCompletelyVisibleItemPosition() !=
+            if (mDragItem.getY() > getHeight() - view.getHeight() / 3 && layout.findLastCompletelyVisibleItemPosition() !=
                     mAdapter.getItemCount() - 1) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-            } else if (mDragItemImage.getCenterY() < view.getHeight() / 3 && layout.findFirstCompletelyVisibleItemPosition() != 0) {
+            } else if (mDragItem.getY() < view.getHeight() / 3 && layout.findFirstCompletelyVisibleItemPosition() != 0) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
             } else {
                 mAutoScroller.stopAutoScroll();
@@ -182,20 +149,16 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         }
     }
 
-    void onDragStarted(View itemView, long itemId) {
+    void onDragStarted(View itemView, long itemId, float x, float y) {
         mDragState = DragState.DRAG_STARTED;
         mDragItemId = itemId;
-        mDragItem.startDrag(itemView, mTouchX, mTouchY);
-        mDragItemImage.createBitmap(itemView);
-        mDragItemImage.setCenterX(mTouchX);
-        mDragItemImage.setCenterY(mTouchY);
-        mDragItemImage.startStartAnimation(itemView);
-
+        mDragItem.startDrag(itemView, x, y);
         mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
+
         mAdapter.setDragItemId(mDragItemId);
         mAdapter.notifyItemChanged(mDragItemPosition);
         if (mListener != null) {
-            mListener.onDragStarted(mDragItemPosition, mTouchX, mTouchY);
+            mListener.onDragStarted(mDragItemPosition, mDragItem.getX(), mDragItem.getY());
         }
 
         invalidate();
@@ -204,8 +167,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     void onDragging(float x, float y) {
         mDragState = DragState.DRAGGING;
         mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
-        mDragItemImage.setCenterX(x);
-        mDragItemImage.setCenterY(y);
         mDragItem.setPosition(x, y);
 
         if (!mAutoScroller.isAutoScrolling()) {
@@ -237,7 +198,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
                 mAdapter.notifyItemChanged(mDragItemPosition);
 
                 // Need to postpone the end to avoid flicker
-                mHandler.post(new Runnable() {
+                post(new Runnable() {
                     @Override
                     public void run() {
                         mDragState = DragState.DRAG_ENDED;
@@ -246,8 +207,6 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
                         }
 
                         mDragItemId = -1;
-                        mDragItemImage.clearBitmap();
-                        mDragItemImage.setAlphaValue(1);
                         mDragItem.hide();
                         setEnabled(true);
                         invalidate();
@@ -285,43 +244,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         mDragState = DragState.DRAG_ENDED;
         mDragItemId = -1;
 
-        if (!mExternalDragItemImage) {
-            mDragItem.hide();
-            mDragItemImage.clearBitmap();
-            mDragItemImage.setAlphaValue(1);
-        }
-
         invalidate();
         return item;
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mTouchX = event.getX();
-                mTouchY = event.getY();
-                break;
-        }
-        return mDragState != DragState.DRAG_ENDED || super.onInterceptTouchEvent(event);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mDragState != DragState.DRAG_ENDED) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_MOVE:
-                    mTouchX = event.getX();
-                    mTouchY = event.getY();
-                    onDragging(event.getX(), event.getY());
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    onDragEnded();
-                    break;
-            }
-            return true;
-        }
-        return super.onTouchEvent(event);
     }
 }
