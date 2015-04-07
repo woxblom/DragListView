@@ -1,5 +1,6 @@
 package com.woxthebox.sample;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,7 +14,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.woxthebox.dragitemrecyclerview.DragItem;
 import com.woxthebox.dragitemrecyclerview.DragListView;
 
 import java.util.ArrayList;
@@ -75,17 +78,31 @@ public class ListFragment extends Fragment {
 
     private void setupListRecyclerView() {
         mDragListView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        //mRecyclerView.setDragItemBackgroundColor(new ColorDrawable(getResources().getColor(R.color.list_item_background)));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
         mDragListView.setAdapter(listAdapter);
         mDragListView.setCanDragHorizontally(false);
+        mDragListView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.list_item));
     }
 
     private void setupGridRecyclerView() {
         mDragListView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
-        //mRecyclerView.setDragItemBackgroundColor(null);
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
         mDragListView.setAdapter(listAdapter);
         mDragListView.setCanDragHorizontally(true);
+        mDragListView.setCustomDragItem(null);
+    }
+
+    private static class MyDragItem extends DragItem {
+
+        public MyDragItem(Context context, int layoutId) {
+            super(context, layoutId);
+        }
+
+        @Override
+        public void onBindDragView(View clickedView, View dragView) {
+            CharSequence text = ((TextView) clickedView.findViewById(R.id.text)).getText();
+            ((TextView) dragView.findViewById(R.id.text)).setText(text);
+            dragView.setBackgroundColor(dragView.getResources().getColor(R.color.list_item_background));
+        }
     }
 }

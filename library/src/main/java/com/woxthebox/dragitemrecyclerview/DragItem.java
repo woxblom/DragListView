@@ -4,12 +4,16 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 
-public abstract class DragItem {
+public class DragItem {
     protected static final int ANIMATION_DURATION = 250;
-    protected View mDragView;
+    private View mDragView;
     
     private float mOffsetX;
     private float mOffsetY;
@@ -19,14 +23,34 @@ public abstract class DragItem {
     private float mAnimationDy;
     private boolean mCanDragHorizontally = true;
 
-    public abstract View createDragView(Context context);
-    public abstract void bindDragView(View clickedView, View dragView);
-    public abstract void startDragAnimation(View dragView);
-    public abstract void endDragAnimation(View dragView);
-
     public DragItem(Context context) {
-        mDragView = createDragView(context);
+        mDragView = new View(context);
         hide();
+    }
+
+    public DragItem(Context context, int layoutId) {
+        mDragView = View.inflate(context, layoutId, null);
+        hide();
+    }
+
+    public void onBindDragView(View clickedView, View dragView) {
+        Bitmap bitmap = Bitmap.createBitmap(clickedView.getWidth(), clickedView.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        clickedView.draw(canvas);
+        dragView.setBackground(new BitmapDrawable(clickedView.getResources(), bitmap));
+    }
+
+    public void onMeasureDragView(View clickedView, View dragView) {
+        dragView.setLayoutParams(new FrameLayout.LayoutParams(clickedView.getMeasuredWidth(), clickedView.getMeasuredHeight()));
+        int widthSpec = View.MeasureSpec.makeMeasureSpec(clickedView.getMeasuredWidth(), View.MeasureSpec.EXACTLY);
+        int heightSpec = View.MeasureSpec.makeMeasureSpec(clickedView.getMeasuredHeight(), View.MeasureSpec.EXACTLY);
+        dragView.measure(widthSpec, heightSpec);
+    }
+
+    public void onStartDragAnimation(View dragView) {
+    }
+
+    public void onEndDragAnimation(View dragView) {
     }
 
     void setCanDragHorizontally(boolean canDragHorizontally) {
@@ -47,8 +71,9 @@ public abstract class DragItem {
 
     void startDrag(View startFromView, float touchX, float touchY) {
         show();
-        bindDragView(startFromView, mDragView);
-        startDragAnimation(mDragView);
+        onBindDragView(startFromView, mDragView);
+        onMeasureDragView(startFromView, mDragView);
+        onStartDragAnimation(mDragView);
         setPosition(touchX, touchY);
 
         float startX = startFromView.getX() - (mDragView.getMeasuredWidth() - startFromView.getMeasuredWidth()) / 2 + mDragView
@@ -67,7 +92,7 @@ public abstract class DragItem {
     }
 
     void endDrag(View endToView, AnimatorListenerAdapter listener) {
-        endDragAnimation(mDragView);
+        onEndDragAnimation(mDragView);
 
         float endX = endToView.getX() - (mDragView.getMeasuredWidth() - endToView.getMeasuredWidth()) / 2 + mDragView
                 .getMeasuredWidth() / 2;

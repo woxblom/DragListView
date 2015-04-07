@@ -11,6 +11,7 @@ import android.widget.FrameLayout;
 public class DragListView extends FrameLayout {
     private DragItemRecyclerView mRecyclerView;
     private DragItem mDragItem;
+    private boolean mCanDragHorizontally;
     private float mTouchX;
     private float mTouchY;
 
@@ -29,7 +30,7 @@ public class DragListView extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mDragItem = new DragItemImpl(getContext());
+        mDragItem = new DragItem(getContext());
         mRecyclerView = createRecyclerView();
         mRecyclerView.setDragItem(mDragItem);
         addView(mRecyclerView);
@@ -102,12 +103,21 @@ public class DragListView extends FrameLayout {
     }
 
     public void setCustomDragItem(DragItem dragItem) {
-        mDragItem = dragItem;
         removeViewAt(1);
+
+        if(dragItem != null) {
+            mDragItem = dragItem;
+        } else {
+            mDragItem = new DragItem(getContext());
+        }
+
+        mDragItem.setCanDragHorizontally(mCanDragHorizontally);
+        mRecyclerView.setDragItem(mDragItem);
         addView(mDragItem.getDragItemView());
     }
 
     public void setCanDragHorizontally(boolean canDragHorizontally) {
+        mCanDragHorizontally = canDragHorizontally;
         mDragItem.setCanDragHorizontally(canDragHorizontally);
     }
 }
