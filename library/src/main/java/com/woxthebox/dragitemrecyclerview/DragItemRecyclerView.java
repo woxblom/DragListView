@@ -105,8 +105,12 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
     @Override
     public void onAutoScroll(int dx, int dy) {
-        scrollBy(dx, dy);
-        updateDragPositionAndScroll();
+        if(isDragging()) {
+            scrollBy(dx, dy);
+            updateDragPositionAndScroll();
+        } else {
+            mAutoScroller.stopAutoScroll();
+        }
     }
 
     public View findChildView(float x, float y) {
@@ -130,18 +134,18 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItem.getX(), mDragItem.getY());
-        if (view != null) {
-            int newPos = getChildPosition(view);
+        int newPos = getChildPosition(view);
+        if (newPos != -1) {
             if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
                 mAdapter.changeItemPosition(mDragItemPosition, newPos);
                 mDragItemPosition = newPos;
             }
 
             LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager();
-            if (mDragItem.getY() > getHeight() - view.getHeight() / 3 && layout.findLastCompletelyVisibleItemPosition() !=
+            if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && layout.findLastCompletelyVisibleItemPosition() !=
                     mAdapter.getItemCount() - 1) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-            } else if (mDragItem.getY() < view.getHeight() / 3 && layout.findFirstCompletelyVisibleItemPosition() != 0) {
+            } else if (mDragItem.getY() < view.getHeight() / 2 && layout.findFirstCompletelyVisibleItemPosition() != 0) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
             } else {
                 mAutoScroller.stopAutoScroll();
@@ -154,6 +158,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         mDragItemId = itemId;
         mDragItem.startDrag(itemView, x, y);
         mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
+        updateDragPositionAndScroll();
 
         mAdapter.setDragItemId(mDragItemId);
         mAdapter.notifyItemChanged(mDragItemPosition);
@@ -165,6 +170,10 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     }
 
     void onDragging(float x, float y) {
+        if(mDragState == DragState.DRAG_ENDED) {
+            return;
+        }
+
         mDragState = DragState.DRAGGING;
         mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
         mDragItem.setPosition(x, y);
@@ -219,22 +228,28 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     void addDragItemAndStart(float y, Object item, long itemId) {
         View child = findChildView(0, y);
         int pos = getChildPosition(child);
-        if(pos != -1) {
-            mDragState = DragState.DRAG_STARTED;
-            mDragItemId = itemId;
-            mAdapter.setDragItemId(mDragItemId);
-            mAdapter.addItem(pos, item);
-            mDragItemPosition = pos;
 
-            mHoldChangePosition = true;
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mHoldChangePosition = false;
-                }
-            }, getItemAnimator().getMoveDuration());
-            invalidate();
+        // If pos is -1 it means that the child has not been layed out yet,
+        // this only happens for pos 0 as far as I know
+        if(pos == -1) {
+            pos = 0;
         }
+
+        mDragState = DragState.DRAG_STARTED;
+        mDragItemId = itemId;
+        mAdapter.setDragItemId(mDragItemId);
+        mAdapter.addItem(pos, item);
+        mDragItemPosition = pos;
+
+        mHoldChangePosition = true;
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mHoldChangePosition = false;
+            }
+        }, getItemAnimator().getMoveDuration());
+
+        invalidate();
     }
 
     Object removeDragItemAndEnd() {

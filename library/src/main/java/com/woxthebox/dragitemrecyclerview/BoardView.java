@@ -97,8 +97,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     @Override
     public void onAutoScroll(int dx, int dy) {
-        scrollBy(dx, dy);
-        updateScrollPosition();
+        if(mCurrentRecyclerView.isDragging()) {
+            scrollBy(dx, dy);
+            updateScrollPosition();
+        } else {
+            mAutoScroller.stopAutoScroll();
+        }
     }
 
     private void updateScrollPosition() {
