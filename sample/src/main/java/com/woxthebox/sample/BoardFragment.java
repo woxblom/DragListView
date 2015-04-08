@@ -44,6 +44,7 @@ public class BoardFragment extends Fragment {
         View view = inflater.inflate(R.layout.board_layout, container, false);
 
         mBoardView = (BoardView) view.findViewById(R.id.board_view);
+        mBoardView.setPageScrollingEnabled(true);
         mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override

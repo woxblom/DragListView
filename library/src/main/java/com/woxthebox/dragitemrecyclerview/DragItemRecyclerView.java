@@ -24,7 +24,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
+class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
 
     public interface DragItemListener {
         public void onDragStarted(int itemPosition, float x, float y);
@@ -113,7 +113,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         }
     }
 
-    public View findChildView(float x, float y) {
+    private View findChildView(float x, float y) {
         final int count = getChildCount();
         if (y <= 0 && count > 0) {
             return getChildAt(0);
