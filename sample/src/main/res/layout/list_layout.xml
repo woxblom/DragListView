@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<com.woxthebox.dragitemrecyclerview.DragListView
+<com.woxthebox.draglistview.DragListView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drag_list_view"
     android:layout_width="match_parent"

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.woxthebox.dragitemrecyclerview;
+package com.woxthebox.draglistview;
 
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;

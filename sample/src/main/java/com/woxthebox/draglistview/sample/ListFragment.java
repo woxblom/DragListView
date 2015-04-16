@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.woxthebox.sample;
+package com.woxthebox.draglistview.sample;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -33,8 +33,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.woxthebox.dragitemrecyclerview.DragItem;
-import com.woxthebox.dragitemrecyclerview.DragListView;
+import com.woxthebox.draglistview.DragItem;
+import com.woxthebox.draglistview.DragListView;
+import com.woxthebox.sample.R;
 
 import java.util.ArrayList;
 

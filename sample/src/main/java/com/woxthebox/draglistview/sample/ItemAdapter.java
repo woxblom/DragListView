@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.woxthebox.sample;
+package com.woxthebox.draglistview.sample;
 
 import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
@@ -23,7 +23,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.woxthebox.dragitemrecyclerview.DragItemAdapter;
+import com.woxthebox.draglistview.DragItemAdapter;
+import com.woxthebox.sample.R;
 
 import java.util.ArrayList;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.woxthebox.sample;
+package com.woxthebox.draglistview.sample;
 
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -23,6 +23,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import com.woxthebox.sample.R;
 
 
 public class MainActivity extends ActionBarActivity {

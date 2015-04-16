@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.woxthebox.sample;
+package com.woxthebox.draglistview.sample;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -35,8 +35,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.woxthebox.dragitemrecyclerview.BoardView;
-import com.woxthebox.dragitemrecyclerview.DragItem;
+import com.woxthebox.draglistview.BoardView;
+import com.woxthebox.draglistview.DragItem;
+import com.woxthebox.sample.R;
 
 import java.util.ArrayList;
 
