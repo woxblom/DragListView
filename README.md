@@ -5,9 +5,9 @@ Youtube demo video<br>
 [![Android drag and drop RecyclerView](http://img.youtube.com/vi/9clvbTW4ATw/0.jpg)](http://www.youtube.com/watch?v=9clvbTW4ATw)
 
 ## Features
-* Re-order items in a RecyclerView list or grid by dragging and dropping
-* Add a background color of the item while dragging
-* Get a callback when a drag is started and ended with the position
+* Re-order items in a list, grid or board by dragging and dropping with nice animations.
+* Add custom animations when the drag is starting and ending.
+* Get a callback when a drag is started and ended with the position.
 
 ## Usage
 **NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager are supported.

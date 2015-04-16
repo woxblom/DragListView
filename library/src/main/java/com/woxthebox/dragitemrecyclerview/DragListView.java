@@ -1,3 +1,19 @@
+/**
+ * Copyright 2014 Magnus Woxblom
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.woxthebox.dragitemrecyclerview;
 
 import android.content.Context;
@@ -9,8 +25,16 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 public class DragListView extends FrameLayout {
+
+    public interface DragListListener {
+        public void onItemDragStarted(int position);
+
+        public void onItemDragEnded(int fromPosition, int toPosition);
+    }
+
     private DragItemRecyclerView mRecyclerView;
     private DragItem mDragItem;
+    private DragListListener mDragListListener;
     private boolean mCanDragHorizontally;
     private float mTouchX;
     private float mTouchY;
@@ -67,6 +91,17 @@ public class DragListView extends FrameLayout {
         return false;
     }
 
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    public DragItemAdapter getAdapter() {
+        if (mRecyclerView != null) {
+            return (DragItemAdapter) mRecyclerView.getAdapter();
+        }
+        return null;
+    }
+
     public void setAdapter(DragItemAdapter adapter) {
         mRecyclerView.setAdapter(adapter);
         adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
@@ -81,14 +116,24 @@ public class DragListView extends FrameLayout {
         mRecyclerView.setLayoutManager(layout);
     }
 
+    public void setDragListListener(DragListListener listener) {
+        mDragListListener = listener;
+    }
+
     private DragItemRecyclerView createRecyclerView() {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
         recyclerView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
+            private int mDragStartPosition;
+
             @Override
             public void onDragStarted(int itemPosition, float x, float y) {
+                mDragStartPosition = itemPosition;
+                if (mDragListListener != null) {
+                    mDragListListener.onItemDragStarted(itemPosition);
+                }
             }
 
             @Override
@@ -97,6 +142,9 @@ public class DragListView extends FrameLayout {
 
             @Override
             public void onDragEnded(int newItemPosition) {
+                if (mDragListListener != null) {
+                    mDragListListener.onItemDragEnded(mDragStartPosition, newItemPosition);
+                }
             }
         });
         return recyclerView;
@@ -105,7 +153,7 @@ public class DragListView extends FrameLayout {
     public void setCustomDragItem(DragItem dragItem) {
         removeViewAt(1);
 
-        if(dragItem != null) {
+        if (dragItem != null) {
             mDragItem = dragItem;
         } else {
             mDragItem = new DragItem(getContext());

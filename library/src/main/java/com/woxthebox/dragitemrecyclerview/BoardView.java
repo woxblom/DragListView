@@ -1,3 +1,19 @@
+/**
+ * Copyright 2014 Magnus Woxblom
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.woxthebox.dragitemrecyclerview;
 
 import android.content.Context;
@@ -21,7 +37,9 @@ import java.util.ArrayList;
 public class BoardView extends HorizontalScrollView implements AutoScroller.AutoScrollListener {
 
     public interface BoardListener {
-        public void onItemMoved(int fromColumn, int fromRow, int toColumn, int toRow);
+        public void onItemDragStarted(int column, int row);
+
+        public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
     }
 
     private static final int SCROLL_ANIMATION_DURATION = 300;
@@ -35,8 +53,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private DragItem mDragItem;
     private BoardListener mBoardListener;
     private boolean mPageScrollingEnabled;
-    private int mDragStartColumn;
-    private int mDragStartRow;
     private float mTouchX;
     private float mTouchY;
     private int mColumnWidth;
@@ -59,7 +75,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         super.onFinishInflate();
         Resources res = getResources();
         boolean isPortrait = res.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        if(isPortrait) {
+        if (isPortrait) {
             mColumnWidth = (int) (res.getDisplayMetrics().widthPixels * 0.86);
         } else {
             mColumnWidth = (int) (res.getDisplayMetrics().density * 320);
@@ -87,7 +103,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         super.onLayout(changed, l, t, r, b);
         // Snap to closes column after first layout.
         // This is needed so correct column is scrolled to after a rotation.
-        if(!mHasLaidOut && isInPageScrollingMode()) {
+        if (!mHasLaidOut && isInPageScrollingMode()) {
             snapToColumn(getClosestColumn(), false);
         }
         mHasLaidOut = true;
@@ -119,7 +135,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 case MotionEvent.ACTION_CANCEL:
                     mAutoScroller.stopAutoScroll();
                     mCurrentRecyclerView.onDragEnded();
-                    if(isInPageScrollingMode()) {
+                    if (isInPageScrollingMode()) {
                         snapToColumn(getColumnOfList(mCurrentRecyclerView), true);
                     }
                     invalidate();
@@ -127,20 +143,20 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
             return true;
         } else {
-            if(isInPageScrollingMode() && mGestureDetector.onTouchEvent(event)) {
+            if (isInPageScrollingMode() && mGestureDetector.onTouchEvent(event)) {
                 // A page fling occurred, consume event
                 return true;
             }
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    if(!mScroller.isFinished()) {
+                    if (!mScroller.isFinished()) {
                         // View was grabbed during animation
                         mScroller.forceFinished(true);
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    if(isInPageScrollingMode()) {
+                    if (isInPageScrollingMode()) {
                         snapToColumn(getClosestColumn(), true);
                     }
                     break;
@@ -247,7 +263,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             RecyclerView list = mLists.get(i);
             int listPosX = ((View) list.getParent()).getLeft();
             int diffX = Math.abs(listPosX + mColumnWidth / 2 - middlePosX);
-            if(diffX < minDiffX) {
+            if (diffX < minDiffX) {
                 minDiffX = diffX;
                 column = i;
             }
@@ -262,7 +278,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         newX = newX < 0 ? 0 : newX;
         newX = newX > maxScroll ? maxScroll : newX;
         if (getScrollX() != newX) {
-            if(animate) {
+            if (animate) {
                 mScroller.startScroll(getScrollX(), getScrollY(), newX - getScrollX(), 0, SCROLL_ANIMATION_DURATION);
                 postInvalidateOnAnimation();
             } else {
@@ -283,6 +299,13 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     public RecyclerView getRecyclerView(int column) {
         if (column > 0 && column < mLists.size()) {
             return mLists.get(column);
+        }
+        return null;
+    }
+
+    public DragItemAdapter getAdapter(int column) {
+        if (column > 0 && column < mLists.size()) {
+            return (DragItemAdapter) mLists.get(column).getAdapter();
         }
         return null;
     }
@@ -317,12 +340,18 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setHasFixedSize(hasFixedItemSize);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
+            private int mDragStartColumn;
+            private int mDragStartRow;
+
             @Override
             public void onDragStarted(int itemPosition, float x, float y) {
                 mDragStartColumn = getColumnOfList(recyclerView);
                 mDragStartRow = itemPosition;
                 mCurrentRecyclerView = recyclerView;
                 mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getX(), mCurrentRecyclerView.getY());
+                if (mBoardListener != null) {
+                    mBoardListener.onItemDragStarted(mDragStartColumn, mDragStartRow);
+                }
                 invalidate();
             }
 
@@ -332,9 +361,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
             @Override
             public void onDragEnded(int newItemPosition) {
-                int newColumn = getColumnOfList(recyclerView);
-                if (mBoardListener != null && (mDragStartColumn != newColumn || mDragStartRow != newItemPosition)) {
-                    mBoardListener.onItemMoved(mDragStartColumn, mDragStartRow, getColumnOfList(recyclerView), newItemPosition);
+                if (mBoardListener != null) {
+                    mBoardListener.onItemDragEnded(mDragStartColumn, mDragStartRow, getColumnOfList(recyclerView), newItemPosition);
                 }
             }
         });
@@ -374,7 +402,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             // Calc new column to scroll to
             int currentColumn = getCurrentColumn(e2.getX() + getScrollX());
             int newColumn;
-            if(velocityX < 0) {
+            if (velocityX < 0) {
                 newColumn = getScrollX() >= mStartScrollX ? currentColumn + 1 : currentColumn;
             } else {
                 newColumn = getScrollX() <= mStartScrollX ? currentColumn - 1 : currentColumn;

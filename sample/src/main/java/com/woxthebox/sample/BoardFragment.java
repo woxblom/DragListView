@@ -1,3 +1,19 @@
+/**
+ * Copyright 2014 Magnus Woxblom
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.woxthebox.sample;
 
 import android.animation.ObjectAnimator;
@@ -48,8 +64,15 @@ public class BoardFragment extends Fragment {
         mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
-            public void onItemMoved(int fromColumn, int fromRow, int toColumn, int toRow) {
-                Toast.makeText(getActivity(), "Column: "+toColumn+" Row: "+toRow, Toast.LENGTH_SHORT).show();
+            public void onItemDragStarted(int column, int row) {
+                Toast.makeText(getActivity(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
+                if (fromColumn != toColumn || fromRow != toRow) {
+                    Toast.makeText(getActivity(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
+                }
             }
         });
         return view;
@@ -97,7 +120,7 @@ public class BoardFragment extends Fragment {
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mItemArray.add(0, new Pair<>((long)mBoardView.getItemCount(), "Test " + mBoardView.getItemCount()));
+                mItemArray.add(0, new Pair<>((long) mBoardView.getItemCount(), "Test " + mBoardView.getItemCount()));
                 listAdapter.notifyDataSetChanged();
             }
         });
@@ -116,21 +139,21 @@ public class BoardFragment extends Fragment {
         public void onBindDragView(View clickedView, View dragView) {
             CharSequence text = ((TextView) clickedView.findViewById(R.id.text)).getText();
             ((TextView) dragView.findViewById(R.id.text)).setText(text);
-            CardView hoverCard = ((CardView) dragView.findViewById(R.id.card));
+            CardView dragCard = ((CardView) dragView.findViewById(R.id.card));
             CardView clickedCard = ((CardView) clickedView.findViewById(R.id.card));
 
-            hoverCard.setMaxCardElevation(40);
-            hoverCard.setCardElevation(clickedCard.getCardElevation());
-            hoverCard.setForeground(clickedView.getResources().getDrawable(R.drawable.card_view_hover_foreground));
+            dragCard.setMaxCardElevation(40);
+            dragCard.setCardElevation(clickedCard.getCardElevation());
+            dragCard.setForeground(clickedView.getResources().getDrawable(R.drawable.card_view_drag_foreground));
         }
 
         @Override
         public void onMeasureDragView(View clickedView, View dragView) {
-            CardView hoverCard = ((CardView) dragView.findViewById(R.id.card));
+            CardView dragCard = ((CardView) dragView.findViewById(R.id.card));
             CardView clickedCard = ((CardView) clickedView.findViewById(R.id.card));
-            int widthDiff = hoverCard.getPaddingLeft() - clickedCard.getPaddingLeft() + hoverCard.getPaddingRight() -
+            int widthDiff = dragCard.getPaddingLeft() - clickedCard.getPaddingLeft() + dragCard.getPaddingRight() -
                     clickedCard.getPaddingRight();
-            int heightDiff = hoverCard.getPaddingTop() - clickedCard.getPaddingTop() + hoverCard.getPaddingBottom() -
+            int heightDiff = dragCard.getPaddingTop() - clickedCard.getPaddingTop() + dragCard.getPaddingBottom() -
                     clickedCard.getPaddingBottom();
             int width = clickedView.getMeasuredWidth() + widthDiff;
             int height = clickedView.getMeasuredHeight() + heightDiff;
@@ -142,18 +165,18 @@ public class BoardFragment extends Fragment {
         }
 
         @Override
-        public void onStartDragAnimation(View hoverView) {
-            CardView hoverCard = ((CardView) hoverView.findViewById(R.id.card));
-            ObjectAnimator anim = ObjectAnimator.ofFloat(hoverCard, "CardElevation", hoverCard.getCardElevation(), 40);
+        public void onStartDragAnimation(View dragView) {
+            CardView dragCard = ((CardView) dragView.findViewById(R.id.card));
+            ObjectAnimator anim = ObjectAnimator.ofFloat(dragCard, "CardElevation", dragCard.getCardElevation(), 40);
             anim.setInterpolator(new DecelerateInterpolator());
             anim.setDuration(ANIMATION_DURATION);
             anim.start();
         }
 
         @Override
-        public void onEndDragAnimation(View hoverView) {
-            CardView hoverCard = ((CardView) hoverView.findViewById(R.id.card));
-            ObjectAnimator anim = ObjectAnimator.ofFloat(hoverCard, "CardElevation", hoverCard.getCardElevation(), 6);
+        public void onEndDragAnimation(View dragView) {
+            CardView dragCard = ((CardView) dragView.findViewById(R.id.card));
+            ObjectAnimator anim = ObjectAnimator.ofFloat(dragCard, "CardElevation", dragCard.getCardElevation(), 6);
             anim.setInterpolator(new DecelerateInterpolator());
             anim.setDuration(ANIMATION_DURATION);
             anim.start();

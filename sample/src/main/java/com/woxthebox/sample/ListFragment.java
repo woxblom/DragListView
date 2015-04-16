@@ -1,3 +1,19 @@
+/**
+ * Copyright 2014 Magnus Woxblom
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.woxthebox.sample;
 
 import android.content.Context;
@@ -15,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.woxthebox.dragitemrecyclerview.DragItem;
 import com.woxthebox.dragitemrecyclerview.DragListView;
@@ -41,6 +58,20 @@ public class ListFragment extends Fragment {
         View view = inflater.inflate(R.layout.list_layout, container, false);
 
         mDragListView = (DragListView) view.findViewById(R.id.drag_list_view);
+        mDragListView.setDragListListener(new DragListView.DragListListener() {
+            @Override
+            public void onItemDragStarted(int position) {
+                Toast.makeText(getActivity(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onItemDragEnded(int fromPosition, int toPosition) {
+                if (fromPosition != toPosition) {
+                    Toast.makeText(getActivity(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         mItemArray = new ArrayList<>();
         for (int i = 0; i < 40; i++) {
             mItemArray.add(new Pair<>(Long.valueOf(i), "Item " + i));
@@ -54,7 +85,7 @@ public class ListFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ((ActionBarActivity)getActivity()).getSupportActionBar().setTitle("List and Grid");
+        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle("List and Grid");
     }
 
     @Override

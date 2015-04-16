@@ -15,10 +15,10 @@
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
-        <inset android:insetLeft="4dp" android:insetBottom="5dp" android:insetRight="4dp" android:insetTop="5dp">
+        <inset android:insetLeft="3dp" android:insetBottom="4dp" android:insetRight="3dp" android:insetTop="4dp">
             <shape>
                 <stroke android:color="@color/app_color" android:width="2dp"/>
-                <corners android:radius="5dp"/>
+                <corners android:radius="3dp"/>
             </shape>
         </inset>
     </item>
