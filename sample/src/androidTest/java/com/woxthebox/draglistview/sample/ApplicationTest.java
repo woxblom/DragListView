@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.woxthebox.sample;
+package com.woxthebox.draglistview.sample;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

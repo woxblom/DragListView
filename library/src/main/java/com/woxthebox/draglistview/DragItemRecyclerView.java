@@ -134,7 +134,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItem.getX(), mDragItem.getY());
-        int newPos = getChildPosition(view);
+        int newPos = getChildAdapterPosition(view);
         if (newPos != -1) {
             if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
                 mAdapter.changeItemPosition(mDragItemPosition, newPos);
@@ -161,7 +161,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         updateDragPositionAndScroll();
 
         mAdapter.setDragItemId(mDragItemId);
-        mAdapter.notifyItemChanged(mDragItemPosition);
+        mAdapter.notifyDataSetChanged();
         if (mListener != null) {
             mListener.onDragStarted(mDragItemPosition, mDragItem.getX(), mDragItem.getY());
         }
@@ -196,7 +196,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
         mAutoScroller.stopAutoScroll();
 
-        final RecyclerView.ViewHolder holder = findViewHolderForPosition(mDragItemPosition);
+        final RecyclerView.ViewHolder holder = findViewHolderForAdapterPosition(mDragItemPosition);
         getItemAnimator().endAnimation(holder);
         setEnabled(false);
         mDragItem.endDrag(holder.itemView, new AnimatorListenerAdapter() {
@@ -204,7 +204,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             public void onAnimationEnd(Animator animation) {
                 holder.itemView.setAlpha(1);
                 mAdapter.setDragItemId(-1);
-                mAdapter.notifyItemChanged(mDragItemPosition);
+                mAdapter.notifyDataSetChanged();
 
                 // Need to postpone the end to avoid flicker
                 post(new Runnable() {
@@ -227,7 +227,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     void addDragItemAndStart(float y, Object item, long itemId) {
         View child = findChildView(0, y);
-        int pos = getChildPosition(child);
+        int pos = getChildAdapterPosition(child);
 
         // If pos is -1 it means that the child has not been layed out yet,
         // this only happens for pos 0 as far as I know
