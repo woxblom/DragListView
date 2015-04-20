@@ -102,7 +102,8 @@ public class DragListView extends FrameLayout {
         return null;
     }
 
-    public void setAdapter(DragItemAdapter adapter) {
+    public void setAdapter(DragItemAdapter adapter, boolean hasFixedItemSize) {
+        mRecyclerView.setHasFixedSize(hasFixedItemSize);
         mRecyclerView.setAdapter(adapter);
         adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
             @Override
@@ -123,7 +124,6 @@ public class DragListView extends FrameLayout {
     private DragItemRecyclerView createRecyclerView() {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
         recyclerView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        recyclerView.setHasFixedSize(true);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             private int mDragStartPosition;

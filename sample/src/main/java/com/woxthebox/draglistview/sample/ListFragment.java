@@ -111,7 +111,7 @@ public class ListFragment extends Fragment {
     private void setupListRecyclerView() {
         mDragListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
-        mDragListView.setAdapter(listAdapter);
+        mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(false);
         mDragListView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.list_item));
     }
@@ -119,7 +119,7 @@ public class ListFragment extends Fragment {
     private void setupGridRecyclerView() {
         mDragListView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
-        mDragListView.setAdapter(listAdapter);
+        mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(true);
         mDragListView.setCustomDragItem(null);
     }
