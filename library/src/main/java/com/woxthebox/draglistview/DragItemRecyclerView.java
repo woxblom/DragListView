@@ -105,7 +105,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     @Override
     public void onAutoScroll(int dx, int dy) {
-        if(isDragging()) {
+        if (isDragging()) {
             scrollBy(dx, dy);
             updateDragPositionAndScroll();
         } else {
@@ -170,7 +170,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     void onDragging(float x, float y) {
-        if(mDragState == DragState.DRAG_ENDED) {
+        if (mDragState == DragState.DRAG_ENDED) {
             return;
         }
 
@@ -195,32 +195,41 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         }
 
         mAutoScroller.stopAutoScroll();
-
-        final RecyclerView.ViewHolder holder = findViewHolderForAdapterPosition(mDragItemPosition);
-        getItemAnimator().endAnimation(holder);
         setEnabled(false);
-        mDragItem.endDrag(holder.itemView, new AnimatorListenerAdapter() {
+
+        // Sometimes the holder will be null if a holder has not yet been set for the position
+        final RecyclerView.ViewHolder holder = findViewHolderForAdapterPosition(mDragItemPosition);
+        if (holder != null) {
+            getItemAnimator().endAnimation(holder);
+            mDragItem.endDrag(holder.itemView, new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    holder.itemView.setAlpha(1);
+                    onDragItemAnimationEnd();
+                }
+            });
+        } else {
+            onDragItemAnimationEnd();
+        }
+    }
+
+    private void onDragItemAnimationEnd() {
+        mAdapter.setDragItemId(-1);
+        mAdapter.notifyDataSetChanged();
+
+        // Need to postpone the end to avoid flicker
+        post(new Runnable() {
             @Override
-            public void onAnimationEnd(Animator animation) {
-                holder.itemView.setAlpha(1);
-                mAdapter.setDragItemId(-1);
-                mAdapter.notifyDataSetChanged();
+            public void run() {
+                mDragState = DragState.DRAG_ENDED;
+                if (mListener != null) {
+                    mListener.onDragEnded(mDragItemPosition);
+                }
 
-                // Need to postpone the end to avoid flicker
-                post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mDragState = DragState.DRAG_ENDED;
-                        if (mListener != null) {
-                            mListener.onDragEnded(mDragItemPosition);
-                        }
-
-                        mDragItemId = -1;
-                        mDragItem.hide();
-                        setEnabled(true);
-                        invalidate();
-                    }
-                });
+                mDragItemId = -1;
+                mDragItem.hide();
+                setEnabled(true);
+                invalidate();
             }
         });
     }
@@ -231,7 +240,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
         // If pos is -1 it means that the child has not been layed out yet,
         // this only happens for pos 0 as far as I know
-        if(pos == -1) {
+        if (pos == -1) {
             pos = 0;
         }
 
