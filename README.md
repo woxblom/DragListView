@@ -1,5 +1,5 @@
-# DragItemRecyclerView
-DragItemRecyclerView can be used when you want to be able to re-order items in a list or grid.
+# DragListView
+DragListView can be used when you want to be able to re-order items in a list, grid or a board.
 
 Youtube demo video<br>
 [![Android drag and drop RecyclerView](http://img.youtube.com/vi/9clvbTW4ATw/0.jpg)](http://www.youtube.com/watch?v=9clvbTW4ATw)
@@ -13,23 +13,85 @@ Youtube demo video<br>
 **NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager are supported.
 List and Grid layouts are used as example in the sample project.
 
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setDragItemBackgroundColor(Color.parseColor("#AACCCCCC"));
-        mRecyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
-            @Override
-            public void onDragStarted(int itemPosition) {
+  For list and grid view use the DragListView.
+
+        mDragListView = (DragListView) view.findViewById(R.id.drag_list_view);
+        mDragListView.setDragListListener(new DragListView.DragListListener() {
+                    @Override
+                    public void onItemDragStarted(int position) {
+                        Toast.makeText(getActivity(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onItemDragEnded(int fromPosition, int toPosition) {
+                        if (fromPosition != toPosition) {
+                            Toast.makeText(getActivity(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+        mDragListView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
+        mDragListView.setAdapter(listAdapter);
+        mDragListView.setCanDragHorizontally(false);
+
+  A custom drag item can be provided to change the visual appearance of the dragging item.
+
+        mDragListView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.list_item));
+
+        private static class MyDragItem extends DragItem {
+            public MyDragItem(Context context, int layoutId) {
+                super(context, layoutId);
             }
 
             @Override
-            public void onDragEnded(int newItemPosition) {
+            public void onBindDragView(View clickedView, View dragView) {
+                CharSequence text = ((TextView) clickedView.findViewById(R.id.text)).getText();
+                ((TextView) dragView.findViewById(R.id.text)).setText(text);
+                dragView.setBackgroundColor(dragView.getResources().getColor(R.color.list_item_background));
             }
+        }
+
+  For a board, which is a number of horizontal columns with lists, then use BoardView. For an example with custom animations
+  check the sample code.
+
+        mBoardView = (BoardView) view.findViewById(R.id.board_view);
+        mBoardView.setPageScrollingEnabled(true);
+        mBoardView.setBoardListener(new BoardView.BoardListener() {
+              @Override
+              public void onItemDragStarted(int column, int row) {
+                  Toast.makeText(getActivity(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
+              }
+
+              @Override
+              public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
+                  if (fromColumn != toColumn || fromRow != toRow) {
+                      Toast.makeText(getActivity(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
+                  }
+              }
         });
-  
+        ...
+        mBoardView.addColumnList(listAdapter, header, false);
+
+
   For your adapter, extend DragItemAdapter and implement the methods below.
   You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
 
     private ArrayList<Pair<Long, String>> mItemList;  
     
+    @Override
+    public Object removeItem(int pos) {
+        Object item = mItemList.remove(pos);
+        notifyItemRemoved(pos);
+        return item;
+    }
+
+    @Override
+    public void addItem(int pos, Object item) {
+        mItemList.add(pos, (Pair<Long, String>) item);
+        notifyItemInserted(pos);
+    }
+
     @Override
     public int getPositionForItemId(long id) {
         for (int i = 0; i < mItemList.size(); i++) {
@@ -46,7 +108,7 @@ List and Grid layouts are used as example in the sample project.
         mItemList.add(toPos, pair);
         notifyDataSetChanged();
     }
-  
+
   Your ViewHolder should extend DragItemAdapter.ViewHolder and you must supply an id of the view that should respond to a drag.
   
     public class ViewHolder extends DragItemAdapter.ViewHolder {
@@ -60,10 +122,10 @@ List and Grid layouts are used as example in the sample project.
 
 ## License
 
-If you use DragItemRecyclerView code in your application you should inform the author about it (*email: woxthebox@gmail.com*) like this:
-> **Subject:** DragItemRecyclerView usage notification<br />
-> **Text:** I use DragItemRecyclerView in {application_name} - {http://link_to_google_play}.
-> I [allow | don't allow] you to mention my app in section "Applications using DragItemRecyclerView" on GitHub.
+If you use DragItemRecyclerView code in your application please inform the author about it (*email: woxthebox@gmail.com*) like this:
+> **Subject:** DragListView usage notification<br />
+> **Text:** I use DragListView in {application_name} - {http://link_to_google_play}.
+> I [allow | don't allow] you to mention my app in section "Applications using DragListView" on GitHub.
 
     Copyright 2014 Magnus Woxblom
 
