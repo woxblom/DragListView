@@ -2,7 +2,7 @@
 DragListView can be used when you want to be able to re-order items in a list, grid or a board.
 
 Youtube demo video<br>
-[![Android drag and drop RecyclerView](http://img.youtube.com/vi/9clvbTW4ATw/0.jpg)](http://www.youtube.com/watch?v=9clvbTW4ATw)
+[![Android drag and drop list and board](http://img.youtube.com/vi/DVeF0xgNM6Y/0.jpg)](https://www.youtube.com/watch?v=DVeF0xgNM6Y)
 
 ## Features
 * Re-order items in a list, grid or board by dragging and dropping with nice animations.
