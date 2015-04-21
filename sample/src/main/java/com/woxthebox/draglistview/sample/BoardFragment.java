@@ -37,7 +37,6 @@ import android.widget.Toast;
 
 import com.woxthebox.draglistview.BoardView;
 import com.woxthebox.draglistview.DragItem;
-import com.woxthebox.sample.R;
 
 import java.util.ArrayList;
 
@@ -67,6 +66,14 @@ public class BoardFragment extends Fragment {
             @Override
             public void onItemDragStarted(int column, int row) {
                 Toast.makeText(getActivity(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onItemChangedColumn(int oldColumn, int newColumn) {
+                TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
+                itemCount1.setText("" + mBoardView.getAdapter(oldColumn).getItemCount());
+                TextView itemCount2 = (TextView) mBoardView.getHeaderView(newColumn).findViewById(R.id.item_count);
+                itemCount2.setText("" + mBoardView.getAdapter(newColumn).getItemCount());
             }
 
             @Override
@@ -116,12 +123,14 @@ public class BoardFragment extends Fragment {
         }
         final ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.item_layout, true);
 
-        View header = View.inflate(getActivity(), R.layout.column_header, null);
+        final View header = View.inflate(getActivity(), R.layout.column_header, null);
         ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
+        ((TextView) header.findViewById(R.id.item_count)).setText("" + addItems);
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mItemArray.add(0, new Pair<>((long) mBoardView.getItemCount(), "Test " + mBoardView.getItemCount()));
+                ((TextView) header.findViewById(R.id.item_count)).setText("" + mItemArray.size());
                 listAdapter.notifyDataSetChanged();
             }
         });

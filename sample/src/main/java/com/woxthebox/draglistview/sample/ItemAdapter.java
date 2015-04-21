@@ -24,7 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.woxthebox.draglistview.DragItemAdapter;
-import com.woxthebox.sample.R;
 
 import java.util.ArrayList;
 

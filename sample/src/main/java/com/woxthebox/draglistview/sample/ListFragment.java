@@ -35,8 +35,6 @@ import android.widget.Toast;
 
 import com.woxthebox.draglistview.DragItem;
 import com.woxthebox.draglistview.DragListView;
-import com.woxthebox.sample.R;
-
 import java.util.ArrayList;
 
 public class ListFragment extends Fragment {

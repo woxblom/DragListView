@@ -15,7 +15,7 @@
 -->
 <resources>
 
-    <string name="app_name">DragItemRecyclerView</string>
+    <string name="app_name">DragListView</string>
     <string name="action_lists">Test lists</string>
     <string name="action_board">Test board </string>
     <string name="action_list">List (drag on touch image icon)</string>

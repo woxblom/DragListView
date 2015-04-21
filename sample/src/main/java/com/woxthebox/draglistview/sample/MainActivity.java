@@ -24,9 +24,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.woxthebox.sample.R;
-
-
 public class MainActivity extends ActionBarActivity {
 
     @Override

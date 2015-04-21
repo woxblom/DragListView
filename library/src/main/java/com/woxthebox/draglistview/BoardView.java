@@ -23,6 +23,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,6 +40,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     public interface BoardListener {
         public void onItemDragStarted(int column, int row);
 
+        public void onItemChangedColumn(int oldColumn, int newColumn);
+
         public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
     }
 
@@ -49,6 +52,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private FrameLayout mRootLayout;
     private LinearLayout mColumnLayout;
     private ArrayList<DragItemRecyclerView> mLists = new ArrayList<>();
+    private SparseArray<View> mHeaders = new SparseArray<>();
     private DragItemRecyclerView mCurrentRecyclerView;
     private DragItem mDragItem;
     private BoardListener mBoardListener;
@@ -194,11 +198,17 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         // Updated event to scrollview coordinates
         DragItemRecyclerView currentList = getCurrentRecyclerView(mTouchX + getScrollX());
         if (mCurrentRecyclerView != currentList) {
+            int oldColumn = getColumnOfList(mCurrentRecyclerView);
+            int newColumn = getColumnOfList(currentList);
             long itemId = mCurrentRecyclerView.getDragItemId();
             Object item = mCurrentRecyclerView.removeDragItemAndEnd();
             mCurrentRecyclerView = currentList;
             mCurrentRecyclerView.addDragItemAndStart(mTouchY, item, itemId);
             mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
+
+            if(mBoardListener != null) {
+                mBoardListener.onItemChangedColumn(oldColumn, newColumn);
+            }
         }
 
         // Updated event to list coordinates
@@ -297,14 +307,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     public RecyclerView getRecyclerView(int column) {
-        if (column > 0 && column < mLists.size()) {
+        if (column >= 0 && column < mLists.size()) {
             return mLists.get(column);
         }
         return null;
     }
 
     public DragItemAdapter getAdapter(int column) {
-        if (column > 0 && column < mLists.size()) {
+        if (column >= 0 && column < mLists.size()) {
             return (DragItemAdapter) mLists.get(column).getAdapter();
         }
         return null;
@@ -316,6 +326,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             count += list.getAdapter().getItemCount();
         }
         return count;
+    }
+
+    public View getHeaderView(int column) {
+        return mHeaders.get(column);
     }
 
     public void setPageScrollingEnabled(boolean enabled) {
@@ -380,6 +394,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         layout.setLayoutParams(new LayoutParams(mColumnWidth, LayoutParams.MATCH_PARENT));
         if (header != null) {
             layout.addView(header);
+            mHeaders.put(mLists.size(), header);
         }
         layout.addView(recyclerView);
 
