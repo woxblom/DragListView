@@ -217,21 +217,15 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         mAdapter.setDragItemId(-1);
         mAdapter.notifyDataSetChanged();
 
-        // Need to postpone the end to avoid flicker
-        post(new Runnable() {
-            @Override
-            public void run() {
-                mDragState = DragState.DRAG_ENDED;
-                if (mListener != null) {
-                    mListener.onDragEnded(mDragItemPosition);
-                }
+        mDragState = DragState.DRAG_ENDED;
+        if (mListener != null) {
+            mListener.onDragEnded(mDragItemPosition);
+        }
 
-                mDragItemId = -1;
-                mDragItem.hide();
-                setEnabled(true);
-                invalidate();
-            }
-        });
+        mDragItemId = -1;
+        mDragItem.hide();
+        setEnabled(true);
+        invalidate();
     }
 
     void addDragItemAndStart(float y, Object item, long itemId) {
