@@ -9,6 +9,16 @@ Youtube demo video<br>
 * Add custom animations when the drag is starting and ending.
 * Get a callback when a drag is started and ended with the position.
 
+## Download lib with gradle
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        compile 'com.github.woxthebox:draglistview:1.0.2'
+    }
+
 ## Usage
 **NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager are supported.
 List and Grid layouts are used as example in the sample project.
@@ -61,6 +71,14 @@ List and Grid layouts are used as example in the sample project.
               @Override
               public void onItemDragStarted(int column, int row) {
                   Toast.makeText(getActivity(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
+              }
+
+              @Override
+              public void onItemChangedColumn(int oldColumn, int newColumn) {
+                  TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
+                  itemCount1.setText("" + mBoardView.getAdapter(oldColumn).getItemCount());
+                  TextView itemCount2 = (TextView) mBoardView.getHeaderView(newColumn).findViewById(R.id.item_count);
+                  itemCount2.setText("" + mBoardView.getAdapter(newColumn).getItemCount());
               }
 
               @Override
