@@ -60,13 +60,13 @@ public class ListFragment extends Fragment {
         mDragListView.setDragListListener(new DragListView.DragListListener() {
             @Override
             public void onItemDragStarted(int position) {
-                Toast.makeText(getActivity(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
+                Toast.makeText(mDragListView.getContext(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onItemDragEnded(int fromPosition, int toPosition) {
                 if (fromPosition != toPosition) {
-                    Toast.makeText(getActivity(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mDragListView.getContext(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
                 }
             }
         });
