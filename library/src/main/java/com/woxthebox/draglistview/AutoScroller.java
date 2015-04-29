@@ -20,25 +20,38 @@ import android.content.Context;
 import android.os.Handler;
 
 public class AutoScroller {
+    public enum AutoScrollMode {
+        POSITION, COLUMN
+    }
+
     public enum ScrollDirection {
         UP, DOWN, LEFT, RIGHT
     }
 
     public interface AutoScrollListener {
-        public void onAutoScroll(int dx, int dy);
+        public void onAutoScrollPositionBy(int dx, int dy);
+
+        public void onAutoScrollColumnBy(int columns);
     }
 
     private static final int SCROLL_SPEED_DP = 8;
     private static final int AUTO_SCROLL_UPDATE_DELAY = 12;
+    private static final int COLUMN_SCROLL_UPDATE_DELAY = 1000;
 
     private Handler mHandler = new Handler();
     private AutoScrollListener mListener;
     private boolean mIsAutoScrolling;
     private int mScrollSpeed;
+    private long mLastScrollTime;
+    private AutoScrollMode mAutoScrollMode = AutoScrollMode.POSITION;
 
     public AutoScroller(Context context, AutoScrollListener listener) {
         mListener = listener;
-        mScrollSpeed = (int)(context.getResources().getDisplayMetrics().density * SCROLL_SPEED_DP);
+        mScrollSpeed = (int) (context.getResources().getDisplayMetrics().density * SCROLL_SPEED_DP);
+    }
+
+    public void setAutoScrollMode(AutoScrollMode autoScrollMode) {
+        mAutoScrollMode = autoScrollMode;
     }
 
     public boolean isAutoScrolling() {
@@ -52,34 +65,67 @@ public class AutoScroller {
     public void startAutoScroll(ScrollDirection direction) {
         switch (direction) {
             case UP:
-                startAutoScroll(0, mScrollSpeed);
+                startAutoScrollPositionBy(0, mScrollSpeed);
                 break;
             case DOWN:
-                startAutoScroll(0, -mScrollSpeed);
+                startAutoScrollPositionBy(0, -mScrollSpeed);
                 break;
             case LEFT:
-                startAutoScroll(mScrollSpeed, 0);
+                if (mAutoScrollMode == AutoScrollMode.POSITION) {
+                    startAutoScrollPositionBy(mScrollSpeed, 0);
+                } else {
+                    startAutoScrollColumnBy(1);
+                }
                 break;
             case RIGHT:
-                startAutoScroll(-mScrollSpeed, 0);
+                if (mAutoScrollMode == AutoScrollMode.POSITION) {
+                    startAutoScrollPositionBy(-mScrollSpeed, 0);
+                } else {
+                    startAutoScrollColumnBy(-1);
+                }
                 break;
         }
     }
 
-    private void startAutoScroll(int dx, int dy) {
+    private void startAutoScrollPositionBy(int dx, int dy) {
         if (!mIsAutoScrolling) {
             mIsAutoScrolling = true;
-            autoScroll(dx, dy);
+            autoScrollPositionBy(dx, dy);
         }
     }
 
-    private void autoScroll(final int dx, final int dy) {
+    private void autoScrollPositionBy(final int dx, final int dy) {
         if (mIsAutoScrolling) {
-            mListener.onAutoScroll(dx, dy);
+            mListener.onAutoScrollPositionBy(dx, dy);
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    autoScroll(dx, dy);
+                    autoScrollPositionBy(dx, dy);
+                }
+            }, AUTO_SCROLL_UPDATE_DELAY);
+        }
+    }
+
+    private void startAutoScrollColumnBy(int columns) {
+        if (!mIsAutoScrolling) {
+            mIsAutoScrolling = true;
+            autoScrollColumnBy(columns);
+        }
+    }
+
+    private void autoScrollColumnBy(final int columns) {
+        if (mIsAutoScrolling) {
+            if (System.currentTimeMillis() - mLastScrollTime > COLUMN_SCROLL_UPDATE_DELAY) {
+                mListener.onAutoScrollColumnBy(columns);
+                mLastScrollTime = System.currentTimeMillis();
+            } else {
+                mListener.onAutoScrollColumnBy(0);
+            }
+
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    autoScrollColumnBy(columns);
                 }
             }, AUTO_SCROLL_UPDATE_DELAY);
         }

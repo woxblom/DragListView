@@ -104,13 +104,17 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     @Override
-    public void onAutoScroll(int dx, int dy) {
+    public void onAutoScrollPositionBy(int dx, int dy) {
         if (isDragging()) {
             scrollBy(dx, dy);
             updateDragPositionAndScroll();
         } else {
             mAutoScroller.stopAutoScroll();
         }
+    }
+
+    @Override
+    public void onAutoScrollColumnBy(int columns) {
     }
 
     private View findChildView(float x, float y) {
