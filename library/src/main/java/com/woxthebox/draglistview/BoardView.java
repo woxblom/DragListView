@@ -56,7 +56,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private DragItemRecyclerView mCurrentRecyclerView;
     private DragItem mDragItem;
     private BoardListener mBoardListener;
-    private boolean mPageScrollingEnabled;
+    private boolean mSnapToColumn = true;
     private float mTouchX;
     private float mTouchY;
     private int mColumnWidth;
@@ -107,7 +107,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         super.onLayout(changed, l, t, r, b);
         // Snap to closes column after first layout.
         // This is needed so correct column is scrolled to after a rotation.
-        if (!mHasLaidOut && isInPageScrollingMode()) {
+        if (!mHasLaidOut && shouldSnapToColumn()) {
             snapToColumn(getClosestColumn(), false);
         }
         mHasLaidOut = true;
@@ -126,6 +126,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     private boolean handleTouchEvent(MotionEvent event) {
+        if (mLists.size() == 0) {
+            return false;
+        }
+
         mTouchX = event.getX();
         mTouchY = event.getY();
         if (isDragging()) {
@@ -139,7 +143,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 case MotionEvent.ACTION_CANCEL:
                     mAutoScroller.stopAutoScroll();
                     mCurrentRecyclerView.onDragEnded();
-                    if (isInPageScrollingMode()) {
+                    if (shouldSnapToColumn()) {
                         snapToColumn(getColumnOfList(mCurrentRecyclerView), true);
                     }
                     invalidate();
@@ -147,7 +151,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
             return true;
         } else {
-            if (isInPageScrollingMode() && mGestureDetector.onTouchEvent(event)) {
+            if (shouldSnapToColumn() && mGestureDetector.onTouchEvent(event)) {
                 // A page fling occurred, consume event
                 return true;
             }
@@ -160,7 +164,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    if (isInPageScrollingMode()) {
+                    if (shouldSnapToColumn()) {
                         snapToColumn(getClosestColumn(), true);
                     }
                     break;
@@ -206,7 +210,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             mCurrentRecyclerView.addDragItemAndStart(mTouchY, item, itemId);
             mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
 
-            if(mBoardListener != null) {
+            if (mBoardListener != null) {
                 mBoardListener.onItemChangedColumn(oldColumn, newColumn);
             }
         }
@@ -282,6 +286,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     private void snapToColumn(int column, boolean animate) {
+        if (mLists.size() <= column) {
+            return;
+        }
+
         View parent = (View) mLists.get(column).getParent();
         int newX = parent.getLeft() - (getMeasuredWidth() - parent.getMeasuredWidth()) / 2;
         int maxScroll = mRootLayout.getMeasuredWidth() - getMeasuredWidth();
@@ -297,9 +305,9 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
     }
 
-    private boolean isInPageScrollingMode() {
+    private boolean shouldSnapToColumn() {
         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        return mPageScrollingEnabled && isPortrait;
+        return mSnapToColumn && isPortrait;
     }
 
     private boolean isDragging() {
@@ -332,8 +340,18 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         return mHeaders.get(column);
     }
 
-    public void setPageScrollingEnabled(boolean enabled) {
-        mPageScrollingEnabled = enabled;
+    /**
+     * @param snapToColumn true if scrolling should snap to columns. Only applies to portrait mode.
+     */
+    public void setSnapToColumnsWhenScrolling(boolean snapToColumn) {
+        mSnapToColumn = snapToColumn;
+    }
+
+    /**
+     * @param snapToTouch true if the drag item should snap to touch position when a drag i started.
+     */
+    public void setSnapDragItemToTouch(boolean snapToTouch) {
+        mDragItem.setSnapToTouch(snapToTouch);
     }
 
     public void setBoardListener(BoardListener listener) {
@@ -341,9 +359,34 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     public void setCustomDragItem(DragItem dragItem) {
-        mDragItem = dragItem;
+        DragItem newDragItem;
+        if (dragItem != null) {
+            newDragItem = dragItem;
+        } else {
+            newDragItem = new DragItem(getContext());
+        }
+
+        newDragItem.setSnapToTouch(mDragItem.isSnapToTouch());
+        mDragItem = newDragItem;
         mRootLayout.removeViewAt(1);
         mRootLayout.addView(dragItem.getDragItemView());
+    }
+
+    public void clearBoard() {
+        int count = mLists.size();
+        for (int i = count - 1; i >= 0; i--) {
+            mColumnLayout.removeViewAt(i);
+            mHeaders.remove(i);
+            mLists.remove(i);
+        }
+    }
+
+    public void removeColumn(int column) {
+        if (column >= 0 && mLists.size() > column) {
+            mColumnLayout.removeViewAt(column);
+            mHeaders.remove(column);
+            mLists.remove(column);
+        }
     }
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {

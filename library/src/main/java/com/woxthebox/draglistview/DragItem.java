@@ -30,14 +30,17 @@ import android.widget.FrameLayout;
 public class DragItem {
     protected static final int ANIMATION_DURATION = 250;
     private View mDragView;
-    
+
     private float mOffsetX;
     private float mOffsetY;
     private float mPosX;
     private float mPosY;
+    private float mPosTouchDx;
+    private float mPosTouchDy;
     private float mAnimationDx;
     private float mAnimationDy;
     private boolean mCanDragHorizontally = true;
+    private boolean mSnapToTouch = true;
 
     public DragItem(Context context) {
         mDragView = new View(context);
@@ -69,8 +72,20 @@ public class DragItem {
     public void onEndDragAnimation(View dragView) {
     }
 
+    boolean canDragHorizontally() {
+        return mCanDragHorizontally;
+    }
+
     void setCanDragHorizontally(boolean canDragHorizontally) {
         mCanDragHorizontally = canDragHorizontally;
+    }
+
+    boolean isSnapToTouch() {
+        return mSnapToTouch;
+    }
+
+    void setSnapToTouch(boolean snapToTouch) {
+        mSnapToTouch = snapToTouch;
     }
 
     View getDragItemView() {
@@ -90,21 +105,30 @@ public class DragItem {
         onBindDragView(startFromView, mDragView);
         onMeasureDragView(startFromView, mDragView);
         onStartDragAnimation(mDragView);
-        setPosition(touchX, touchY);
 
         float startX = startFromView.getX() - (mDragView.getMeasuredWidth() - startFromView.getMeasuredWidth()) / 2 + mDragView
                 .getMeasuredWidth() / 2;
         float startY = startFromView.getY() - (mDragView.getMeasuredHeight() - startFromView.getMeasuredHeight()) / 2 + mDragView
                 .getMeasuredHeight() / 2;
-        setAnimationDx(startX - touchX);
-        setAnimationDY(startY - touchY);
 
-        PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("AnimationDx", mAnimationDx, 0);
-        PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("AnimationDY", mAnimationDy, 0);
-        ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(this, pvhX, pvhY);
-        anim.setInterpolator(new DecelerateInterpolator());
-        anim.setDuration(ANIMATION_DURATION);
-        anim.start();
+        if (mSnapToTouch) {
+            mPosTouchDx = 0;
+            mPosTouchDy = 0;
+            setPosition(touchX, touchY);
+            setAnimationDx(startX - touchX);
+            setAnimationDY(startY - touchY);
+
+            PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("AnimationDx", mAnimationDx, 0);
+            PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("AnimationDY", mAnimationDy, 0);
+            ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(this, pvhX, pvhY);
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.setDuration(ANIMATION_DURATION);
+            anim.start();
+        } else {
+            mPosTouchDx = startX - touchX;
+            mPosTouchDy = startY - touchY;
+            setPosition(touchX, touchY);
+        }
     }
 
     void endDrag(View endToView, AnimatorListenerAdapter listener) {
@@ -151,9 +175,9 @@ public class DragItem {
         return mPosY;
     }
 
-    void setPosition(float x, float y) {
-        mPosX = x;
-        mPosY = y;
+    void setPosition(float touchX, float touchY) {
+        mPosX = touchX + mPosTouchDx;
+        mPosY = touchY + mPosTouchDy;
         updatePosition();
     }
 
@@ -164,7 +188,7 @@ public class DragItem {
     }
 
     void updatePosition() {
-        if(mCanDragHorizontally) {
+        if (mCanDragHorizontally) {
             mDragView.setX(mPosX + mOffsetX + mAnimationDx - mDragView.getMeasuredWidth() / 2);
         }
 

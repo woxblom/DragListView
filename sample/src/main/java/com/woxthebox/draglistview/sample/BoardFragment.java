@@ -60,7 +60,8 @@ public class BoardFragment extends Fragment {
         View view = inflater.inflate(R.layout.board_layout, container, false);
 
         mBoardView = (BoardView) view.findViewById(R.id.board_view);
-        mBoardView.setPageScrollingEnabled(true);
+        mBoardView.setSnapToColumnsWhenScrolling(true);
+        mBoardView.setSnapDragItemToTouch(true);
         mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
@@ -109,6 +110,12 @@ public class BoardFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_add_column:
                 addColumnList();
+                return true;
+            case R.id.action_remove_column:
+                mBoardView.removeColumn(0);
+                return true;
+            case R.id.action_clear_board:
+                mBoardView.clearBoard();
                 return true;
         }
         return super.onOptionsItemSelected(item);

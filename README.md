@@ -66,7 +66,8 @@ List and Grid layouts are used as example in the sample project.
   check the sample code.
 
         mBoardView = (BoardView) view.findViewById(R.id.board_view);
-        mBoardView.setPageScrollingEnabled(true);
+        mBoardView.setSnapToColumnsWhenScrolling(true);
+        mBoardView.setSnapDragItemToTouch(true);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
               @Override
               public void onItemDragStarted(int column, int row) {

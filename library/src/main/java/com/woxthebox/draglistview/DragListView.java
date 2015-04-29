@@ -35,7 +35,6 @@ public class DragListView extends FrameLayout {
     private DragItemRecyclerView mRecyclerView;
     private DragItem mDragItem;
     private DragListListener mDragListListener;
-    private boolean mCanDragHorizontally;
     private float mTouchX;
     private float mTouchY;
 
@@ -153,19 +152,25 @@ public class DragListView extends FrameLayout {
     public void setCustomDragItem(DragItem dragItem) {
         removeViewAt(1);
 
+        DragItem newDragItem;
         if (dragItem != null) {
-            mDragItem = dragItem;
+            newDragItem = dragItem;
         } else {
-            mDragItem = new DragItem(getContext());
+            newDragItem = new DragItem(getContext());
         }
 
-        mDragItem.setCanDragHorizontally(mCanDragHorizontally);
+        newDragItem.setCanDragHorizontally(mDragItem.canDragHorizontally());
+        newDragItem.setSnapToTouch(mDragItem.isSnapToTouch());
+        mDragItem = newDragItem;
         mRecyclerView.setDragItem(mDragItem);
         addView(mDragItem.getDragItemView());
     }
 
     public void setCanDragHorizontally(boolean canDragHorizontally) {
-        mCanDragHorizontally = canDragHorizontally;
         mDragItem.setCanDragHorizontally(canDragHorizontally);
+    }
+
+    public void setSnapDragItemToTouch(boolean snapToTouch) {
+        mDragItem.setSnapToTouch(snapToTouch);
     }
 }

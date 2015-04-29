@@ -121,7 +121,9 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
         for (int i = count - 1; i >= 0; i--) {
             final View child = getChildAt(i);
-            if (x >= child.getLeft() && x <= child.getRight() && y >= child.getTop() && y <= child.getBottom()) {
+            MarginLayoutParams params = (MarginLayoutParams) child.getLayoutParams();
+            if (x >= child.getLeft() - params.leftMargin && x <= child.getRight() + params.rightMargin
+                    && y >= child.getTop() - params.topMargin && y <= child.getBottom() + params.bottomMargin) {
                 return child;
             }
         }
