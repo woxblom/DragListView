@@ -73,9 +73,9 @@ public class BoardFragment extends Fragment {
             @Override
             public void onItemChangedColumn(int oldColumn, int newColumn) {
                 TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
-                itemCount1.setText("" + mBoardView.getAdapter(oldColumn).getItemCount());
+                itemCount1.setText(Integer.toString(mBoardView.getAdapter(oldColumn).getItemCount()));
                 TextView itemCount2 = (TextView) mBoardView.getHeaderView(newColumn).findViewById(R.id.item_count);
-                itemCount2.setText("" + mBoardView.getAdapter(newColumn).getItemCount());
+                itemCount2.setText(Integer.toString(mBoardView.getAdapter(newColumn).getItemCount()));
             }
 
             @Override
