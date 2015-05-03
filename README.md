@@ -16,7 +16,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.0.3'
+        compile 'com.github.woxthebox:draglistview:1.0.4'
     }
 
 ## Usage
@@ -67,6 +67,7 @@ List and Grid layouts are used as example in the sample project.
 
         mBoardView = (BoardView) view.findViewById(R.id.board_view);
         mBoardView.setSnapToColumnsWhenScrolling(true);
+        mBoardView.setSnapToColumnWhenDragging(true);
         mBoardView.setSnapDragItemToTouch(true);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
               @Override
