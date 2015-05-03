@@ -45,8 +45,8 @@
             android:padding="12dp">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_marginRight="12dp"
                 android:src="@drawable/ic_launcher"/>
 

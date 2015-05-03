@@ -45,7 +45,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
     }
 
-    private static final int SCROLL_ANIMATION_DURATION = 300;
+    private static final int SCROLL_ANIMATION_DURATION = 325;
     private Scroller mScroller;
     private AutoScroller mAutoScroller;
     private GestureDetector mGestureDetector;
