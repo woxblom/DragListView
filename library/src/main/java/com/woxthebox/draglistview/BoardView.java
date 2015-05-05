@@ -38,11 +38,11 @@ import java.util.ArrayList;
 public class BoardView extends HorizontalScrollView implements AutoScroller.AutoScrollListener {
 
     public interface BoardListener {
-        public void onItemDragStarted(int column, int row);
+        void onItemDragStarted(int column, int row);
 
-        public void onItemChangedColumn(int oldColumn, int newColumn);
+        void onItemChangedColumn(int oldColumn, int newColumn);
 
-        public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
+        void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
     }
 
     private static final int SCROLL_ANIMATION_DURATION = 325;
@@ -61,6 +61,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private float mTouchX;
     private float mTouchY;
     private int mColumnWidth;
+    private int mDragStartColumn;
+    private int mDragStartRow;
     private boolean mHasLaidOut;
 
     public BoardView(Context context) {
@@ -186,7 +188,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
 
             // If auto scrolling at the same time as the scroller is running,
-            // then update the drag item position
+            // then update the drag item position to prevent stuttering item
             if (mAutoScroller.isAutoScrolling()) {
                 mDragItem.setPosition(getListTouchX(mCurrentRecyclerView), getListTouchY(mCurrentRecyclerView));
             }
@@ -215,10 +217,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             if (columns != 0 && newColumn >= 0 && newColumn < mLists.size()) {
                 snapToColumn(newColumn, true);
             }
-            // Don't update scroll position when the scroller is running
-            if (mScroller.isFinished()) {
-                updateScrollPosition();
-            }
+            updateScrollPosition();
         } else {
             mAutoScroller.stopAutoScroll();
         }
@@ -434,9 +433,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setHasFixedSize(hasFixedItemSize);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
-            private int mDragStartColumn;
-            private int mDragStartRow;
-
             @Override
             public void onDragStarted(int itemPosition, float x, float y) {
                 mDragStartColumn = getColumnOfList(recyclerView);

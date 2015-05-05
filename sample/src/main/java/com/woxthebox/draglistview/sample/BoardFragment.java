@@ -22,7 +22,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.Pair;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -92,7 +92,7 @@ public class BoardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle("Board");
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
 
         addColumnList();
         addColumnList();
