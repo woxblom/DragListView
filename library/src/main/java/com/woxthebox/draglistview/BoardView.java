@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Magnus Woxblom
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -231,12 +231,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             int newColumn = getColumnOfList(currentList);
             long itemId = mCurrentRecyclerView.getDragItemId();
             Object item = mCurrentRecyclerView.removeDragItemAndEnd();
-            mCurrentRecyclerView = currentList;
-            mCurrentRecyclerView.addDragItemAndStart(getListTouchY(mCurrentRecyclerView), item, itemId);
-            mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
+            if (item != null) {
+                mCurrentRecyclerView = currentList;
+                mCurrentRecyclerView.addDragItemAndStart(getListTouchY(mCurrentRecyclerView), item, itemId);
+                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
 
-            if (mBoardListener != null) {
-                mBoardListener.onItemChangedColumn(oldColumn, newColumn);
+                if (mBoardListener != null) {
+                    mBoardListener.onItemChangedColumn(oldColumn, newColumn);
+                }
             }
         }
 
@@ -366,8 +368,89 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         return count;
     }
 
+    public int getItemCount(int column) {
+        if (mLists.size() > column) {
+            return mLists.get(column).getAdapter().getItemCount();
+        }
+        return 0;
+    }
+
+    public int getColumnCount() {
+        return mLists.size();
+    }
+
     public View getHeaderView(int column) {
         return mHeaders.get(column);
+    }
+
+    public void removeItem(int column, int row) {
+        if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
+            DragItemAdapter adapter = (DragItemAdapter) mLists.get(column).getAdapter();
+            adapter.removeItem(row);
+        }
+    }
+
+    public void addItem(int column, int row, Object item, boolean scrollToItem) {
+        if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
+            DragItemAdapter adapter = (DragItemAdapter) mLists.get(column).getAdapter();
+            adapter.addItem(row, item);
+            if (scrollToItem) {
+                scrollToItem(column, row, false);
+            }
+        }
+    }
+
+    public void moveItem(int fromColumn, int fromRow, int toColumn, int toRow, boolean scrollToItem) {
+        if (!isDragging() && mLists.size() > fromColumn && mLists.get(fromColumn).getAdapter().getItemCount() > fromRow
+                && mLists.size() > toColumn && mLists.get(toColumn).getAdapter().getItemCount() >= toRow) {
+            DragItemAdapter adapter = (DragItemAdapter) mLists.get(fromColumn).getAdapter();
+            Object item = adapter.removeItem(fromRow);
+            adapter = (DragItemAdapter) mLists.get(toColumn).getAdapter();
+            adapter.addItem(toRow, item);
+            if (scrollToItem) {
+                scrollToItem(toColumn, toRow, false);
+            }
+        }
+    }
+
+    public void replaceItem(int column, int row, Object item, boolean scrollToItem) {
+        if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
+            DragItemAdapter adapter = (DragItemAdapter) mLists.get(column).getAdapter();
+            adapter.removeItem(row);
+            adapter.addItem(row, item);
+            if (scrollToItem) {
+                scrollToItem(column, row, false);
+            }
+        }
+    }
+
+    public void scrollToItem(int column, int row, boolean animate) {
+        if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
+            mScroller.forceFinished(true);
+            snapToColumn(column, animate);
+            if (animate) {
+                mLists.get(column).smoothScrollToPosition(row);
+            } else {
+                mLists.get(column).scrollToPosition(row);
+            }
+        }
+    }
+
+    public void clearBoard() {
+        int count = mLists.size();
+        for (int i = count - 1; i >= 0; i--) {
+            mColumnLayout.removeViewAt(i);
+            mHeaders.remove(i);
+            mLists.remove(i);
+        }
+    }
+
+    public void removeColumn(int column) {
+        if (column >= 0 && mLists.size() > column) {
+            mColumnLayout.removeViewAt(column);
+            mHeaders.remove(column);
+            mLists.remove(column);
+        }
     }
 
     /**
@@ -377,6 +460,9 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mSnapToColumnWhenScrolling = snapToColumn;
     }
 
+    /**
+     * @param snapToColumn true if dragging should snap to columns when dragging towards the edge. Only applies to portrait mode.
+     */
     public void setSnapToColumnWhenDragging(boolean snapToColumn) {
         mSnapToColumnWhenDragging = snapToColumn;
         mAutoScroller.setAutoScrollMode(snapToColumnWhenDragging() ? AutoScroller.AutoScrollMode.COLUMN : AutoScroller.AutoScrollMode
@@ -384,7 +470,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
-     * @param snapToTouch true if the drag item should snap to touch position when a drag i started.
+     * @param snapToTouch true if the drag item should snap to touch position when a drag is started.
      */
     public void setSnapDragItemToTouch(boolean snapToTouch) {
         mDragItem.setSnapToTouch(snapToTouch);
@@ -406,23 +492,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mDragItem = newDragItem;
         mRootLayout.removeViewAt(1);
         mRootLayout.addView(dragItem.getDragItemView());
-    }
-
-    public void clearBoard() {
-        int count = mLists.size();
-        for (int i = count - 1; i >= 0; i--) {
-            mColumnLayout.removeViewAt(i);
-            mHeaders.remove(i);
-            mLists.remove(i);
-        }
-    }
-
-    public void removeColumn(int column) {
-        if (column >= 0 && mLists.size() > column) {
-            mColumnLayout.removeViewAt(column);
-            mHeaders.remove(column);
-            mLists.remove(column);
-        }
     }
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {

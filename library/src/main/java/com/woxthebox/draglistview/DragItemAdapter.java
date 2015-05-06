@@ -23,7 +23,7 @@ import android.view.View;
 public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     interface DragStartedListener {
-        public void onDragStarted(View itemView, long itemId);
+        void onDragStarted(View itemView, long itemId);
     }
 
     private DragStartedListener mDragStartedListener;

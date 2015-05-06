@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Magnus Woxblom
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,6 +42,7 @@ import java.util.ArrayList;
 
 public class BoardFragment extends Fragment {
 
+    private static int sCreatedItems = 0;
     private BoardView mBoardView;
     private int mColumns;
 
@@ -123,23 +124,28 @@ public class BoardFragment extends Fragment {
     }
 
     private void addColumnList() {
-        final ArrayList mItemArray = new ArrayList<Pair<Long, String>>();
-        int addItems = 20;
+        final ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
+        int addItems = 15;
         for (int i = 0; i < addItems; i++) {
-            long id = i + mColumns * addItems;
+            long id = sCreatedItems++;
             mItemArray.add(new Pair<>(id, "Item " + id));
         }
-        final ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.item_layout, true);
 
+        final int column = mColumns;
+        final ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.item_layout, true);
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
         ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
         ((TextView) header.findViewById(R.id.item_count)).setText("" + addItems);
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mItemArray.add(0, new Pair<>((long) mBoardView.getItemCount(), "Test " + mBoardView.getItemCount()));
+                long id = sCreatedItems++;
+                Pair item = new Pair<>(id, "Test " + id);
+                mBoardView.addItem(column, 0, item, true);
+                //mBoardView.removeItem(column, 0);
+                //mBoardView.moveItem(0, 0, 1, 3, false);
+                //mBoardView.replaceItem(0, 0, item1, true);
                 ((TextView) header.findViewById(R.id.item_count)).setText("" + mItemArray.size());
-                listAdapter.notifyDataSetChanged();
             }
         });
 

@@ -61,6 +61,13 @@ public class ItemAdapter extends DragItemAdapter<ItemAdapter.ViewHolder> {
     }
 
     @Override
+    public void changeItemPosition(int fromPos, int toPos) {
+        Pair<Long, String> pair = mItemList.remove(fromPos);
+        mItemList.add(toPos, pair);
+        notifyDataSetChanged();
+    }
+
+    @Override
     public int getPositionForItemId(long id) {
         for (int i = 0; i < mItemList.size(); i++) {
             if (id == mItemList.get(i).first) {
@@ -68,13 +75,6 @@ public class ItemAdapter extends DragItemAdapter<ItemAdapter.ViewHolder> {
             }
         }
         return -1;
-    }
-
-    @Override
-    public void changeItemPosition(int fromPos, int toPos) {
-        Pair<Long, String> pair = mItemList.remove(fromPos);
-        mItemList.add(toPos, pair);
-        notifyDataSetChanged();
     }
 
     @Override

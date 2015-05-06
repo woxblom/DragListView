@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Magnus Woxblom
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,11 +27,11 @@ import android.view.View;
 class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
 
     public interface DragItemListener {
-        public void onDragStarted(int itemPosition, float x, float y);
+        void onDragStarted(int itemPosition, float x, float y);
 
-        public void onDragging(int itemPosition, float x, float y);
+        void onDragging(int itemPosition, float x, float y);
 
-        public void onDragEnded(int newItemPosition);
+        void onDragEnded(int newItemPosition);
     }
 
     private enum DragState {
@@ -132,9 +132,6 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             }
         }
 
-        if (count > 0) {
-            return getChildAt(count - 1);
-        }
         return null;
     }
 
@@ -236,9 +233,16 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     void addDragItemAndStart(float y, Object item, long itemId) {
         View child = findChildView(0, y);
-        int pos = getChildAdapterPosition(child);
+        int pos;
+        if (child == null && getChildCount() > 0) {
+            // If child is null and child count is not 0 it means that an item was
+            // dragged below the last item in the list, then put it after that item
+            pos = getChildAdapterPosition(getChildAt(getChildCount() - 1)) + 1;
+        } else {
+            pos = getChildAdapterPosition(child);
+        }
 
-        // If pos is -1 it means that the child has not been layed out yet,
+        // If pos is -1 it means that the child has not been laid out yet,
         // this only happens for pos 0 as far as I know
         if (pos == -1) {
             pos = 0;
@@ -262,6 +266,9 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     Object removeDragItemAndEnd() {
+        if (mDragItemPosition == -1) {
+            return null;
+        }
         mAutoScroller.stopAutoScroll();
         Object item = mAdapter.removeItem(mDragItemPosition);
         mAdapter.setDragItemId(-1);
