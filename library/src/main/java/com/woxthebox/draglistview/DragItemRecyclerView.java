@@ -22,7 +22,9 @@ import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 
 class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
 
@@ -44,8 +46,11 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private DragItemAdapter mAdapter;
     private DragItem mDragItem;
     private long mDragItemId = -1;
-    private int mDragItemPosition;
     private boolean mHoldChangePosition;
+    private int mDragItemPosition;
+    private int mTouchSlop;
+    private float mStartX;
+    private float mStartY;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -64,6 +69,26 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     private void init() {
         mAutoScroller = new AutoScroller(getContext(), this);
+        mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mStartX = event.getX();
+                mStartY = event.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                final float diffX = Math.abs(event.getX() - mStartX);
+                final float diffY = Math.abs(event.getY() - mStartY);
+                if (diffY > diffX && diffY > mTouchSlop * 0.25) {
+                    // Steal event from parent as we now only want to scroll in the list
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                }
+                break;
+        }
+        return super.onInterceptTouchEvent(event);
     }
 
     public void setDragItemListener(DragItemListener listener) {
