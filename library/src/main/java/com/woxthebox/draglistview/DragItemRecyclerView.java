@@ -49,7 +49,6 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private boolean mHoldChangePosition;
     private int mDragItemPosition;
     private int mTouchSlop;
-    private float mStartX;
     private float mStartY;
 
     public DragItemRecyclerView(Context context) {
@@ -76,11 +75,9 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     public boolean onInterceptTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                mStartX = event.getX();
                 mStartY = event.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
-                final float diffX = Math.abs(event.getX() - mStartX);
                 final float diffY = Math.abs(event.getY() - mStartY);
                 if (diffY > mTouchSlop * 0.5) {
                     // Steal event from parent as we now only want to scroll in the list
