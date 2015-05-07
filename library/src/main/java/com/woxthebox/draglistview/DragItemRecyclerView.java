@@ -82,7 +82,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             case MotionEvent.ACTION_MOVE:
                 final float diffX = Math.abs(event.getX() - mStartX);
                 final float diffY = Math.abs(event.getY() - mStartY);
-                if (diffY > diffX && diffY > mTouchSlop * 0.25) {
+                if (diffY > mTouchSlop * 0.5) {
                     // Steal event from parent as we now only want to scroll in the list
                     getParent().requestDisallowInterceptTouchEvent(true);
                 }
