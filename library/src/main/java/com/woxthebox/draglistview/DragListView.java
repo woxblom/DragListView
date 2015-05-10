@@ -122,6 +122,7 @@ public class DragListView extends FrameLayout {
 
     private DragItemRecyclerView createRecyclerView() {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
+        recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {

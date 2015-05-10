@@ -179,6 +179,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     void onDragStarted(View itemView, long itemId, float x, float y) {
+        // If a drag is starting the parent must always be allowed to intercept
+        getParent().requestDisallowInterceptTouchEvent(false);
         mDragState = DragState.DRAG_STARTED;
         mDragItemId = itemId;
         mDragItem.startDrag(itemView, x, y);

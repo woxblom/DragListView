@@ -101,6 +101,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mColumnLayout = new LinearLayout(getContext());
         mColumnLayout.setOrientation(LinearLayout.HORIZONTAL);
         mColumnLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+        mColumnLayout.setMotionEventSplittingEnabled(false);
 
         mRootLayout.addView(mColumnLayout);
         mRootLayout.addView(mDragItem.getDragItemView());
@@ -113,7 +114,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         // Snap to closes column after first layout.
         // This is needed so correct column is scrolled to after a rotation.
         if (!mHasLaidOut && snapToColumnWhenScrolling()) {
-            snapToColumn(getClosestColumn(), false);
+            scrollToColumn(getClosestColumn(), false);
         }
         mHasLaidOut = true;
     }
@@ -149,7 +150,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                     mAutoScroller.stopAutoScroll();
                     mCurrentRecyclerView.onDragEnded();
                     if (snapToColumnWhenScrolling()) {
-                        snapToColumn(getColumnOfList(mCurrentRecyclerView), true);
+                        scrollToColumn(getColumnOfList(mCurrentRecyclerView), true);
                     }
                     invalidate();
                     break;
@@ -170,7 +171,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     if (snapToColumnWhenScrolling()) {
-                        snapToColumn(getClosestColumn(), true);
+                        scrollToColumn(getClosestColumn(), true);
                     }
                     break;
             }
@@ -215,7 +216,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             DragItemRecyclerView currentList = getCurrentRecyclerView(getWidth() / 2 + getScrollX());
             int newColumn = getColumnOfList(currentList) + columns;
             if (columns != 0 && newColumn >= 0 && newColumn < mLists.size()) {
-                snapToColumn(newColumn, true);
+                scrollToColumn(newColumn, true);
             }
             updateScrollPosition();
         } else {
@@ -310,26 +311,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
         }
         return column;
-    }
-
-    private void snapToColumn(int column, boolean animate) {
-        if (mLists.size() <= column) {
-            return;
-        }
-
-        View parent = (View) mLists.get(column).getParent();
-        int newX = parent.getLeft() - (getMeasuredWidth() - parent.getMeasuredWidth()) / 2;
-        int maxScroll = mRootLayout.getMeasuredWidth() - getMeasuredWidth();
-        newX = newX < 0 ? 0 : newX;
-        newX = newX > maxScroll ? maxScroll : newX;
-        if (getScrollX() != newX) {
-            if (animate) {
-                mScroller.startScroll(getScrollX(), getScrollY(), newX - getScrollX(), 0, SCROLL_ANIMATION_DURATION);
-                postInvalidateOnAnimation();
-            } else {
-                setScrollX(newX);
-            }
-        }
     }
 
     private boolean snapToColumnWhenScrolling() {
@@ -427,11 +408,32 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     public void scrollToItem(int column, int row, boolean animate) {
         if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
             mScroller.forceFinished(true);
-            snapToColumn(column, animate);
+            scrollToColumn(column, animate);
             if (animate) {
                 mLists.get(column).smoothScrollToPosition(row);
             } else {
                 mLists.get(column).scrollToPosition(row);
+            }
+        }
+    }
+
+    public void scrollToColumn(int column, boolean animate) {
+        if (mLists.size() <= column) {
+            return;
+        }
+
+        View parent = (View) mLists.get(column).getParent();
+        int newX = parent.getLeft() - (getMeasuredWidth() - parent.getMeasuredWidth()) / 2;
+        int maxScroll = mRootLayout.getMeasuredWidth() - getMeasuredWidth();
+        newX = newX < 0 ? 0 : newX;
+        newX = newX > maxScroll ? maxScroll : newX;
+        if (getScrollX() != newX) {
+            mScroller.forceFinished(true);
+            if (animate) {
+                mScroller.startScroll(getScrollX(), getScrollY(), newX - getScrollX(), 0, SCROLL_ANIMATION_DURATION);
+                postInvalidateOnAnimation();
+            } else {
+                setScrollX(newX);
             }
         }
     }
@@ -496,6 +498,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
+        recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
         recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -572,7 +575,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
 
             // Calc new scrollX position
-            snapToColumn(newColumn, true);
+            scrollToColumn(newColumn, true);
             return true;
         }
     }
