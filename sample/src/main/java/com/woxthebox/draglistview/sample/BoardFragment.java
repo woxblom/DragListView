@@ -108,8 +108,23 @@ public class BoardFragment extends Fragment {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.action_disable_drag).setVisible(mBoardView.isDragEnabled());
+        menu.findItem(R.id.action_enable_drag).setVisible(!mBoardView.isDragEnabled());
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_disable_drag:
+                mBoardView.setDragEnabled(false);
+                getActivity().invalidateOptionsMenu();
+                return true;
+            case R.id.action_enable_drag:
+                mBoardView.setDragEnabled(true);
+                getActivity().invalidateOptionsMenu();
+                return true;
             case R.id.action_add_column:
                 addColumnList();
                 return true;

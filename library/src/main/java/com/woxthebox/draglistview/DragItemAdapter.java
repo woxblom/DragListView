@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Magnus Woxblom
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,10 +29,14 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
     private DragStartedListener mDragStartedListener;
     private long mDragItemId = -1;
     private boolean mDragOnLongPress;
+    private boolean mDragEnabled = true;
 
     public abstract Object removeItem(int pos);
+
     public abstract void addItem(int pos, Object item);
+
     public abstract int getPositionForItemId(long id);
+
     public abstract void changeItemPosition(int fromPos, int toPos);
 
     public DragItemAdapter(boolean dragOnLongPress) {
@@ -54,34 +58,80 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
         mDragItemId = dragItemId;
     }
 
+    void setDragEnabled(boolean enabled) {
+        mDragEnabled = enabled;
+    }
+
     public abstract class ViewHolder extends RecyclerView.ViewHolder {
-        public View mGrabHandle;
+        public View mGrabView;
         public long mItemId;
 
         public ViewHolder(final View itemView, int handleResId) {
             super(itemView);
-            mGrabHandle = itemView.findViewById(handleResId);
+            mGrabView = itemView.findViewById(handleResId);
 
             if (mDragOnLongPress) {
-                mGrabHandle.setOnLongClickListener(new View.OnLongClickListener() {
+                mGrabView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        mDragStartedListener.onDragStarted(itemView, mItemId);
-                        return true;
+                        if (mDragEnabled) {
+                            mDragStartedListener.onDragStarted(itemView, mItemId);
+                            return true;
+                        }
+                        if (itemView == mGrabView) {
+                            return onItemLongClicked(view);
+                        }
+                        return false;
                     }
                 });
             } else {
-                mGrabHandle.setOnTouchListener(new View.OnTouchListener() {
+                mGrabView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
-                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        if (mDragEnabled && event.getAction() == MotionEvent.ACTION_DOWN) {
                             mDragStartedListener.onDragStarted(itemView, mItemId);
                             return true;
+                        }
+                        if (!mDragEnabled && itemView == mGrabView) {
+                            return onTouch(view, event);
                         }
                         return false;
                     }
                 });
             }
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClicked(view);
+                }
+            });
+
+            if (itemView != mGrabView) {
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View view) {
+                        return onItemLongClicked(view);
+                    }
+                });
+                itemView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View view, MotionEvent event) {
+                        return onItemTouch(view, event);
+                    }
+                });
+            }
+        }
+
+        public void onItemClicked(View view) {
+        }
+
+        public boolean onItemLongClicked(View view) {
+            return false;
+        }
+
+        public boolean onItemTouch(View view, MotionEvent event) {
+            return false;
         }
     }
 }

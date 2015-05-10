@@ -64,6 +64,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private int mDragStartColumn;
     private int mDragStartRow;
     private boolean mHasLaidOut;
+    private boolean mDragEnabled = true;
 
     public BoardView(Context context) {
         super(context);
@@ -455,6 +456,19 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
     }
 
+    public boolean isDragEnabled() {
+        return mDragEnabled;
+    }
+
+    public void setDragEnabled(boolean enabled) {
+        mDragEnabled = enabled;
+        if (mLists.size() > 0) {
+            for (DragItemRecyclerView list : mLists) {
+                ((DragItemAdapter) list.getAdapter()).setDragEnabled(mDragEnabled);
+            }
+        }
+    }
+
     /**
      * @param snapToColumn true if scrolling should snap to columns. Only applies to portrait mode.
      */
@@ -530,6 +544,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         });
 
         recyclerView.setAdapter(adapter);
+        adapter.setDragEnabled(mDragEnabled);
         adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
             @Override
             public void onDragStarted(View itemView, long itemId) {

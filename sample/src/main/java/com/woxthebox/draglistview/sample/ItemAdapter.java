@@ -101,12 +101,17 @@ public class ItemAdapter extends DragItemAdapter<ItemAdapter.ViewHolder> {
         public ViewHolder(final View itemView) {
             super(itemView, mGrabHandleId);
             mText = (TextView) itemView.findViewById(R.id.text);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Toast.makeText(view.getContext(), "Item clicked", Toast.LENGTH_SHORT).show();
-                }
-            });
+        }
+
+        @Override
+        public void onItemClicked(View view) {
+            Toast.makeText(view.getContext(), "Item clicked", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public boolean onItemLongClicked(View view) {
+            Toast.makeText(view.getContext(), "Item long clicked", Toast.LENGTH_SHORT).show();
+            return true;
         }
     }
 }

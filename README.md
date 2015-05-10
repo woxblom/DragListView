@@ -8,6 +8,7 @@ Youtube demo video<br>
 * Re-order items in a list, grid or board by dragging and dropping with nice animations.
 * Add custom animations when the drag is starting and ending.
 * Get a callback when a drag is started and ended with the position.
+* Disable and enable drag and drop
 
 ## Download lib with gradle
 
@@ -16,7 +17,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.0.8'
+        compile 'com.github.woxthebox:draglistview:1.0.9'
     }
 
 ## Usage
@@ -63,7 +64,8 @@ List and Grid layouts are used as example in the sample project.
         }
 
   For a board, which is a number of horizontal columns with lists, then use BoardView. For an example with custom animations
-  check the sample code.
+  check the sample code. A custom header view can also be used when adding a column. This can be any view and will be attached to
+  the top of the column.
 
         mBoardView = (BoardView) view.findViewById(R.id.board_view);
         mBoardView.setSnapToColumnsWhenScrolling(true);
@@ -130,6 +132,9 @@ List and Grid layouts are used as example in the sample project.
     }
 
   Your ViewHolder should extend DragItemAdapter.ViewHolder and you must supply an id of the view that should respond to a drag.
+  If you want to respond to clicks, long clicks or touch events on the itemView root layout you should not set your own click listeners.
+  You should instead override onItemClick, onItemLongClicked and onItemTouch as these needs to be handled in the super class when
+  disabling and enabling drag.
   
     public class ViewHolder extends DragItemAdapter.ViewHolder {
         public TextView mText;
@@ -138,7 +143,20 @@ List and Grid layouts are used as example in the sample project.
             super(itemView, mGrabHandleId);
             mText = (TextView) itemView.findViewById(R.id.text);
         }
+
+        @Override
+        public void onItemClicked(View view) {
+            Toast.makeText(view.getContext(), "Item clicked", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public boolean onItemLongClicked(View view) {
+            Toast.makeText(view.getContext(), "Item long clicked", Toast.LENGTH_SHORT).show();
+            return true;
+        }
     }
+
+
 
 ## License
 

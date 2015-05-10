@@ -95,8 +95,23 @@ public class ListFragment extends Fragment {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        menu.findItem(R.id.action_disable_drag).setVisible(mDragListView.isDragEnabled());
+        menu.findItem(R.id.action_enable_drag).setVisible(!mDragListView.isDragEnabled());
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_disable_drag:
+                mDragListView.setDragEnabled(false);
+                getActivity().invalidateOptionsMenu();
+                return true;
+            case R.id.action_enable_drag:
+                mDragListView.setDragEnabled(true);
+                getActivity().invalidateOptionsMenu();
+                return true;
             case R.id.action_list:
                 setupListRecyclerView();
                 return true;

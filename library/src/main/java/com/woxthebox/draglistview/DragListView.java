@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Magnus Woxblom
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,14 +27,15 @@ import android.widget.FrameLayout;
 public class DragListView extends FrameLayout {
 
     public interface DragListListener {
-        public void onItemDragStarted(int position);
+        void onItemDragStarted(int position);
 
-        public void onItemDragEnded(int fromPosition, int toPosition);
+        void onItemDragEnded(int fromPosition, int toPosition);
     }
 
     private DragItemRecyclerView mRecyclerView;
-    private DragItem mDragItem;
     private DragListListener mDragListListener;
+    private DragItem mDragItem;
+    private boolean mDragEnabled = true;
     private float mTouchX;
     private float mTouchY;
 
@@ -90,36 +91,6 @@ public class DragListView extends FrameLayout {
         return false;
     }
 
-    public RecyclerView getRecyclerView() {
-        return mRecyclerView;
-    }
-
-    public DragItemAdapter getAdapter() {
-        if (mRecyclerView != null) {
-            return (DragItemAdapter) mRecyclerView.getAdapter();
-        }
-        return null;
-    }
-
-    public void setAdapter(DragItemAdapter adapter, boolean hasFixedItemSize) {
-        mRecyclerView.setHasFixedSize(hasFixedItemSize);
-        mRecyclerView.setAdapter(adapter);
-        adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
-            @Override
-            public void onDragStarted(View itemView, long itemId) {
-                mRecyclerView.onDragStarted(itemView, itemId, mTouchX, mTouchY);
-            }
-        });
-    }
-
-    public void setLayoutManager(RecyclerView.LayoutManager layout) {
-        mRecyclerView.setLayoutManager(layout);
-    }
-
-    public void setDragListListener(DragListListener listener) {
-        mDragListListener = listener;
-    }
-
     private DragItemRecyclerView createRecyclerView() {
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
         recyclerView.setMotionEventSplittingEnabled(false);
@@ -148,6 +119,48 @@ public class DragListView extends FrameLayout {
             }
         });
         return recyclerView;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    public DragItemAdapter getAdapter() {
+        if (mRecyclerView != null) {
+            return (DragItemAdapter) mRecyclerView.getAdapter();
+        }
+        return null;
+    }
+
+    public void setAdapter(DragItemAdapter adapter, boolean hasFixedItemSize) {
+        mRecyclerView.setHasFixedSize(hasFixedItemSize);
+        mRecyclerView.setAdapter(adapter);
+        adapter.setDragEnabled(mDragEnabled);
+        adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
+            @Override
+            public void onDragStarted(View itemView, long itemId) {
+                mRecyclerView.onDragStarted(itemView, itemId, mTouchX, mTouchY);
+            }
+        });
+    }
+
+    public void setLayoutManager(RecyclerView.LayoutManager layout) {
+        mRecyclerView.setLayoutManager(layout);
+    }
+
+    public void setDragListListener(DragListListener listener) {
+        mDragListListener = listener;
+    }
+
+    public boolean isDragEnabled() {
+        return mDragEnabled;
+    }
+
+    public void setDragEnabled(boolean enabled) {
+        mDragEnabled = enabled;
+        if (mRecyclerView.getAdapter() != null) {
+            ((DragItemAdapter) mRecyclerView.getAdapter()).setDragEnabled(mDragEnabled);
+        }
     }
 
     public void setCustomDragItem(DragItem dragItem) {
