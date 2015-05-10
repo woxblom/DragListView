@@ -99,6 +99,8 @@ List and Grid layouts are used as example in the sample project.
   For your adapter, extend DragItemAdapter and call setItemList() with a List<T> type. setItemList() can be called anytime later to change the list.
   You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
 
+    public class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHolder>
+    ...
     public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
         super(dragOnLongPress);
         mLayoutId = layoutId;
