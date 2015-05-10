@@ -20,7 +20,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
 
-public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
+import java.util.List;
+
+public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     interface DragStartedListener {
         void onDragStarted(View itemView, long itemId);
@@ -30,17 +32,58 @@ public abstract class DragItemAdapter<VH extends DragItemAdapter.ViewHolder> ext
     private long mDragItemId = -1;
     private boolean mDragOnLongPress;
     private boolean mDragEnabled = true;
-
-    public abstract Object removeItem(int pos);
-
-    public abstract void addItem(int pos, Object item);
-
-    public abstract int getPositionForItemId(long id);
-
-    public abstract void changeItemPosition(int fromPos, int toPos);
+    protected List<T> mItemList;
 
     public DragItemAdapter(boolean dragOnLongPress) {
         mDragOnLongPress = dragOnLongPress;
+    }
+
+    public void setItemList(List<T> itemList) {
+        mItemList = itemList;
+        notifyDataSetChanged();
+    }
+
+    public List<T> getItemList() {
+        return mItemList;
+    }
+
+    public Object removeItem(int pos) {
+        if (mItemList != null && mItemList.size() > pos) {
+            Object item = mItemList.remove(pos);
+            notifyItemRemoved(pos);
+            return item;
+        }
+        return null;
+    }
+
+    public void addItem(int pos, T item) {
+        if (mItemList != null && mItemList.size() > pos) {
+            mItemList.add(pos, item);
+            notifyItemInserted(pos);
+        }
+    }
+
+    public void changeItemPosition(int fromPos, int toPos) {
+        if (mItemList != null && mItemList.size() > fromPos && mItemList.size() > toPos) {
+            T item = mItemList.remove(fromPos);
+            mItemList.add(toPos, item);
+            notifyDataSetChanged();
+        }
+    }
+
+    public int getPositionForItemId(long id) {
+        int count = getItemCount();
+        for (int i = 0; i < count; i++) {
+            if (id == getItemId(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int getItemCount() {
+        return mItemList == null ? 0 : mItemList.size();
     }
 
     @Override

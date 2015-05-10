@@ -17,7 +17,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.0.9'
+        compile 'com.github.woxthebox:draglistview:1.1.0'
     }
 
 ## Usage
@@ -96,39 +96,15 @@ List and Grid layouts are used as example in the sample project.
         mBoardView.addColumnList(listAdapter, header, false);
 
 
-  For your adapter, extend DragItemAdapter and implement the methods below.
+  For your adapter, extend DragItemAdapter and call setItemList() with a List<T> type. setItemList() can be called anytime later to change the list.
   You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
 
-    private ArrayList<Pair<Long, String>> mItemList;  
-    
-    @Override
-    public Object removeItem(int pos) {
-        Object item = mItemList.remove(pos);
-        notifyItemRemoved(pos);
-        return item;
-    }
-
-    @Override
-    public void addItem(int pos, Object item) {
-        mItemList.add(pos, (Pair<Long, String>) item);
-        notifyItemInserted(pos);
-    }
-
-    @Override
-    public int getPositionForItemId(long id) {
-        for (int i = 0; i < mItemList.size(); i++) {
-            if (id == mItemList.get(i).first) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    @Override
-    public void changeItemPosition(int fromPos, int toPos) {
-        Pair<Long, String> pair = mItemList.remove(fromPos);
-        mItemList.add(toPos, pair);
-        notifyDataSetChanged();
+    public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
+        super(dragOnLongPress);
+        mLayoutId = layoutId;
+        mGrabHandleId = grabHandleId;
+        setHasStableIds(true);
+        setItemList(list);
     }
 
   Your ViewHolder should extend DragItemAdapter.ViewHolder and you must supply an id of the view that should respond to a drag.
