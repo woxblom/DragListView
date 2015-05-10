@@ -101,6 +101,7 @@ public class DragListView extends FrameLayout {
 
             @Override
             public void onDragStarted(int itemPosition, float x, float y) {
+                getParent().requestDisallowInterceptTouchEvent(true);
                 mDragStartPosition = itemPosition;
                 if (mDragListListener != null) {
                     mDragListListener.onItemDragStarted(itemPosition);
