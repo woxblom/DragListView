@@ -57,7 +57,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
     }
 
     public void addItem(int pos, T item) {
-        if (mItemList != null && mItemList.size() > pos) {
+        if (mItemList != null && mItemList.size() >= pos) {
             mItemList.add(pos, item);
             notifyItemInserted(pos);
         }

@@ -373,7 +373,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     public void addItem(int column, int row, Object item, boolean scrollToItem) {
-        if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
+        if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() >= row) {
             DragItemAdapter adapter = (DragItemAdapter) mLists.get(column).getAdapter();
             adapter.addItem(row, item);
             if (scrollToItem) {
@@ -391,6 +391,20 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             adapter.addItem(toRow, item);
             if (scrollToItem) {
                 scrollToItem(toColumn, toRow, false);
+            }
+        }
+    }
+
+    public void moveItem(long itemId, int toColumn, int toRow, boolean scrollToItem) {
+        for (int i = 0; i < mLists.size(); i++) {
+            RecyclerView.Adapter adapter = mLists.get(i).getAdapter();
+            final int count = adapter.getItemCount();
+            for (int j = 0; j < count; j++) {
+                long id = adapter.getItemId(j);
+                if (id == itemId) {
+                    moveItem(i, j, toColumn, toRow, scrollToItem);
+                    return;
+                }
             }
         }
     }

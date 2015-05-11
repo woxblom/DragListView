@@ -20,6 +20,7 @@ import android.content.Context;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -92,10 +93,12 @@ public class DragListView extends FrameLayout {
     }
 
     private DragItemRecyclerView createRecyclerView() {
-        final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
+        final DragItemRecyclerView recyclerView = (DragItemRecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.drag_item_recycler_view, null);
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setVerticalScrollBarEnabled(false);
+        recyclerView.setHorizontalScrollBarEnabled(false);
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             private int mDragStartPosition;
 
