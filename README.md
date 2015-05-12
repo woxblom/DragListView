@@ -134,7 +134,10 @@ List and Grid layouts are used as example in the sample project.
         }
     }
 
+## Used in apps
 
+[App Organizer](https://play.google.com/store/apps/details?id=com.wox.app_organizer.ui)<br/>
+The app organizer helps you manage and order your apps.
 
 ## License
 
