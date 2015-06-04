@@ -17,11 +17,11 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.1.2'
+        compile 'com.github.woxthebox:draglistview:1.1.3'
     }
 
 ## Usage
-**NOTE: The adapter must use stable ids and only layout managers based on a LinearLayoutManager are supported.
+**NOTE: The adapter must use stable ids.
 List and Grid layouts are used as example in the sample project.
 
   For list and grid view use the DragListView.

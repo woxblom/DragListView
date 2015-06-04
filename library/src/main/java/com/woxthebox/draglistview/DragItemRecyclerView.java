@@ -19,7 +19,6 @@ package com.woxthebox.draglistview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -50,6 +49,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private int mDragItemPosition;
     private int mTouchSlop;
     private float mStartY;
+    private boolean mClipToPadding;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -105,6 +105,12 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     @Override
+    public void setClipToPadding(boolean clipToPadding) {
+        super.setClipToPadding(clipToPadding);
+        mClipToPadding = clipToPadding;
+    }
+
+    @Override
     public void setAdapter(Adapter adapter) {
         if (!(adapter instanceof DragItemAdapter)) {
             throw new RuntimeException("Adapter must extend DragItemAdapter");
@@ -115,14 +121,6 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
         super.setAdapter(adapter);
         mAdapter = (DragItemAdapter) adapter;
-    }
-
-    @Override
-    public void setLayoutManager(LayoutManager layout) {
-        super.setLayoutManager(layout);
-        if (!(layout instanceof LinearLayoutManager)) {
-            throw new RuntimeException("Layout must be an instance of LinearLayoutManager");
-        }
     }
 
     @Override
@@ -166,11 +164,22 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
                 mDragItemPosition = newPos;
             }
 
-            LinearLayoutManager layout = (LinearLayoutManager) getLayoutManager();
-            if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && layout.findLastCompletelyVisibleItemPosition() !=
-                    mAdapter.getItemCount() - 1) {
+            boolean lastItemReached = false;
+            boolean firstItemReached = false;
+            int top = mClipToPadding ? getPaddingTop() : 0;
+            int bottom = mClipToPadding ? getHeight() - getPaddingBottom() : getHeight();
+            ViewHolder lastChild = findViewHolderForAdapterPosition(mAdapter.getItemCount() - 1);
+            ViewHolder firstChild = findViewHolderForAdapterPosition(0);
+            if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
+                lastItemReached = true;
+            }
+            if (firstChild != null && firstChild.itemView.getTop() >= top) {
+                firstItemReached = true;
+            }
+
+            if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-            } else if (mDragItem.getY() < view.getHeight() / 2 && layout.findFirstCompletelyVisibleItemPosition() != 0) {
+            } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
             } else {
                 mAutoScroller.stopAutoScroll();
