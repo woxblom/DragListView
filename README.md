@@ -17,7 +17,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.1.3'
+        compile 'com.github.woxthebox:draglistview:1.1.4'
     }
 
 ## Usage
