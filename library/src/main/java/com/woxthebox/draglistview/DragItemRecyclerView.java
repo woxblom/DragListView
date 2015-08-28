@@ -50,6 +50,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private int mTouchSlop;
     private float mStartY;
     private boolean mClipToPadding;
+    private boolean mCanNotDragAboveTop;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -86,6 +87,10 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
                 break;
         }
         return super.onInterceptTouchEvent(event);
+    }
+
+    public void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
+        mCanNotDragAboveTop = canNotDragAboveTop;
     }
 
     public void setDragItemListener(DragItemListener listener) {
@@ -160,8 +165,11 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         int newPos = getChildAdapterPosition(view);
         if (newPos != -1) {
             if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
-                mAdapter.changeItemPosition(mDragItemPosition, newPos);
-                mDragItemPosition = newPos;
+                // If we are not allowed to drag above top and new pos is 0 then don't do anything
+                if (!(mCanNotDragAboveTop && newPos == 0)) {
+                    mAdapter.changeItemPosition(mDragItemPosition, newPos);
+                    mDragItemPosition = newPos;
+                }
             }
 
             boolean lastItemReached = false;

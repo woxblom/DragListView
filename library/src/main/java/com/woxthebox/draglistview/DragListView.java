@@ -191,4 +191,8 @@ public class DragListView extends FrameLayout {
     public void setSnapDragItemToTouch(boolean snapToTouch) {
         mDragItem.setSnapToTouch(snapToTouch);
     }
+
+    public void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
+        mRecyclerView.setCanNotDragAboveTopItem(canNotDragAboveTop);
+    }
 }
