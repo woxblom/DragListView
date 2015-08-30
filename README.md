@@ -142,7 +142,7 @@ Addresses the daily work & project collaboration needs of everyone in one tool.
 [App Organizer](https://play.google.com/store/apps/details?id=com.wox.app_organizer.ui)<br/>
 Helps you manage and order your apps.
 
-[Scan It - Book Scanner](https://play.google.com/store/apps/details?id=com.diotek.scanit)
+[Scan It - Book Scanner](https://play.google.com/store/apps/details?id=com.diotek.scanit)<br/>
 Put your heavy physical books onto your smartphone.
 
 ## License
