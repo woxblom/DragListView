@@ -136,8 +136,14 @@ List and Grid layouts are used as example in the sample project.
 
 ## Used in apps
 
+[Projectplace](https://play.google.com/store/apps/details?id=com.projectplace.octopi)<br/>
+Addresses the daily work & project collaboration needs of everyone in one tool.
+
 [App Organizer](https://play.google.com/store/apps/details?id=com.wox.app_organizer.ui)<br/>
-The app organizer helps you manage and order your apps.
+Helps you manage and order your apps.
+
+[Scan It - Book Scanner](https://play.google.com/store/apps/details?id=com.diotek.scanit)
+Put your heavy physical books onto your smartphone.
 
 ## License
 
