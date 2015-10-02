@@ -184,6 +184,10 @@ public class DragListView extends FrameLayout {
         addView(mDragItem.getDragItemView());
     }
 
+    public boolean isDragging() {
+        return mRecyclerView.isDragging();
+    }
+
     public void setCanDragHorizontally(boolean canDragHorizontally) {
         mDragItem.setCanDragHorizontally(canDragHorizontally);
     }
@@ -194,5 +198,9 @@ public class DragListView extends FrameLayout {
 
     public void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
         mRecyclerView.setCanNotDragAboveTopItem(canNotDragAboveTop);
+    }
+
+    public void setScrollingEnabled(boolean scrollingEnabled) {
+        mRecyclerView.setScrollingEnabled(scrollingEnabled);
     }
 }

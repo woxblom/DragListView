@@ -51,6 +51,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private float mStartY;
     private boolean mClipToPadding;
     private boolean mCanNotDragAboveTop;
+    private boolean mScrollingEnabled = true;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -74,6 +75,10 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        if (!mScrollingEnabled) {
+            return false;
+        }
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mStartY = event.getY();
@@ -91,6 +96,10 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     public void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
         mCanNotDragAboveTop = canNotDragAboveTop;
+    }
+
+    public void setScrollingEnabled(boolean scrollingEnabled) {
+        mScrollingEnabled = scrollingEnabled;
     }
 
     public void setDragItemListener(DragItemListener listener) {

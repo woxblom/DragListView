@@ -106,11 +106,11 @@ public class ListFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.action_disable_drag:
                 mDragListView.setDragEnabled(false);
-                getActivity().invalidateOptionsMenu();
+                getActivity().supportInvalidateOptionsMenu();
                 return true;
             case R.id.action_enable_drag:
                 mDragListView.setDragEnabled(true);
-                getActivity().invalidateOptionsMenu();
+                getActivity().supportInvalidateOptionsMenu();
                 return true;
             case R.id.action_list:
                 setupListRecyclerView();
@@ -123,15 +123,15 @@ public class ListFragment extends Fragment {
     }
 
     private void setupListRecyclerView() {
-        mDragListView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mDragListView.setLayoutManager(new LinearLayoutManager(getContext()));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
         mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(false);
-        mDragListView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.list_item));
+        mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.list_item));
     }
 
     private void setupGridRecyclerView() {
-        mDragListView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
+        mDragListView.setLayoutManager(new GridLayoutManager(getContext(), 4));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
         mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(true);
