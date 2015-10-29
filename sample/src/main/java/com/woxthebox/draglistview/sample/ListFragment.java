@@ -115,8 +115,11 @@ public class ListFragment extends Fragment {
             case R.id.action_list:
                 setupListRecyclerView();
                 return true;
-            case R.id.action_grid:
-                setupGridRecyclerView();
+            case R.id.action_grid_vertical:
+                setupGridVerticalRecyclerView();
+                return true;
+            case R.id.action_grid_horizontal:
+                setupGridHorizontalRecyclerView();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -130,8 +133,16 @@ public class ListFragment extends Fragment {
         mDragListView.setCustomDragItem(new MyDragItem(getContext(), R.layout.list_item));
     }
 
-    private void setupGridRecyclerView() {
+    private void setupGridVerticalRecyclerView() {
         mDragListView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
+        mDragListView.setAdapter(listAdapter, true);
+        mDragListView.setCanDragHorizontally(true);
+        mDragListView.setCustomDragItem(null);
+    }
+
+    private void setupGridHorizontalRecyclerView() {
+        mDragListView.setLayoutManager(new GridLayoutManager(getContext(), 4, LinearLayoutManager.HORIZONTAL, false));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
         mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(true);

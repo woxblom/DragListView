@@ -19,6 +19,7 @@ package com.woxthebox.draglistview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -138,6 +139,14 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     @Override
+    public void setLayoutManager(LayoutManager layout) {
+        super.setLayoutManager(layout);
+        if (!(layout instanceof LinearLayoutManager)) {
+            throw new RuntimeException("Layout must be an instance of LinearLayoutManager");
+        }
+    }
+
+    @Override
     public void onAutoScrollPositionBy(int dx, int dy) {
         if (isDragging()) {
             scrollBy(dx, dy);
@@ -171,13 +180,23 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItem.getX(), mDragItem.getY());
-        int newPos = getChildAdapterPosition(view);
+        int newPos = getChildLayoutPosition(view);
         if (newPos != -1) {
+            LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
             if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
                 // If we are not allowed to drag above top and new pos is 0 then don't do anything
                 if (!(mCanNotDragAboveTop && newPos == 0)) {
+                    int pos = layoutManager.findFirstVisibleItemPosition();
+                    View posView = layoutManager.findViewByPosition(pos);
                     mAdapter.changeItemPosition(mDragItemPosition, newPos);
                     mDragItemPosition = newPos;
+
+                    // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
+                    if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                        layoutManager.scrollToPositionWithOffset(pos, posView.getTop());
+                    } else {
+                        layoutManager.scrollToPositionWithOffset(pos, posView.getLeft());
+                    }
                 }
             }
 
@@ -185,21 +204,45 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             boolean firstItemReached = false;
             int top = mClipToPadding ? getPaddingTop() : 0;
             int bottom = mClipToPadding ? getHeight() - getPaddingBottom() : getHeight();
-            ViewHolder lastChild = findViewHolderForAdapterPosition(mAdapter.getItemCount() - 1);
-            ViewHolder firstChild = findViewHolderForAdapterPosition(0);
-            if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
-                lastItemReached = true;
-            }
-            if (firstChild != null && firstChild.itemView.getTop() >= top) {
-                firstItemReached = true;
+            int left = mClipToPadding ? getPaddingLeft() : 0;
+            int right = mClipToPadding ? getWidth() - getPaddingRight() : getWidth();
+            ViewHolder lastChild = findViewHolderForLayoutPosition(mAdapter.getItemCount() - 1);
+            ViewHolder firstChild = findViewHolderForLayoutPosition(0);
+
+            // Check if first or last item has been reached
+            if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
+                    lastItemReached = true;
+                }
+                if (firstChild != null && firstChild.itemView.getTop() >= top) {
+                    firstItemReached = true;
+                }
+            } else {
+                if (lastChild != null && lastChild.itemView.getRight() <= right) {
+                    lastItemReached = true;
+                }
+                if (firstChild != null && firstChild.itemView.getLeft() >= left) {
+                    firstItemReached = true;
+                }
             }
 
-            if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
-                mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-            } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
-                mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
+            // Start auto scroll if at the edge
+            if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
+                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
+                } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
+                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
+                } else {
+                    mAutoScroller.stopAutoScroll();
+                }
             } else {
-                mAutoScroller.stopAutoScroll();
+                if (mDragItem.getX() > getWidth() - view.getWidth() / 2 && !lastItemReached) {
+                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
+                } else if (mDragItem.getX() < view.getWidth() / 2 && !firstItemReached) {
+                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
+                } else {
+                    mAutoScroller.stopAutoScroll();
+                }
             }
         }
     }
@@ -287,9 +330,9 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         if (child == null && getChildCount() > 0) {
             // If child is null and child count is not 0 it means that an item was
             // dragged below the last item in the list, then put it after that item
-            pos = getChildAdapterPosition(getChildAt(getChildCount() - 1)) + 1;
+            pos = getChildLayoutPosition(getChildAt(getChildCount() - 1)) + 1;
         } else {
-            pos = getChildAdapterPosition(child);
+            pos = getChildLayoutPosition(child);
         }
 
         // If pos is -1 it means that the child has not been laid out yet,

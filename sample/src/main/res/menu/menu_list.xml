@@ -30,7 +30,11 @@
         android:title="@string/action_list"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_grid"
-        android:title="@string/action_grid"
+        android:id="@+id/action_grid_vertical"
+        android:title="@string/action_grid_vertical"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_grid_horizontal"
+        android:title="@string/action_grid_horizontal"
         app:showAsAction="never"/>
 </menu>

@@ -67,7 +67,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         if (mItemList != null && mItemList.size() > fromPos && mItemList.size() > toPos) {
             T item = mItemList.remove(fromPos);
             mItemList.add(toPos, item);
-            notifyDataSetChanged();
+            notifyItemMoved(fromPos, toPos);
         }
     }
 
