@@ -193,9 +193,11 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
                     // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
                     if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
-                        layoutManager.scrollToPositionWithOffset(pos, posView.getTop());
+                        int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
+                        layoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
                     } else {
-                        layoutManager.scrollToPositionWithOffset(pos, posView.getLeft());
+                        int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
+                        layoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
                     }
                 }
             }

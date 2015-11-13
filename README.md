@@ -17,7 +17,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.1.7'
+        compile 'com.github.woxthebox:draglistview:1.1.8'
     }
 
 ## Usage
@@ -144,6 +144,9 @@ Helps you manage and order your apps.
 
 [Scan It - Book Scanner](https://play.google.com/store/apps/details?id=com.diotek.scanit)<br/>
 Put your heavy physical books onto your smartphone.
+
+[EzCCS](https://play.google.com/store/apps/details?id=com.scottsware.ezccsa&hl=en)
+For United Pilots and Flight Attendants that use CCS. Fast one-click access CCS. OFFLINE of viewing of CCS pages.
 
 ## License
 
