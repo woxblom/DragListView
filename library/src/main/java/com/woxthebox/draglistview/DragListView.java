@@ -77,7 +77,7 @@ public class DragListView extends FrameLayout {
     private boolean handleTouchEvent(MotionEvent event) {
         mTouchX = event.getX();
         mTouchY = event.getY();
-        if (mRecyclerView.isDragging()) {
+        if (isDragging()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_MOVE:
                     mRecyclerView.onDragging(event.getX(), event.getY());
