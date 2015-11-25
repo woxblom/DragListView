@@ -145,8 +145,11 @@ Helps you manage and order your apps.
 [Scan It - Book Scanner](https://play.google.com/store/apps/details?id=com.diotek.scanit)<br/>
 Put your heavy physical books onto your smartphone.
 
-[EzCCS](https://play.google.com/store/apps/details?id=com.scottsware.ezccsa&hl=en)
+[EzCCS](https://play.google.com/store/apps/details?id=com.scottsware.ezccsa&hl=en)<br/>
 For United Pilots and Flight Attendants that use CCS. Fast one-click access CCS. OFFLINE of viewing of CCS pages.
+
+[Super Simple Shopping List](https://play.google.com/store/apps/details?id=com.bitwize10.supersimpleshoppinglist)<br/>
+One of the simplest shopping list apps available!
 
 ## License
 
