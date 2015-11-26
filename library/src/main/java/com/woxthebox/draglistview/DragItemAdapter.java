@@ -101,7 +101,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         mDragItemId = dragItemId;
     }
 
-    void setDragEnabled(boolean enabled) {
+    public void setDragEnabled(boolean enabled) {
         mDragEnabled = enabled;
     }
 
