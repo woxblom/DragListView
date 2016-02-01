@@ -29,9 +29,9 @@ public class AutoScroller {
     }
 
     public interface AutoScrollListener {
-        public void onAutoScrollPositionBy(int dx, int dy);
+        void onAutoScrollPositionBy(int dx, int dy);
 
-        public void onAutoScrollColumnBy(int columns);
+        void onAutoScrollColumnBy(int columns);
     }
 
     private static final int SCROLL_SPEED_DP = 8;

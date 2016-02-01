@@ -19,6 +19,7 @@ package com.woxthebox.draglistview;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -195,7 +196,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 mDragItem.setPosition(getListTouchX(mCurrentRecyclerView), getListTouchY(mCurrentRecyclerView));
             }
 
-            postInvalidateOnAnimation();
+            ViewCompat.postInvalidateOnAnimation(this);
         } else {
             super.computeScroll();
         }
@@ -446,9 +447,9 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             mScroller.forceFinished(true);
             if (animate) {
                 mScroller.startScroll(getScrollX(), getScrollY(), newX - getScrollX(), 0, SCROLL_ANIMATION_DURATION);
-                postInvalidateOnAnimation();
+                ViewCompat.postInvalidateOnAnimation(this);
             } else {
-                setScrollX(newX);
+                scrollTo(newX, getScrollY());
             }
         }
     }
@@ -521,7 +522,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         newDragItem.setSnapToTouch(mDragItem.isSnapToTouch());
         mDragItem = newDragItem;
         mRootLayout.removeViewAt(1);
-        mRootLayout.addView(dragItem.getDragItemView());
+        mRootLayout.addView(mDragItem.getDragItemView());
     }
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {

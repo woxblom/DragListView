@@ -1,12 +1,12 @@
 /**
  * Copyright 2014 Magnus Woxblom
- *
+ * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
@@ -56,7 +57,12 @@ public class DragItem {
         Bitmap bitmap = Bitmap.createBitmap(clickedView.getWidth(), clickedView.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         clickedView.draw(canvas);
-        dragView.setBackground(new BitmapDrawable(clickedView.getResources(), bitmap));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            dragView.setBackground(new BitmapDrawable(clickedView.getResources(), bitmap));
+        } else {
+            //noinspection deprecation
+            dragView.setBackgroundDrawable(new BitmapDrawable(clickedView.getResources(), bitmap));
+        }
     }
 
     public void onMeasureDragView(View clickedView, View dragView) {
@@ -157,11 +163,13 @@ public class DragItem {
         updatePosition();
     }
 
+    @SuppressWarnings("unused")
     void setX(float x) {
         mPosX = x;
         updatePosition();
     }
 
+    @SuppressWarnings("unused")
     void setY(float y) {
         mPosY = y;
         updatePosition();

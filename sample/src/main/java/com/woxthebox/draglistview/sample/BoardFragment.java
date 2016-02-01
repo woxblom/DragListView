@@ -184,6 +184,7 @@ public class BoardFragment extends Fragment {
 
             dragCard.setMaxCardElevation(40);
             dragCard.setCardElevation(clickedCard.getCardElevation());
+            // I know the dragView is a FrameLayout and that is why I can use setForeground below api level 23
             dragCard.setForeground(clickedView.getResources().getDrawable(R.drawable.card_view_drag_foreground));
         }
 
