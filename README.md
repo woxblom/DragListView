@@ -154,6 +154,9 @@ One of the simplest shopping list apps available!
 [Muscle Memory](https://play.google.com/store/apps/details?id=com.binaryshrub.musclememory)<br/>
 Will take the mess out of tracking your workouts.
 
+[NEO Bookmark](https://play.google.com/store/apps/details?id=com.seyeonsoft.neobookmark.lite)<br/>
+With the NEO bookmark, you can see categories and bookmarks at a glance.
+
 ## License
 
 If you use DragItemRecyclerView code in your application please inform the author about it (*email: woxthebox@gmail.com*) like this:
