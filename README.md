@@ -20,6 +20,10 @@ Youtube demo video<br>
         compile 'com.github.woxthebox:draglistview:1.2.0'
     }
 
+Add this to proguard rules, otherwise animations won't work correctly
+
+    -keep class com.woxthebox.draglistview.** { *; }
+
 ## Usage
 **NOTE: The adapter must use stable ids.
 List and Grid layouts are used as example in the sample project.
