@@ -161,6 +161,9 @@ Will take the mess out of tracking your workouts.
 [NEO Bookmark](https://play.google.com/store/apps/details?id=com.seyeonsoft.neobookmark.lite)<br/>
 With the NEO bookmark, you can see categories and bookmarks at a glance.
 
+[BMX Guide](https://play.google.com/store/apps/details?id=com.florianschaeffner.bmxguide)<br/>
+Store your landed and marked BMX tricks in your personal trick book.
+
 ## License
 
 If you use DragItemRecyclerView code in your application please inform the author about it (*email: woxthebox@gmail.com*) like this:
