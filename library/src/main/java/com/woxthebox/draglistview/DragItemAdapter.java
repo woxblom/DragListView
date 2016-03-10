@@ -136,7 +136,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                             return true;
                         }
                         if (!mDragEnabled && itemView == mGrabView) {
-                            return onTouch(view, event);
+                            return onItemTouch(view, event);
                         }
                         return false;
                     }
