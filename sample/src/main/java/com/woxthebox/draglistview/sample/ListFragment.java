@@ -20,7 +20,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,6 +44,7 @@ public class ListFragment extends Fragment {
 
     private ArrayList<Pair<Long, String>> mItemArray;
     private DragListView mDragListView;
+    private SwipeRefreshLayout mRefreshLayout;
 
     public static ListFragment newInstance() {
         return new ListFragment();
@@ -56,16 +59,19 @@ public class ListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.list_layout, container, false);
+        mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mDragListView = (DragListView) view.findViewById(R.id.drag_list_view);
         mDragListView.getRecyclerView().setVerticalScrollBarEnabled(true);
         mDragListView.setDragListListener(new DragListView.DragListListener() {
             @Override
             public void onItemDragStarted(int position) {
+                mRefreshLayout.setEnabled(false);
                 Toast.makeText(mDragListView.getContext(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onItemDragEnded(int fromPosition, int toPosition) {
+                mRefreshLayout.setEnabled(true);
                 if (fromPosition != toPosition) {
                     Toast.makeText(mDragListView.getContext(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
                 }
@@ -76,6 +82,19 @@ public class ListFragment extends Fragment {
         for (int i = 0; i < 40; i++) {
             mItemArray.add(new Pair<>(Long.valueOf(i), "Item " + i));
         }
+
+        mRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.app_color));
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mRefreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRefreshLayout.setRefreshing(false);
+                    }
+                }, 2000);
+            }
+        });
 
         setupListRecyclerView();
         return view;
