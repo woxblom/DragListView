@@ -103,7 +103,7 @@ public class DragItem {
     }
 
     void hide() {
-        mDragView.setVisibility(View.INVISIBLE);
+        mDragView.setVisibility(View.GONE);
     }
 
     void startDrag(View startFromView, float touchX, float touchY) {

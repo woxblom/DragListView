@@ -44,7 +44,7 @@ public class ListFragment extends Fragment {
 
     private ArrayList<Pair<Long, String>> mItemArray;
     private DragListView mDragListView;
-    private SwipeRefreshLayout mRefreshLayout;
+    private MySwipeRefreshLayout mRefreshLayout;
 
     public static ListFragment newInstance() {
         return new ListFragment();
@@ -59,7 +59,7 @@ public class ListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.list_layout, container, false);
-        mRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        mRefreshLayout = (MySwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
         mDragListView = (DragListView) view.findViewById(R.id.drag_list_view);
         mDragListView.getRecyclerView().setVerticalScrollBarEnabled(true);
         mDragListView.setDragListListener(new DragListView.DragListListener() {
@@ -83,6 +83,7 @@ public class ListFragment extends Fragment {
             mItemArray.add(new Pair<>(Long.valueOf(i), "Item " + i));
         }
 
+        mRefreshLayout.setScrollingView(mDragListView.getRecyclerView());
         mRefreshLayout.setColorSchemeColors(ContextCompat.getColor(getContext(), R.color.app_color));
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -158,6 +159,7 @@ public class ListFragment extends Fragment {
         mDragListView.setAdapter(listAdapter, true);
         mDragListView.setCanDragHorizontally(true);
         mDragListView.setCustomDragItem(null);
+
     }
 
     private void setupGridHorizontalRecyclerView() {
