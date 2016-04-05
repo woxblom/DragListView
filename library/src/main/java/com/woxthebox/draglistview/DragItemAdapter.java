@@ -24,14 +24,14 @@ import java.util.List;
 
 public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-    interface DragStartedListener {
-        void onDragStarted(View itemView, long itemId);
+    interface DragStartCallback {
+        boolean startDrag(View itemView, long itemId);
+        boolean isDragging();
     }
 
-    private DragStartedListener mDragStartedListener;
+    private DragStartCallback mDragStartCallback;
     private long mDragItemId = -1;
     private boolean mDragOnLongPress;
-    private boolean mDragEnabled = true;
     protected List<T> mItemList;
 
     public DragItemAdapter(boolean dragOnLongPress) {
@@ -93,16 +93,12 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         holder.itemView.setVisibility(mDragItemId == itemId ? View.INVISIBLE : View.VISIBLE);
     }
 
-    void setDragStartedListener(DragStartedListener dragStartedListener) {
-        mDragStartedListener = dragStartedListener;
+    void setDragStartedListener(DragStartCallback dragStartedListener) {
+        mDragStartCallback = dragStartedListener;
     }
 
     void setDragItemId(long dragItemId) {
         mDragItemId = dragItemId;
-    }
-
-    void setDragEnabled(boolean enabled) {
-        mDragEnabled = enabled;
     }
 
     public abstract class ViewHolder extends RecyclerView.ViewHolder {
@@ -117,8 +113,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                 mGrabView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
-                        if (mDragEnabled) {
-                            mDragStartedListener.onDragStarted(itemView, mItemId);
+                        if (mDragStartCallback.startDrag(itemView, mItemId)) {
                             return true;
                         }
                         if (itemView == mGrabView) {
@@ -131,11 +126,10 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                 mGrabView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
-                        if (mDragEnabled && event.getAction() == MotionEvent.ACTION_DOWN) {
-                            mDragStartedListener.onDragStarted(itemView, mItemId);
+                        if (event.getAction() == MotionEvent.ACTION_DOWN && mDragStartCallback.startDrag(itemView, mItemId)) {
                             return true;
                         }
-                        if (!mDragEnabled && itemView == mGrabView) {
+                        if (!mDragStartCallback.isDragging() && itemView == mGrabView) {
                             return onItemTouch(view, event);
                         }
                         return false;

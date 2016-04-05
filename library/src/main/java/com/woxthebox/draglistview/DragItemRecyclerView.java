@@ -53,6 +53,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private boolean mClipToPadding;
     private boolean mCanNotDragAboveTop;
     private boolean mScrollingEnabled = true;
+    private boolean mDragEnabled = true;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -95,27 +96,35 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         return super.onInterceptTouchEvent(event);
     }
 
-    public void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
+    void setDragEnabled(boolean enabled) {
+        mDragEnabled = enabled;
+    }
+
+    boolean isDragEnabled() {
+        return mDragEnabled;
+    }
+
+    void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
         mCanNotDragAboveTop = canNotDragAboveTop;
     }
 
-    public void setScrollingEnabled(boolean scrollingEnabled) {
+    void setScrollingEnabled(boolean scrollingEnabled) {
         mScrollingEnabled = scrollingEnabled;
     }
 
-    public void setDragItemListener(DragItemListener listener) {
+    void setDragItemListener(DragItemListener listener) {
         mListener = listener;
     }
 
-    public void setDragItem(DragItem dragItem) {
+    void setDragItem(DragItem dragItem) {
         mDragItem = dragItem;
     }
 
-    public boolean isDragging() {
+    boolean isDragging() {
         return mDragState != DragState.DRAG_ENDED;
     }
 
-    public long getDragItemId() {
+    long getDragItemId() {
         return mDragItemId;
     }
 
@@ -249,13 +258,18 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         }
     }
 
-    void onDragStarted(View itemView, long itemId, float x, float y) {
+    boolean startDrag(View itemView, long itemId, float x, float y) {
+        int dragItemPosition = mAdapter.getPositionForItemId(itemId);
+        if (!mDragEnabled || (mCanNotDragAboveTop && dragItemPosition == 0)) {
+            return false;
+        }
+
         // If a drag is starting the parent must always be allowed to intercept
         getParent().requestDisallowInterceptTouchEvent(false);
         mDragState = DragState.DRAG_STARTED;
         mDragItemId = itemId;
         mDragItem.startDrag(itemView, x, y);
-        mDragItemPosition = mAdapter.getPositionForItemId(mDragItemId);
+        mDragItemPosition = dragItemPosition;
         updateDragPositionAndScroll();
 
         mAdapter.setDragItemId(mDragItemId);
@@ -265,6 +279,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         }
 
         invalidate();
+        return true;
     }
 
     void onDragging(float x, float y) {

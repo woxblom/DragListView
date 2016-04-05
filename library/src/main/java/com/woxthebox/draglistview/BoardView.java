@@ -479,7 +479,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mDragEnabled = enabled;
         if (mLists.size() > 0) {
             for (DragItemRecyclerView list : mLists) {
-                ((DragItemAdapter) list.getAdapter()).setDragEnabled(mDragEnabled);
+                list.setDragEnabled(mDragEnabled);
             }
         }
     }
@@ -559,11 +559,16 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         });
 
         recyclerView.setAdapter(adapter);
-        adapter.setDragEnabled(mDragEnabled);
-        adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
+        recyclerView.setDragEnabled(mDragEnabled);
+        adapter.setDragStartedListener(new DragItemAdapter.DragStartCallback() {
             @Override
-            public void onDragStarted(View itemView, long itemId) {
-                recyclerView.onDragStarted(itemView, itemId, getListTouchX(recyclerView), getListTouchY(recyclerView));
+            public boolean startDrag(View itemView, long itemId) {
+                return recyclerView.startDrag(itemView, itemId, getListTouchX(recyclerView), getListTouchY(recyclerView));
+            }
+
+            @Override
+            public boolean isDragging() {
+                return recyclerView.isDragging();
             }
         });
 

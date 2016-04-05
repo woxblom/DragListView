@@ -36,7 +36,6 @@ public class DragListView extends FrameLayout {
     private DragItemRecyclerView mRecyclerView;
     private DragListListener mDragListListener;
     private DragItem mDragItem;
-    private boolean mDragEnabled = true;
     private float mTouchX;
     private float mTouchY;
 
@@ -138,11 +137,15 @@ public class DragListView extends FrameLayout {
     public void setAdapter(DragItemAdapter adapter, boolean hasFixedItemSize) {
         mRecyclerView.setHasFixedSize(hasFixedItemSize);
         mRecyclerView.setAdapter(adapter);
-        adapter.setDragEnabled(mDragEnabled);
-        adapter.setDragStartedListener(new DragItemAdapter.DragStartedListener() {
+        adapter.setDragStartedListener(new DragItemAdapter.DragStartCallback() {
             @Override
-            public void onDragStarted(View itemView, long itemId) {
-                mRecyclerView.onDragStarted(itemView, itemId, mTouchX, mTouchY);
+            public boolean startDrag(View itemView, long itemId) {
+                return mRecyclerView.startDrag(itemView, itemId, mTouchX, mTouchY);
+            }
+
+            @Override
+            public boolean isDragging() {
+                return mRecyclerView.isDragging();
             }
         });
     }
@@ -156,14 +159,11 @@ public class DragListView extends FrameLayout {
     }
 
     public boolean isDragEnabled() {
-        return mDragEnabled;
+        return mRecyclerView.isDragEnabled();
     }
 
     public void setDragEnabled(boolean enabled) {
-        mDragEnabled = enabled;
-        if (mRecyclerView.getAdapter() != null) {
-            ((DragItemAdapter) mRecyclerView.getAdapter()).setDragEnabled(mDragEnabled);
-        }
+        mRecyclerView.setDragEnabled(enabled);
     }
 
     public void setCustomDragItem(DragItem dragItem) {
