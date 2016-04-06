@@ -26,7 +26,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -72,7 +71,6 @@ public class ListFragment extends Fragment {
 
             @Override
             public void onItemDragging(int itemPosition, float x, float y) {
-                Log.i(getActivity().getPackageName(), "Dragging - Position: " + itemPosition + "\nX: " + x + "\nY: " + y);
             }
 
             @Override
