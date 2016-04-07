@@ -70,6 +70,10 @@ public class ListFragment extends Fragment {
             }
 
             @Override
+            public void onItemDragging(int itemPosition, float x, float y) {
+            }
+
+            @Override
             public void onItemDragEnded(int fromPosition, int toPosition) {
                 mRefreshLayout.setEnabled(true);
                 if (fromPosition != toPosition) {

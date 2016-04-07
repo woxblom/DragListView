@@ -30,6 +30,8 @@ public class DragListView extends FrameLayout {
     public interface DragListListener {
         void onItemDragStarted(int position);
 
+        void onItemDragging(int itemPosition, float x, float y);
+
         void onItemDragEnded(int fromPosition, int toPosition);
     }
 
@@ -111,6 +113,9 @@ public class DragListView extends FrameLayout {
 
             @Override
             public void onDragging(int itemPosition, float x, float y) {
+                if (mDragListListener != null) {
+                    mDragListListener.onItemDragging(itemPosition, x, y);
+                }
             }
 
             @Override
