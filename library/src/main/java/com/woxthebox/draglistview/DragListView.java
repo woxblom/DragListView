@@ -35,6 +35,20 @@ public class DragListView extends FrameLayout {
         void onItemDragEnded(int fromPosition, int toPosition);
     }
 
+    public static abstract class DragListListenerAdapter implements DragListListener {
+        @Override
+        public void onItemDragStarted(int position) {
+        }
+
+        @Override
+        public void onItemDragging(int itemPosition, float x, float y) {
+        }
+
+        @Override
+        public void onItemDragEnded(int fromPosition, int toPosition) {
+        }
+    }
+
     private DragItemRecyclerView mRecyclerView;
     private DragListListener mDragListListener;
     private DragItem mDragItem;
