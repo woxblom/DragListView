@@ -170,6 +170,9 @@ Italian fitness application.
 [Paperplane - Travel Planning](https://play.google.com/store/apps/details?id=com.paperplane)<br/>
 An intuitive travel planning app.
 
+[DogHero](https://play.google.com/store/apps/details?id=br.com.doghero.astro&hl=pt_BR)<br/>
+Hosting dogs in your area.
+
 ## License
 
 If you use DragItemRecyclerView code in your application please inform the author about it (*email: woxthebox@gmail.com*) like this:
