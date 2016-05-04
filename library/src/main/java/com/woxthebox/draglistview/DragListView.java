@@ -218,6 +218,10 @@ public class DragListView extends FrameLayout {
         mRecyclerView.setCanNotDragAboveTopItem(canNotDragAboveTop);
     }
 
+    public void setCanNotDragBelowBottomItem(boolean canNotDragBelowBottom) {
+        mRecyclerView.setCanNotDragBelowBottomItem(canNotDragBelowBottom);
+    }
+
     public void setScrollingEnabled(boolean scrollingEnabled) {
         mRecyclerView.setScrollingEnabled(scrollingEnabled);
     }

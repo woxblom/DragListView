@@ -52,6 +52,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private float mStartY;
     private boolean mClipToPadding;
     private boolean mCanNotDragAboveTop;
+    private boolean mCanNotDragBelowBottom;
     private boolean mScrollingEnabled = true;
     private boolean mDragEnabled = true;
 
@@ -106,6 +107,10 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     void setCanNotDragAboveTopItem(boolean canNotDragAboveTop) {
         mCanNotDragAboveTop = canNotDragAboveTop;
+    }
+
+    void setCanNotDragBelowBottomItem(boolean canNotDragBelowBottom) {
+        mCanNotDragBelowBottom = canNotDragBelowBottom;
     }
 
     void setScrollingEnabled(boolean scrollingEnabled) {
@@ -193,8 +198,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         if (newPos != -1) {
             LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
             if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
-                // If we are not allowed to drag above top and new pos is 0 then don't do anything
-                if (!(mCanNotDragAboveTop && newPos == 0)) {
+                // If we are not allowed to drag above top or bottom and new pos is 0 or item count then don't do anything
+                if (!(mCanNotDragAboveTop && newPos == 0) && !(mCanNotDragBelowBottom && newPos == mAdapter.getItemCount() - 1)) {
                     int pos = layoutManager.findFirstVisibleItemPosition();
                     View posView = layoutManager.findViewByPosition(pos);
                     mAdapter.changeItemPosition(mDragItemPosition, newPos);
@@ -260,7 +265,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     boolean startDrag(View itemView, long itemId, float x, float y) {
         int dragItemPosition = mAdapter.getPositionForItemId(itemId);
-        if (!mDragEnabled || (mCanNotDragAboveTop && dragItemPosition == 0)) {
+        if (!mDragEnabled || (mCanNotDragAboveTop && dragItemPosition == 0)
+                || (mCanNotDragBelowBottom && dragItemPosition == mAdapter.getItemCount() - 1)) {
             return false;
         }
 
