@@ -49,8 +49,27 @@ public class DragListView extends FrameLayout {
         }
     }
 
+    public interface DragListCallback {
+        boolean canDragItemAtPosition(int dragPosition);
+
+        boolean canDropItemAtPosition(int dropPosition);
+    }
+
+    public static abstract class DragListCallbackAdapter implements DragListCallback {
+        @Override
+        public boolean canDragItemAtPosition(int dragPosition) {
+            return true;
+        }
+
+        @Override
+        public boolean canDropItemAtPosition(int dropPosition) {
+            return true;
+        }
+    }
+
     private DragItemRecyclerView mRecyclerView;
     private DragListListener mDragListListener;
+    private DragListCallback mDragListCallback;
     private DragItem mDragItem;
     private float mTouchX;
     private float mTouchY;
@@ -139,6 +158,23 @@ public class DragListView extends FrameLayout {
                 }
             }
         });
+        recyclerView.setDragItemCallback(new DragItemRecyclerView.DragItemCallback() {
+            @Override
+            public boolean canDragItemAtPosition(int dragPosition) {
+                if (mDragListCallback != null) {
+                    return mDragListCallback.canDragItemAtPosition(dragPosition);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean canDropItemAtPosition(int dropPosition) {
+                if (mDragListCallback != null) {
+                    return mDragListCallback.canDropItemAtPosition(dropPosition);
+                }
+                return true;
+            }
+        });
         return recyclerView;
     }
 
@@ -175,6 +211,10 @@ public class DragListView extends FrameLayout {
 
     public void setDragListListener(DragListListener listener) {
         mDragListListener = listener;
+    }
+
+    public void setDragListCallback(DragListCallback callback) {
+        mDragListCallback = callback;
     }
 
     public boolean isDragEnabled() {

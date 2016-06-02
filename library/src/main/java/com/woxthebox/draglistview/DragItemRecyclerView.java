@@ -36,12 +36,19 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         void onDragEnded(int newItemPosition);
     }
 
+    public interface DragItemCallback {
+        boolean canDragItemAtPosition(int dragPosition);
+
+        boolean canDropItemAtPosition(int dropPosition);
+    }
+
     private enum DragState {
         DRAG_STARTED, DRAGGING, DRAG_ENDED
     }
 
     private AutoScroller mAutoScroller;
     private DragItemListener mListener;
+    private DragItemCallback mDragCallback;
     private DragState mDragState = DragState.DRAG_ENDED;
     private DragItemAdapter mAdapter;
     private DragItem mDragItem;
@@ -121,6 +128,10 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         mListener = listener;
     }
 
+    void setDragItemCallback(DragItemCallback callback) {
+        mDragCallback = callback;
+    }
+
     void setDragItem(DragItem dragItem) {
         mDragItem = dragItem;
     }
@@ -192,27 +203,40 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         return null;
     }
 
+    private boolean shouldChangeItemPosition(int newPos) {
+        // Check if drag position is changed and valid and that we are not in a hold position state
+        if (mHoldChangePosition || mDragItemPosition == -1 || mDragItemPosition == newPos) {
+            return false;
+        }
+        // If we are not allowed to drag above top or bottom and new pos is 0 or item count then return false
+        if ((mCanNotDragAboveTop && newPos == 0) || (mCanNotDragBelowBottom && newPos == mAdapter.getItemCount() - 1)) {
+            return false;
+        }
+        // Check with callback if we are allowed to drop at this position
+        if (mDragCallback != null && !mDragCallback.canDropItemAtPosition(newPos)) {
+            return false;
+        }
+        return true;
+    }
+
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItem.getX(), mDragItem.getY());
         int newPos = getChildLayoutPosition(view);
         if (newPos != -1) {
             LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
-            if (!mHoldChangePosition && mDragItemPosition != -1 && mDragItemPosition != newPos) {
-                // If we are not allowed to drag above top or bottom and new pos is 0 or item count then don't do anything
-                if (!(mCanNotDragAboveTop && newPos == 0) && !(mCanNotDragBelowBottom && newPos == mAdapter.getItemCount() - 1)) {
-                    int pos = layoutManager.findFirstVisibleItemPosition();
-                    View posView = layoutManager.findViewByPosition(pos);
-                    mAdapter.changeItemPosition(mDragItemPosition, newPos);
-                    mDragItemPosition = newPos;
+            if(shouldChangeItemPosition(newPos)) {
+                int pos = layoutManager.findFirstVisibleItemPosition();
+                View posView = layoutManager.findViewByPosition(pos);
+                mAdapter.changeItemPosition(mDragItemPosition, newPos);
+                mDragItemPosition = newPos;
 
-                    // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
-                    if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
-                        int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
-                        layoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
-                    } else {
-                        int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
-                        layoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
-                    }
+                // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
+                if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                    int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
+                    layoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
+                } else {
+                    int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
+                    layoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
                 }
             }
 
@@ -267,6 +291,10 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         int dragItemPosition = mAdapter.getPositionForItemId(itemId);
         if (!mDragEnabled || (mCanNotDragAboveTop && dragItemPosition == 0)
                 || (mCanNotDragBelowBottom && dragItemPosition == mAdapter.getItemCount() - 1)) {
+            return false;
+        }
+
+        if (mDragCallback != null && !mDragCallback.canDragItemAtPosition(dragItemPosition)) {
             return false;
         }
 

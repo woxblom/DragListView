@@ -50,6 +50,27 @@ List and Grid layouts are used as example in the sample project.
         mDragListView.setAdapter(listAdapter);
         mDragListView.setCanDragHorizontally(false);
 
+  If you want to prevent to drag or drop items at certain positions the use these methods.
+
+        // Prevents to drop an item in the top or bottom
+        mDragListView.setCanNotDragAboveTopItem(true);
+        mDragListView.setCanNotDragBelowBottomItem(true);
+
+        // Set a callback so you can decide exactly which positions that is allowed to drag from and drop to
+        mDragListView.setDragListCallback(new DragListView.DragListCallbackAdapter() {
+                    @Override
+                    public boolean canDragItemAtPosition(int dragPosition) {
+                        // Can not drag item at position 5
+                        return dragPosition != 5;
+                    }
+
+                    @Override
+                    public boolean canDropItemAtPosition(int dropPosition) {
+                        // Can not drop item at position 2
+                        return dropPosition != 2;
+                    }
+                });
+
   A custom drag item can be provided to change the visual appearance of the dragging item.
 
         mDragListView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.list_item));
