@@ -20,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.Collections;
 import java.util.List;
 
 public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
@@ -30,7 +31,8 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
     }
 
     private DragStartCallback mDragStartCallback;
-    private long mDragItemId = -1;
+    private long mDragItemId = RecyclerView.NO_ID;
+    private long mDropTargetId = RecyclerView.NO_ID;
     private boolean mDragOnLongPress;
     protected List<T> mItemList;
 
@@ -71,6 +73,13 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         }
     }
 
+    public void swapItems(int pos1, int pos2) {
+        if (mItemList != null && mItemList.size() > pos1 && mItemList.size() > pos2) {
+            Collections.swap(mItemList, pos1, pos2);
+            notifyDataSetChanged();
+        }
+    }
+
     public int getPositionForItemId(long id) {
         int count = getItemCount();
         for (int i = 0; i < count; i++) {
@@ -78,7 +87,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                 return i;
             }
         }
-        return -1;
+        return RecyclerView.NO_POSITION;
     }
 
     @Override
@@ -99,6 +108,14 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
 
     void setDragItemId(long dragItemId) {
         mDragItemId = dragItemId;
+    }
+
+    void setDropTargetId(long dropTargetId) {
+        mDropTargetId = dropTargetId;
+    }
+
+    public long getDropTargetId() {
+        return mDropTargetId;
     }
 
     public abstract class ViewHolder extends RecyclerView.ViewHolder {

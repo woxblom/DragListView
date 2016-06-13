@@ -17,6 +17,7 @@
 package com.woxthebox.draglistview;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -264,5 +265,29 @@ public class DragListView extends FrameLayout {
 
     public void setScrollingEnabled(boolean scrollingEnabled) {
         mRecyclerView.setScrollingEnabled(scrollingEnabled);
+    }
+
+    /**
+     * Set if items should not reorder automatically when dragging. If reorder is disabled, drop target
+     * drawables can be set with {@link #setDropTargetDrawables} which will highlight the current item that
+     * will be swapped when dropping. By default items will reorder automatically when dragging.
+     *
+     * @param disableReorder True if reorder of items should be disabled, false otherwise.
+     */
+    public void setDisableReorderWhenDragging(boolean disableReorder) {
+        mRecyclerView.setDisableReorderWhenDragging(disableReorder);
+    }
+
+    /**
+     * If {@link #setDisableReorderWhenDragging} has been set to True then a background and/or foreground drawable
+     * can be provided to highlight the current item which will be swapped when dropping. These drawables
+     * will be drawn as decorations in the RecyclerView and will not interfere with the items own background
+     * and foreground drawables.
+     *
+     * @param backgroundDrawable The background drawable for the item that will be swapped.
+     * @param foregroundDrawable The foreground drawable for the item that will be swapped.
+     */
+    public void setDropTargetDrawables(Drawable backgroundDrawable, Drawable foregroundDrawable) {
+        mRecyclerView.setDropTargetDrawables(backgroundDrawable, foregroundDrawable);
     }
 }

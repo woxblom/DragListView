@@ -19,6 +19,8 @@ package com.woxthebox.draglistview;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -52,7 +54,9 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private DragState mDragState = DragState.DRAG_ENDED;
     private DragItemAdapter mAdapter;
     private DragItem mDragItem;
-    private long mDragItemId = -1;
+    private Drawable mDropTargetBackgroundDrawable;
+    private Drawable mDropTargetForegroundDrawable;
+    private long mDragItemId = NO_ID;
     private boolean mHoldChangePosition;
     private int mDragItemPosition;
     private int mTouchSlop;
@@ -61,6 +65,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private boolean mCanNotDragAboveTop;
     private boolean mCanNotDragBelowBottom;
     private boolean mScrollingEnabled = true;
+    private boolean mDisableReorderWhenDragging;
     private boolean mDragEnabled = true;
 
     public DragItemRecyclerView(Context context) {
@@ -81,6 +86,35 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private void init() {
         mAutoScroller = new AutoScroller(getContext(), this);
         mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+
+        addItemDecoration(new ItemDecoration() {
+            @Override
+            public void onDraw(Canvas c, RecyclerView parent, State state) {
+                super.onDraw(c, parent, state);
+                drawDecoration(c, parent, mDropTargetBackgroundDrawable);
+            }
+
+            @Override
+            public void onDrawOver(Canvas c, RecyclerView parent, State state) {
+                super.onDrawOver(c, parent, state);
+                drawDecoration(c, parent, mDropTargetForegroundDrawable);
+            }
+
+            private void drawDecoration(Canvas c, RecyclerView parent, Drawable drawable) {
+                if (mAdapter.getDropTargetId() == NO_ID || drawable == null) {
+                    return;
+                }
+
+                for (int i = 0; i < parent.getChildCount(); i++) {
+                    View item = parent.getChildAt(i);
+                    int pos = getChildAdapterPosition(item);
+                    if (pos != NO_POSITION && mAdapter.getItemId(pos) == mAdapter.getDropTargetId()) {
+                        drawable.setBounds(item.getLeft(), item.getTop(), item.getRight(), item.getBottom());
+                        drawable.draw(c);
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -122,6 +156,15 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     void setScrollingEnabled(boolean scrollingEnabled) {
         mScrollingEnabled = scrollingEnabled;
+    }
+
+    void setDisableReorderWhenDragging(boolean disableReorder) {
+        mDisableReorderWhenDragging = disableReorder;
+    }
+
+    public void setDropTargetDrawables(Drawable backgroundDrawable, Drawable foregroundDrawable) {
+        mDropTargetBackgroundDrawable = backgroundDrawable;
+        mDropTargetForegroundDrawable = foregroundDrawable;
     }
 
     void setDragItemListener(DragItemListener listener) {
@@ -205,7 +248,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
 
     private boolean shouldChangeItemPosition(int newPos) {
         // Check if drag position is changed and valid and that we are not in a hold position state
-        if (mHoldChangePosition || mDragItemPosition == -1 || mDragItemPosition == newPos) {
+        if (mHoldChangePosition || mDragItemPosition == NO_POSITION || mDragItemPosition == newPos) {
             return false;
         }
         // If we are not allowed to drag above top or bottom and new pos is 0 or item count then return false
@@ -222,9 +265,16 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItem.getX(), mDragItem.getY());
         int newPos = getChildLayoutPosition(view);
-        if (newPos != -1) {
-            LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
-            if(shouldChangeItemPosition(newPos)) {
+        if (newPos == NO_POSITION) {
+            return;
+        }
+
+        LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
+        if (shouldChangeItemPosition(newPos)) {
+            if (mDisableReorderWhenDragging) {
+                mAdapter.setDropTargetId(mAdapter.getItemId(newPos));
+                mAdapter.notifyDataSetChanged();
+            } else {
                 int pos = layoutManager.findFirstVisibleItemPosition();
                 View posView = layoutManager.findViewByPosition(pos);
                 mAdapter.changeItemPosition(mDragItemPosition, newPos);
@@ -239,50 +289,50 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
                     layoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
                 }
             }
+        }
 
-            boolean lastItemReached = false;
-            boolean firstItemReached = false;
-            int top = mClipToPadding ? getPaddingTop() : 0;
-            int bottom = mClipToPadding ? getHeight() - getPaddingBottom() : getHeight();
-            int left = mClipToPadding ? getPaddingLeft() : 0;
-            int right = mClipToPadding ? getWidth() - getPaddingRight() : getWidth();
-            ViewHolder lastChild = findViewHolderForLayoutPosition(mAdapter.getItemCount() - 1);
-            ViewHolder firstChild = findViewHolderForLayoutPosition(0);
+        boolean lastItemReached = false;
+        boolean firstItemReached = false;
+        int top = mClipToPadding ? getPaddingTop() : 0;
+        int bottom = mClipToPadding ? getHeight() - getPaddingBottom() : getHeight();
+        int left = mClipToPadding ? getPaddingLeft() : 0;
+        int right = mClipToPadding ? getWidth() - getPaddingRight() : getWidth();
+        ViewHolder lastChild = findViewHolderForLayoutPosition(mAdapter.getItemCount() - 1);
+        ViewHolder firstChild = findViewHolderForLayoutPosition(0);
 
-            // Check if first or last item has been reached
-            if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
-                if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
-                    lastItemReached = true;
-                }
-                if (firstChild != null && firstChild.itemView.getTop() >= top) {
-                    firstItemReached = true;
-                }
-            } else {
-                if (lastChild != null && lastChild.itemView.getRight() <= right) {
-                    lastItemReached = true;
-                }
-                if (firstChild != null && firstChild.itemView.getLeft() >= left) {
-                    firstItemReached = true;
-                }
+        // Check if first or last item has been reached
+        if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+            if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
+                lastItemReached = true;
             }
+            if (firstChild != null && firstChild.itemView.getTop() >= top) {
+                firstItemReached = true;
+            }
+        } else {
+            if (lastChild != null && lastChild.itemView.getRight() <= right) {
+                lastItemReached = true;
+            }
+            if (firstChild != null && firstChild.itemView.getLeft() >= left) {
+                firstItemReached = true;
+            }
+        }
 
-            // Start auto scroll if at the edge
-            if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
-                if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
-                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-                } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
-                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
-                } else {
-                    mAutoScroller.stopAutoScroll();
-                }
+        // Start auto scroll if at the edge
+        if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+            if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
+                mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
+            } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
+                mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
             } else {
-                if (mDragItem.getX() > getWidth() - view.getWidth() / 2 && !lastItemReached) {
-                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
-                } else if (mDragItem.getX() < view.getWidth() / 2 && !firstItemReached) {
-                    mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
-                } else {
-                    mAutoScroller.stopAutoScroll();
-                }
+                mAutoScroller.stopAutoScroll();
+            }
+        } else {
+            if (mDragItem.getX() > getWidth() - view.getWidth() / 2 && !lastItemReached) {
+                mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
+            } else if (mDragItem.getX() < view.getWidth() / 2 && !firstItemReached) {
+                mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
+            } else {
+                mAutoScroller.stopAutoScroll();
             }
         }
     }
@@ -344,24 +394,40 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         mAutoScroller.stopAutoScroll();
         setEnabled(false);
 
-        // Sometimes the holder will be null if a holder has not yet been set for the position
-        final RecyclerView.ViewHolder holder = findViewHolderForAdapterPosition(mDragItemPosition);
-        if (holder != null) {
-            getItemAnimator().endAnimation(holder);
-            mDragItem.endDrag(holder.itemView, new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    holder.itemView.setAlpha(1);
+        if (mDisableReorderWhenDragging) {
+            int newPos = mAdapter.getPositionForItemId(mAdapter.getDropTargetId());
+            if (newPos != NO_POSITION) {
+                mAdapter.swapItems(mDragItemPosition, newPos);
+                mDragItemPosition = newPos;
+            }
+            mAdapter.setDropTargetId(NO_ID);
+        }
+
+        // Post so layout is done before we start end animation
+        post(new Runnable() {
+            @Override
+            public void run() {
+                // Sometimes the holder will be null if a holder has not yet been set for the position
+                final RecyclerView.ViewHolder holder = findViewHolderForAdapterPosition(mDragItemPosition);
+                if (holder != null) {
+                    getItemAnimator().endAnimation(holder);
+                    mDragItem.endDrag(holder.itemView, new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            holder.itemView.setAlpha(1);
+                            onDragItemAnimationEnd();
+                        }
+                    });
+                } else {
                     onDragItemAnimationEnd();
                 }
-            });
-        } else {
-            onDragItemAnimationEnd();
-        }
+            }
+        });
     }
 
     private void onDragItemAnimationEnd() {
-        mAdapter.setDragItemId(-1);
+        mAdapter.setDragItemId(NO_ID);
+        mAdapter.setDropTargetId(NO_ID);
         mAdapter.notifyDataSetChanged();
 
         mDragState = DragState.DRAG_ENDED;
@@ -369,7 +435,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             mListener.onDragEnded(mDragItemPosition);
         }
 
-        mDragItemId = -1;
+        mDragItemId = NO_ID;
         mDragItem.hide();
         setEnabled(true);
         invalidate();
@@ -386,9 +452,9 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             pos = getChildLayoutPosition(child);
         }
 
-        // If pos is -1 it means that the child has not been laid out yet,
+        // If pos is NO_POSITION it means that the child has not been laid out yet,
         // this only happens for pos 0 as far as I know
-        if (pos == -1) {
+        if (pos == NO_POSITION) {
             pos = 0;
         }
 
@@ -410,14 +476,14 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     }
 
     Object removeDragItemAndEnd() {
-        if (mDragItemPosition == -1) {
+        if (mDragItemPosition == NO_POSITION) {
             return null;
         }
         mAutoScroller.stopAutoScroll();
         Object item = mAdapter.removeItem(mDragItemPosition);
-        mAdapter.setDragItemId(-1);
+        mAdapter.setDragItemId(NO_ID);
         mDragState = DragState.DRAG_ENDED;
-        mDragItemId = -1;
+        mDragItemId = NO_ID;
 
         invalidate();
         return item;

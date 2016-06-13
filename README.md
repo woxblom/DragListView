@@ -17,7 +17,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.2.6'
+        compile 'com.github.woxthebox:draglistview:1.2.7'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -87,6 +87,14 @@ List and Grid layouts are used as example in the sample project.
                 dragView.setBackgroundColor(dragView.getResources().getColor(R.color.list_item_background));
             }
         }
+
+  If you don't want items to automatically reorder when dragging you can disable that with the following code. This
+  will do so you can swap two items instead of reorder one item as you are dragging. You should add a drop target drawable
+  when using this feature to make it clear which item you will swap with when dropping. You can add either a background or
+  foreground drop target drawable, or both.
+
+        mDragListView.setDisableReorderWhenDragging(true);
+        mDragListView.setDropTargetDrawables(myBackgroundDrawable, myForeGroundDrawable);
 
   For a board, which is a number of horizontal columns with lists, then use BoardView. For an example with custom animations
   check the sample code. A custom header view can also be used when adding a column. This can be any view and will be attached to
