@@ -27,7 +27,7 @@
             wrap_content to work for some reason -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <com.woxthebox.draglistview.DragListView
                 android:id="@+id/drag_list_view"
