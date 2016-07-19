@@ -32,11 +32,12 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Scroller;
 
 import java.util.ArrayList;
 
-public class BoardViewInExpandableList extends HorizontalScrollView implements AutoScroller.AutoScrollListener {
+public class BoardViewInExpandableList extends ScrollView implements AutoScroller.AutoScrollListener {
 
     public interface BoardListenerOnExpandableList {
         void onItemDragStarted(int column, int row);
@@ -101,7 +102,7 @@ public class BoardViewInExpandableList extends HorizontalScrollView implements A
         mRootLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         mColumnLayout = new LinearLayout(getContext());
-        mColumnLayout.setOrientation(LinearLayout.HORIZONTAL);
+        mColumnLayout.setOrientation(LinearLayout.VERTICAL);
         mColumnLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
         mColumnLayout.setMotionEventSplittingEnabled(false);
 
