@@ -141,7 +141,7 @@ public class BoardInExpandableListFragment extends Fragment {
 
     private void addColumnList() {
         final ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
-        int addItems = 15;
+        int addItems = 10;
         for (int i = 0; i < addItems; i++) {
             long id = sCreatedItems++;
             mItemArray.add(new Pair<>(id, "Item " + id));
@@ -155,19 +155,27 @@ public class BoardInExpandableListFragment extends Fragment {
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long id = sCreatedItems++;
-                Pair item = new Pair<>(id, "Test " + id);
-                mBoardView.addItem(column, 0, item, true);
-                //mBoardView.moveItem(4, 0, 0, true);
-                //mBoardView.removeItem(column, 0);
-                //mBoardView.moveItem(0, 0, 1, 3, false);
-                //mBoardView.replaceItem(0, 0, item1, true);
-                ((TextView) header.findViewById(R.id.item_count)).setText("" + mItemArray.size());
+                handleClickOnHeader(column, header, mItemArray);
             }
         });
 
         mBoardView.addColumnList(listAdapter, header, false);
         mColumns++;
+    }
+
+//    private void handleClickOnHeader(int column, View header, ArrayList<Pair<Long, String>> mItemArray) {
+//        long id = sCreatedItems++;
+//        Pair item = new Pair<>(id, "Test " + id);
+//        mBoardView.addItem(column, 0, item, true);
+//        //mBoardView.moveItem(4, 0, 0, true);
+//        //mBoardView.removeItem(column, 0);
+//        //mBoardView.moveItem(0, 0, 1, 3, false);
+//        //mBoardView.replaceItem(0, 0, item1, true);
+//        ((TextView) header.findViewById(R.id.item_count)).setText("" + mItemArray.size());
+//    }
+
+    private void handleClickOnHeader(int column, View header, ArrayList<Pair<Long, String>> mItemArray) {
+        mBoardView.collapseSection(column);
     }
 
     private static class MyDragItem extends DragItem {

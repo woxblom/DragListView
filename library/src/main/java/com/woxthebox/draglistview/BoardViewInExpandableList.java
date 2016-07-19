@@ -41,6 +41,7 @@ import java.util.ArrayList;
 
 public class BoardViewInExpandableList extends ScrollView implements AutoScroller.AutoScrollListener {
 
+
     public interface BoardListenerOnExpandableList {
         void onItemDragStarted(int column, int row);
 
@@ -464,6 +465,11 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
             mHeaders.remove(i);
             mLists.remove(i);
         }
+    }
+
+    public void collapseSection(int column) {
+        DragItemAdapter dragItemAdapter = (DragItemAdapter) mLists.get(column).getAdapter();
+        dragItemAdapter.toggleCollapsState();
     }
 
     public void removeColumn(int column) {
