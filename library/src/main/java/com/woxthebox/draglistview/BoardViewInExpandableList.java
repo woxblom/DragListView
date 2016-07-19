@@ -28,6 +28,7 @@ import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
@@ -99,11 +100,11 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         mDragItem = new DragItem(getContext());
 
         mRootLayout = new FrameLayout(getContext());
-        mRootLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+        mRootLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 
         mColumnLayout = new LinearLayout(getContext());
         mColumnLayout.setOrientation(LinearLayout.VERTICAL);
-        mColumnLayout.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+        mColumnLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         mColumnLayout.setMotionEventSplittingEnabled(false);
 
         mRootLayout.addView(mColumnLayout);
@@ -575,7 +576,8 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
 
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setLayoutParams(new LayoutParams(mColumnWidth, LayoutParams.MATCH_PARENT));
+        //layout.setLayoutParams(new LayoutParams(mColumnWidth, LayoutParams.MATCH_PARENT));
+        layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         if (header != null) {
             layout.addView(header);
             mHeaders.put(mLists.size(), header);
