@@ -35,7 +35,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.woxthebox.draglistview.BoardView;
 import com.woxthebox.draglistview.BoardViewInExpandableList;
 import com.woxthebox.draglistview.DragItem;
 
@@ -175,7 +174,7 @@ public class BoardInExpandableListFragment extends Fragment {
 //    }
 
     private void handleClickOnHeader(int column, View header, ArrayList<Pair<Long, String>> mItemArray) {
-        mBoardView.collapseSection(column);
+        mBoardView.toggleSection(column);
     }
 
     private static class MyDragItem extends DragItem {

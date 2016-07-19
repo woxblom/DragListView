@@ -467,7 +467,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         }
     }
 
-    public void collapseSection(int column) {
+    public void toggleSection(int column) {
         DragItemAdapter dragItemAdapter = (DragItemAdapter) mLists.get(column).getAdapter();
         dragItemAdapter.toggleCollapsState();
     }
