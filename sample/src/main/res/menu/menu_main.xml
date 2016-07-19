@@ -25,4 +25,8 @@
         android:id="@+id/action_board"
         android:title="@string/action_board"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_board_in_expandable"
+        android:title="@string/action_board_in_expandable"
+        app:showAsAction="never"/>
 </menu>
