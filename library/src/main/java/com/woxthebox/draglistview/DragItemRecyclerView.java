@@ -30,6 +30,9 @@ import android.view.ViewConfiguration;
 
 class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
 
+    public void addDragItemAndStart(float listTouchY, Object item, long itemId) {
+    }
+
     public interface DragItemListener {
         void onDragStarted(int itemPosition, float x, float y);
 
@@ -441,8 +444,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         invalidate();
     }
 
-    void addDragItemAndStart(float y, Object item, long itemId) {
-        View child = findChildView(0, y);
+    void addDragItemAndStart(float x, float y, Object item, long itemId) {
+        View child = findChildView(x, y);
         int pos;
         if (child == null && getChildCount() > 0) {
             // If child is null and child count is not 0 it means that an item was

@@ -61,9 +61,9 @@ public class BoardInExpandableListFragment extends Fragment {
         View view = inflater.inflate(R.layout.board_in_expandable_list_layout, container, false);
 
         mBoardView = (BoardViewInExpandableList) view.findViewById(R.id.board_view);
-        mBoardView.setSnapToColumnsWhenScrolling(true);
-        mBoardView.setSnapToColumnWhenDragging(true);
-        mBoardView.setSnapDragItemToTouch(true);
+        mBoardView.setSnapToColumnsWhenScrolling(false);
+        mBoardView.setSnapToColumnWhenDragging(false);
+        mBoardView.setSnapDragItemToTouch(false);
         mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
         mBoardView.setBoardListener(new BoardViewInExpandableList.BoardListenerOnExpandableList() {
             @Override

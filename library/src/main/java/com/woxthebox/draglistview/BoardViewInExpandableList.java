@@ -25,6 +25,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -97,7 +98,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         mGestureDetector = new GestureDetector(getContext(), new GestureListener());
         mScroller = new Scroller(getContext(), new DecelerateInterpolator(1.1f));
         mAutoScroller = new AutoScroller(getContext(), this);
-        mAutoScroller.setAutoScrollMode(snapToColumnWhenDragging() ? AutoScroller.AutoScrollMode.COLUMN : AutoScroller.AutoScrollMode
+        mAutoScroller.setAutoScrollMode(AutoScroller.AutoScrollMode
                 .POSITION);
         mDragItem = new DragItem(getContext());
 
@@ -219,7 +220,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
     @Override
     public void onAutoScrollColumnBy(int columns) {
         if (isDragging()) {
-            DragItemRecyclerView currentList = getCurrentRecyclerView(getWidth() / 2 + getScrollX());
+            DragItemRecyclerView currentList = getCurrentRecyclerViewByXY(mTouchX, getHeight() / 2 + getScrollY());
             int newColumn = getColumnOfList(currentList) + columns;
             if (columns != 0 && newColumn >= 0 && newColumn < mLists.size()) {
                 scrollToColumn(newColumn, true);
@@ -232,7 +233,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
 
     private void updateScrollPosition() {
         // Updated event to scrollview coordinates
-        DragItemRecyclerView currentList = getCurrentRecyclerView(mTouchX + getScrollX());
+        DragItemRecyclerView currentList = getCurrentRecyclerViewByXY(mTouchX + getScrollX(), mTouchY + getScrollY());
         if (mCurrentRecyclerView != currentList) {
             int oldColumn = getColumnOfList(mCurrentRecyclerView);
             int newColumn = getColumnOfList(currentList);
@@ -240,8 +241,8 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
             Object item = mCurrentRecyclerView.removeDragItemAndEnd();
             if (item != null) {
                 mCurrentRecyclerView = currentList;
-                mCurrentRecyclerView.addDragItemAndStart(getListTouchY(mCurrentRecyclerView), item, itemId);
-                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
+                mCurrentRecyclerView.addDragItemAndStart(getListTouchX(mCurrentRecyclerView),getListTouchY(mCurrentRecyclerView), item, itemId);
+                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), ((View) mCurrentRecyclerView.getParent()).getTop());
 
                 if (mBoardListener != null) {
                     mBoardListener.onItemChangedColumn(oldColumn, newColumn);
@@ -250,31 +251,58 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         }
 
         // Updated event to list coordinates
+        //mCurrentRecyclerView.onDragging(getListTouchX(mCurrentRecyclerView), getListTouchY(mCurrentRecyclerView));
         mCurrentRecyclerView.onDragging(getListTouchX(mCurrentRecyclerView), getListTouchY(mCurrentRecyclerView));
 
-        float scrollEdge = getResources().getDisplayMetrics().widthPixels * 0.14f;
-        if (mTouchX > getWidth() - scrollEdge && getScrollX() < mColumnLayout.getWidth()) {
-            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
-        } else if (mTouchX < scrollEdge && getScrollX() > 0) {
-            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
-        } else {
-            mAutoScroller.stopAutoScroll();
-        }
+//        float scrollEdge = getResources().getDisplayMetrics().widthPixels * 0.14f;
+//        if (mTouchX > getWidth() - scrollEdge && getScrollX() < mColumnLayout.getWidth()) {
+//            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
+//        } else if (mTouchX < scrollEdge && getScrollX() > 0) {
+//            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.RIGHT);
+//        } else {
+//            mAutoScroller.stopAutoScroll();
+//        }
+
+//        float scrollEdge = getResources().getDisplayMetrics().heightPixels * 0.50f;
+        Log.d("OKK ","mTouchY : " + Float.toString(mTouchX));
+//        if (mTouchY + getScrollY() > getHeight() - scrollEdge && getScrollY() < mColumnLayout.getHeight()) {
+//            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
+//        } else if (mTouchY < scrollEdge && getScrollY() > 0) {
+//            mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
+//        } else {
+//            mAutoScroller.stopAutoScroll();
+//        }
+
+
+        //mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
+
         invalidate();
     }
+
+    //TODO: check if mTouchX get's correctly
 
     private float getListTouchX(DragItemRecyclerView list) {
         return mTouchX + getScrollX() - ((View) list.getParent()).getLeft();
     }
 
     private float getListTouchY(DragItemRecyclerView list) {
-        return mTouchY - list.getTop();
+        return mTouchY + getScrollY() - ((View) list.getParent()).getTop();
     }
 
-    private DragItemRecyclerView getCurrentRecyclerView(float x) {
+//    private DragItemRecyclerView getCurrentRecyclerView(float x) {
+//        for (DragItemRecyclerView list : mLists) {
+//            View parent = (View) list.getParent();
+//            if (parent.getLeft() <= x && parent.getRight() > x) {
+//                return list;
+//            }
+//        }
+//        return mCurrentRecyclerView;
+//    }
+
+    private DragItemRecyclerView getCurrentRecyclerViewByXY(float x,float y) {
         for (DragItemRecyclerView list : mLists) {
             View parent = (View) list.getParent();
-            if (parent.getLeft() <= x && parent.getRight() > x) {
+            if (parent.getLeft() <= x && parent.getRight() > x && y <= parent.getBottom() && y >= parent.getTop()) {
                 return list;
             }
         }
@@ -292,27 +320,54 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         return column;
     }
 
-    private int getCurrentColumn(float posX) {
+//    private int getCurrentColumn(float posX) {
+//        for (int i = 0; i < mLists.size(); i++) {
+//            RecyclerView list = mLists.get(i);
+//            View parent = (View) list.getParent();
+//            if (parent.getLeft() <= posX && parent.getRight() > posX) {
+//                return i;
+//            }
+//        }
+//        return 0;
+//    }
+
+    private int getCurrentColumn(float posY) {
         for (int i = 0; i < mLists.size(); i++) {
             RecyclerView list = mLists.get(i);
             View parent = (View) list.getParent();
-            if (parent.getLeft() <= posX && parent.getRight() > posX) {
+            if (parent.getTop() <= posY && parent.getBottom() > posY) {
                 return i;
             }
         }
         return 0;
     }
 
+//    private int getClosestColumn() {
+//        int middlePosX = getScrollX() + getMeasuredWidth() / 2;
+//        int column = 0;
+//        int minDiffX = Integer.MAX_VALUE;
+//        for (int i = 0; i < mLists.size(); i++) {
+//            RecyclerView list = mLists.get(i);
+//            int listPosX = ((View) list.getParent()).getLeft();
+//            int diffX = Math.abs(listPosX + mColumnWidth / 2 - middlePosX);
+//            if (diffX < minDiffX) {
+//                minDiffX = diffX;
+//                column = i;
+//            }
+//        }
+//        return column;
+//    }
+
     private int getClosestColumn() {
-        int middlePosX = getScrollX() + getMeasuredWidth() / 2;
+        int middlePosY = getScrollY() + getMeasuredHeight() / 2;
         int column = 0;
-        int minDiffX = Integer.MAX_VALUE;
+        int minDiffY = Integer.MAX_VALUE;
         for (int i = 0; i < mLists.size(); i++) {
             RecyclerView list = mLists.get(i);
-            int listPosX = ((View) list.getParent()).getLeft();
-            int diffX = Math.abs(listPosX + mColumnWidth / 2 - middlePosX);
-            if (diffX < minDiffX) {
-                minDiffX = diffX;
+            int listPosY = ((View) list.getParent()).getTop();
+            int diffY = Math.abs(listPosY + list.getMeasuredHeight() / 2 - middlePosY);
+            if (diffY < minDiffY) {
+                minDiffY = diffY;
                 column = i;
             }
         }
@@ -443,21 +498,20 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         }
 
         View parent = (View) mLists.get(column).getParent();
-        int newX = parent.getLeft() - (getMeasuredWidth() - parent.getMeasuredWidth()) / 2;
-        int maxScroll = mRootLayout.getMeasuredWidth() - getMeasuredWidth();
-        newX = newX < 0 ? 0 : newX;
-        newX = newX > maxScroll ? maxScroll : newX;
-        if (getScrollX() != newX) {
+        int newY = parent.getTop() - (getMeasuredHeight() - parent.getMeasuredHeight()) / 2;
+        int maxScroll = mRootLayout.getMeasuredHeight() - getMeasuredHeight();
+        newY = newY < 0 ? 0 : newY;
+        newY = newY > maxScroll ? maxScroll : newY;
+        if (getScrollY() != newY) {
             mScroller.forceFinished(true);
             if (animate) {
-                mScroller.startScroll(getScrollX(), getScrollY(), newX - getScrollX(), 0, SCROLL_ANIMATION_DURATION);
+                mScroller.startScroll(getScrollX(), getScrollY(), 0,newY - getScrollY(), SCROLL_ANIMATION_DURATION);
                 ViewCompat.postInvalidateOnAnimation(this);
             } else {
-                scrollTo(newX, getScrollY());
+                scrollTo(getScrollX(), newY);
             }
         }
     }
-
     public void clearBoard() {
         int count = mLists.size();
         for (int i = count - 1; i >= 0; i--) {
@@ -505,7 +559,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
      */
     public void setSnapToColumnWhenDragging(boolean snapToColumn) {
         mSnapToColumnWhenDragging = snapToColumn;
-        mAutoScroller.setAutoScrollMode(snapToColumnWhenDragging() ? AutoScroller.AutoScrollMode.COLUMN : AutoScroller.AutoScrollMode
+        mAutoScroller.setAutoScrollMode(AutoScroller.AutoScrollMode
                 .POSITION);
     }
 
@@ -538,7 +592,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
         final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
-        recyclerView.setLayoutParams(new GridLayoutManager.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+        recyclerView.setLayoutParams(new GridLayoutManager.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(),5));
         recyclerView.setHasFixedSize(hasFixedItemSize);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -548,7 +602,7 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
                 mDragStartColumn = getColumnOfList(recyclerView);
                 mDragStartRow = itemPosition;
                 mCurrentRecyclerView = recyclerView;
-                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getX(), mCurrentRecyclerView.getY());
+                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), ((View) mCurrentRecyclerView.getParent()).getTop());
                 if (mBoardListener != null) {
                     mBoardListener.onItemDragStarted(mDragStartColumn, mDragStartRow);
                 }
@@ -598,22 +652,24 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         private float mStartScrollX;
+        private float mStartScrollY;
 
         @Override
         public boolean onDown(MotionEvent e) {
             mStartScrollX = getScrollX();
+            mStartScrollY = getScrollY();
             return super.onDown(e);
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             // Calc new column to scroll to
-            int currentColumn = getCurrentColumn(e2.getX() + getScrollX());
+            int currentColumn = getCurrentColumn(e2.getY() + getScrollY());
             int newColumn;
-            if (velocityX < 0) {
-                newColumn = getScrollX() >= mStartScrollX ? currentColumn + 1 : currentColumn;
+            if (velocityY < 0) {
+                newColumn = getScrollY() >= mStartScrollY ? currentColumn + 1 : currentColumn;
             } else {
-                newColumn = getScrollX() <= mStartScrollX ? currentColumn - 1 : currentColumn;
+                newColumn = getScrollY() <= mStartScrollY ? currentColumn - 1 : currentColumn;
             }
             if (newColumn < 0 || newColumn > mLists.size() - 1) {
                 newColumn = newColumn < 0 ? 0 : mLists.size() - 1;
