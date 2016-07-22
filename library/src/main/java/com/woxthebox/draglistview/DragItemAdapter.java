@@ -28,13 +28,6 @@ import java.util.List;
 
 public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
-    public boolean ismIsExpanded() {
-        return mIsExpanded;
-    }
-
-    public void setmIsExpanded(boolean mIsExpanded) {
-        this.mIsExpanded = mIsExpanded;
-    }
 
     interface DragStartCallback {
         boolean startDrag(View itemView, long itemId);
