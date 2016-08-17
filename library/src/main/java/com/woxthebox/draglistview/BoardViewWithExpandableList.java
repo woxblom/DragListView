@@ -36,7 +36,7 @@ import android.widget.Scroller;
 
 import java.util.ArrayList;
 
-public class BoardViewInExpandableList extends ScrollView implements AutoScroller.AutoScrollListener {
+public class BoardViewWithExpandableList extends ScrollView implements AutoScroller.AutoScrollListener {
 
 
     public interface BoardListenerOnExpandableList {
@@ -66,15 +66,15 @@ public class BoardViewInExpandableList extends ScrollView implements AutoScrolle
     private boolean mHasLaidOut;
     private boolean mDragEnabled = true;
 
-    public BoardViewInExpandableList(Context context) {
+    public BoardViewWithExpandableList(Context context) {
         super(context);
     }
 
-    public BoardViewInExpandableList(Context context, AttributeSet attrs) {
+    public BoardViewWithExpandableList(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public BoardViewInExpandableList(Context context, AttributeSet attrs, int defStyleAttr) {
+    public BoardViewWithExpandableList(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 

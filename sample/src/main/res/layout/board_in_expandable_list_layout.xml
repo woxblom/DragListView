@@ -13,7 +13,7 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<com.woxthebox.draglistview.BoardViewInExpandableList
+<com.woxthebox.draglistview.BoardViewWithExpandableList
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/board_view"
     android:layout_width="match_parent"

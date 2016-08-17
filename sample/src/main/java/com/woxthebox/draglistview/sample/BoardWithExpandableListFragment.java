@@ -35,19 +35,19 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.woxthebox.draglistview.BoardViewInExpandableList;
+import com.woxthebox.draglistview.BoardViewWithExpandableList;
 import com.woxthebox.draglistview.DragItem;
 
 import java.util.ArrayList;
 
-public class BoardInExpandableListFragment extends Fragment {
+public class BoardWithExpandableListFragment extends Fragment {
 
     private static int sCreatedItems = 0;
-    private BoardViewInExpandableList mBoardView;
+    private BoardViewWithExpandableList mBoardView;
     private int mColumns;
 
-    public static BoardInExpandableListFragment newInstance() {
-        return new BoardInExpandableListFragment();
+    public static BoardWithExpandableListFragment newInstance() {
+        return new BoardWithExpandableListFragment();
     }
 
     @Override
@@ -60,12 +60,12 @@ public class BoardInExpandableListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.board_in_expandable_list_layout, container, false);
 
-        mBoardView = (BoardViewInExpandableList) view.findViewById(R.id.board_view);
+        mBoardView = (BoardViewWithExpandableList) view.findViewById(R.id.board_view);
         mBoardView.setSnapToColumnsWhenScrolling(false);
         mBoardView.setSnapToColumnWhenDragging(false);
         mBoardView.setSnapDragItemToTouch(false);
         mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
-        mBoardView.setBoardListener(new BoardViewInExpandableList.BoardListenerOnExpandableList() {
+        mBoardView.setBoardListener(new BoardViewWithExpandableList.BoardListenerOnExpandableList() {
             @Override
             public void onItemDragStarted(int column, int row) {
                 Toast.makeText(mBoardView.getContext(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
@@ -167,7 +167,7 @@ public class BoardInExpandableListFragment extends Fragment {
 //        Pair item = new Pair<>(id, "Test " + id);
 //        mBoardView.addItem(column, 0, item, true);
 //        //mBoardView.moveItem(4, 0, 0, true);
-//        //mBoardView.removeItem(column, 0);
+//        mBoardView.removeItem(column, 0);
 //        //mBoardView.moveItem(0, 0, 1, 3, false);
 //        //mBoardView.replaceItem(0, 0, item1, true);
 //        ((TextView) header.findViewById(R.id.item_count)).setText("" + mItemArray.size());

@@ -24,8 +24,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.woxthebox.draglistview.BoardViewInExpandableList;
-
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -34,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState == null) {
-            showFragment(BoardInExpandableListFragment.newInstance());
+            showFragment(BoardFragment.newInstance());
         }
 
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.app_color)));
@@ -70,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                 showFragment(BoardFragment.newInstance());
                 return true;
             case R.id.action_board_in_expandable:
-                showFragment(BoardInExpandableListFragment.newInstance());
+                showFragment(BoardWithExpandableListFragment.newInstance());
                 return true;
         }
 
