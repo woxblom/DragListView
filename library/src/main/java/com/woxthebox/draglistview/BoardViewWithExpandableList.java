@@ -152,7 +152,7 @@ public class BoardViewWithExpandableList extends ScrollView implements AutoScrol
             }
             return true;
         } else {
-            if (snapToColumnWhenScrolling()/* && mGestureDetector.onTouchEvent(event)*/) {
+            if (snapToColumnWhenScrolling()) {
                 // A page fling occurred, consume event
                 return true;
             }
@@ -245,19 +245,14 @@ public class BoardViewWithExpandableList extends ScrollView implements AutoScrol
         float scrollEdge = getResources().getDisplayMetrics().heightPixels * 0.14f;
         if (mTouchY > getHeight() - scrollEdge && getScrollY() < mColumnLayout.getHeight()) {
             mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
-            Log.d("Scroll... ", "DOWN!!!");
         } else if (mTouchY < scrollEdge) {
             mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
-            Log.d("Scroll... ", "UP!!!");
         } else {
-            Log.d("Scroll... ", "STOPPED!!!");
             mAutoScroller.stopAutoScroll();
         }
 
         invalidate();
     }
-
-    //TODO: check if mTouchX get's correctly
 
     private float getListTouchX(DragItemRecyclerView list) {
         return mTouchX + getScrollX() - ((View) list.getParent()).getLeft();
