@@ -222,7 +222,7 @@ public class BoardViewWithExpandableList extends ScrollView implements AutoScrol
     private void updateScrollPosition() {
         // Updated event to scrollview coordinates
         DragItemRecyclerView currentList = getCurrentRecyclerViewByXY(mTouchX + getScrollX(), mTouchY + getScrollY());
-        if (mCurrentRecyclerView != currentList) {
+        if (mCurrentRecyclerView != currentList && ((DragItemAdapter) currentList.getAdapter()).isExpanded()) {
             int oldColumn = getColumnOfList(mCurrentRecyclerView);
             int newColumn = getColumnOfList(currentList);
             long itemId = mCurrentRecyclerView.getDragItemId();
@@ -461,7 +461,10 @@ public class BoardViewWithExpandableList extends ScrollView implements AutoScrol
 
     public void toggleSection(int column) {
         DragItemAdapter dragItemAdapter = (DragItemAdapter) mLists.get(column).getAdapter();
-        dragItemAdapter.toggleCollapsState();
+        boolean isExpanded = dragItemAdapter.toggleCollapseState();
+        DragItemRecyclerView dragItemRecyclerView = mLists.get(column);
+        int visibility = isExpanded ? VISIBLE : GONE;
+        dragItemRecyclerView.setVisibility(visibility);
     }
 
     public void removeColumn(int column) {

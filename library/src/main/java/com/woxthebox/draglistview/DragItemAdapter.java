@@ -17,12 +17,8 @@
 package com.woxthebox.draglistview;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,7 +35,6 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
     private long mDropTargetId = RecyclerView.NO_ID;
     private boolean mDragOnLongPress;
     protected List<T> mItemList;
-    protected List<T> mCollapsedItemList = new ArrayList<>();
     private boolean mIsExpanded = true;
 
     public DragItemAdapter(boolean dragOnLongPress) {
@@ -96,65 +91,14 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         return RecyclerView.NO_POSITION;
     }
 
-    public void toggleCollapsState() {
-
-        if (mIsExpanded) {
-            mIsExpanded = collapseItems();
-            if (!mIsExpanded) {
-                notifyItemRangeRemoved(0,mCollapsedItemList.size());
-            }
-        } else {
-
-            mIsExpanded = expandItems();
-            if (mIsExpanded) {
-                notifyItemRangeInserted(0,mItemList.size());
-            }
-        }
-    }
-
-    private boolean collapseItems() {
-        boolean expanded = false;
-
-        try {
-            if (getCollapsedItemCount() > 0) {
-                mCollapsedItemList.clear();
-            }
-            mCollapsedItemList.addAll(mItemList);
-            if (getItemCount() > 0) {
-                mItemList.clear();
-            }
-        } catch (Exception ex) {
-            expanded = true;
-        }
-        return expanded;
-    }
-
-    private boolean expandItems() {
-        boolean expanded = true;
-
-        try {
-            if (getCollapsedItemCount() > 0) {
-                if (getItemCount() > 0) {
-                    mItemList.clear();
-                }
-                mItemList.addAll(mCollapsedItemList);
-                if (mCollapsedItemList != null) {
-                    mCollapsedItemList.clear();
-                }
-            }
-        } catch (Exception ex) {
-            expanded = false;
-        }
-        return expanded;
+    public boolean toggleCollapseState() {
+        mIsExpanded = !mIsExpanded;
+        return mIsExpanded;
     }
 
     @Override
     public int getItemCount() {
         return mItemList == null ? 0 : mItemList.size();
-    }
-
-    public int getCollapsedItemCount() {
-        return mCollapsedItemList == null ? 0 : mCollapsedItemList.size();
     }
 
     @Override
@@ -178,6 +122,10 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
 
     public long getDropTargetId() {
         return mDropTargetId;
+    }
+
+    public boolean isExpanded() {
+        return mIsExpanded;
     }
 
     public abstract class ViewHolder extends RecyclerView.ViewHolder {
