@@ -485,6 +485,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
+     * @param width the width of columns in both portrait and landscape. This must be called before {@link #addColumnList} is
+     *              called for the width to take effect.
+     */
+    public void setColumnWidth(int width) {
+        mColumnWidth = width;
+    }
+
+    /**
      * @param snapToColumn true if scrolling should snap to columns. Only applies to portrait mode.
      */
     public void setSnapToColumnsWhenScrolling(boolean snapToColumn) {
