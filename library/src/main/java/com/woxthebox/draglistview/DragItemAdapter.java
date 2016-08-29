@@ -19,11 +19,11 @@ package com.woxthebox.draglistview;
 import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
-
 import java.util.Collections;
 import java.util.List;
 
 public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
+
 
     interface DragStartCallback {
         boolean startDrag(View itemView, long itemId);
@@ -35,6 +35,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
     private long mDropTargetId = RecyclerView.NO_ID;
     private boolean mDragOnLongPress;
     protected List<T> mItemList;
+    private boolean mIsExpanded = true;
 
     public DragItemAdapter(boolean dragOnLongPress) {
         mDragOnLongPress = dragOnLongPress;
@@ -90,6 +91,11 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         return RecyclerView.NO_POSITION;
     }
 
+    public boolean toggleCollapseState() {
+        mIsExpanded = !mIsExpanded;
+        return mIsExpanded;
+    }
+
     @Override
     public int getItemCount() {
         return mItemList == null ? 0 : mItemList.size();
@@ -116,6 +122,10 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
 
     public long getDropTargetId() {
         return mDropTargetId;
+    }
+
+    public boolean isExpanded() {
+        return mIsExpanded;
     }
 
     public abstract class ViewHolder extends RecyclerView.ViewHolder {

@@ -52,8 +52,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean listFragment = getSupportFragmentManager().findFragmentByTag("fragment") instanceof ListFragment;
+        boolean expandableListFragment = getSupportFragmentManager().findFragmentByTag("fragment") instanceof BoardWithExpandableListFragment;
+        boolean boardFragment = getSupportFragmentManager().findFragmentByTag("fragment") instanceof BoardFragment;
         menu.findItem(R.id.action_lists).setVisible(!listFragment);
-        menu.findItem(R.id.action_board).setVisible(listFragment);
+        menu.findItem(R.id.action_board).setVisible(!boardFragment);
+        menu.findItem(R.id.action_board_in_expandable).setVisible(!expandableListFragment);
 
         return true;
     }
@@ -66,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.action_board:
                 showFragment(BoardFragment.newInstance());
+                return true;
+            case R.id.action_board_in_expandable:
+                showFragment(BoardWithExpandableListFragment.newInstance());
                 return true;
         }
 

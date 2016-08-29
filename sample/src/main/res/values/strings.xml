@@ -18,6 +18,7 @@
     <string name="app_name">DragListView</string>
     <string name="action_lists">Test lists</string>
     <string name="action_board">Test board </string>
+    <string name="action_board_in_expandable">Test board in Expandable List</string>
     <string name="action_disable_drag">Disable drag</string>
     <string name="action_enable_drag">Enable drag</string>
     <string name="action_list">List (drag on touch image icon)</string>
