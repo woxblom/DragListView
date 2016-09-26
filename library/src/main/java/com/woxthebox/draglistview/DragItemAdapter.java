@@ -27,18 +27,14 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
 
     interface DragStartCallback {
         boolean startDrag(View itemView, long itemId);
+
         boolean isDragging();
     }
 
     private DragStartCallback mDragStartCallback;
     private long mDragItemId = RecyclerView.NO_ID;
     private long mDropTargetId = RecyclerView.NO_ID;
-    private boolean mDragOnLongPress;
     protected List<T> mItemList;
-
-    public DragItemAdapter(boolean dragOnLongPress) {
-        mDragOnLongPress = dragOnLongPress;
-    }
 
     public void setItemList(List<T> itemList) {
         mItemList = itemList;
@@ -100,6 +96,13 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         long itemId = getItemId(position);
         holder.mItemId = itemId;
         holder.itemView.setVisibility(mDragItemId == itemId ? View.INVISIBLE : View.VISIBLE);
+        holder.setDragStartCallback(mDragStartCallback);
+    }
+
+    @Override
+    public void onViewRecycled(VH holder) {
+        super.onViewRecycled(holder);
+        holder.setDragStartCallback(null);
     }
 
     void setDragStartedListener(DragStartCallback dragStartedListener) {
@@ -118,18 +121,24 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         return mDropTargetId;
     }
 
-    public abstract class ViewHolder extends RecyclerView.ViewHolder {
+    public static abstract class ViewHolder extends RecyclerView.ViewHolder {
         public View mGrabView;
         public long mItemId;
 
-        public ViewHolder(final View itemView, int handleResId) {
+        private DragStartCallback mDragStartCallback;
+
+        public ViewHolder(final View itemView, int handleResId, boolean dragOnLongPress) {
             super(itemView);
             mGrabView = itemView.findViewById(handleResId);
 
-            if (mDragOnLongPress) {
+            if (dragOnLongPress) {
                 mGrabView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
                     public boolean onLongClick(View view) {
+                        if (mDragStartCallback == null) {
+                            return false;
+                        }
+
                         if (mDragStartCallback.startDrag(itemView, mItemId)) {
                             return true;
                         }
@@ -143,6 +152,10 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                 mGrabView.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
+                        if (mDragStartCallback == null) {
+                            return false;
+                        }
+
                         if (event.getAction() == MotionEvent.ACTION_DOWN && mDragStartCallback.startDrag(itemView, mItemId)) {
                             return true;
                         }
@@ -175,6 +188,10 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                     }
                 });
             }
+        }
+
+        public void setDragStartCallback(DragStartCallback dragStartedListener) {
+            mDragStartCallback = dragStartedListener;
         }
 
         public void onItemClicked(View view) {

@@ -31,11 +31,12 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter
 
     private int mLayoutId;
     private int mGrabHandleId;
+    private boolean mDragOnLongPress;
 
     public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
-        super(dragOnLongPress);
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
+        mDragOnLongPress = dragOnLongPress;
         setHasStableIds(true);
         setItemList(list);
     }
@@ -59,11 +60,11 @@ public class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter
         return mItemList.get(position).first;
     }
 
-    public class ViewHolder extends DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHolder>.ViewHolder {
+    public class ViewHolder extends DragItemAdapter.ViewHolder {
         public TextView mText;
 
         public ViewHolder(final View itemView) {
-            super(itemView, mGrabHandleId);
+            super(itemView, mGrabHandleId, mDragOnLongPress);
             mText = (TextView) itemView.findViewById(R.id.text);
         }
 

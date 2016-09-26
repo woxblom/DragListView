@@ -17,7 +17,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.2.9'
+        compile 'com.github.woxthebox:draglistview:1.3'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -130,19 +130,19 @@ List and Grid layouts are used as example in the sample project.
 
 
   For your adapter, extend DragItemAdapter and call setItemList() with a List<T> type. setItemList() can be called anytime later to change the list.
-  You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
 
     public class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHolder>
     ...
     public ItemAdapter(ArrayList<Pair<Long, String>> list, int layoutId, int grabHandleId, boolean dragOnLongPress) {
-        super(dragOnLongPress);
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
+        mDragOnLongPress = dragOnLongPress;
         setHasStableIds(true);
         setItemList(list);
     }
 
   Your ViewHolder should extend DragItemAdapter.ViewHolder and you must supply an id of the view that should respond to a drag.
+  You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
   If you want to respond to clicks, long clicks or touch events on the itemView root layout you should not set your own click listeners.
   You should instead override onItemClick, onItemLongClicked and onItemTouch as these needs to be handled in the super class when
   disabling and enabling drag.
@@ -151,7 +151,7 @@ List and Grid layouts are used as example in the sample project.
         public TextView mText;
 
         public ViewHolder(final View itemView) {
-            super(itemView, mGrabHandleId);
+            super(itemView, mGrabHandleId, mDragOnLongPress);
             mText = (TextView) itemView.findViewById(R.id.text);
         }
 
