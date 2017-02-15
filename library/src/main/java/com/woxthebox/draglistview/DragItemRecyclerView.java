@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -209,8 +210,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     @Override
     public void setLayoutManager(LayoutManager layout) {
         super.setLayoutManager(layout);
-        if (!(layout instanceof LinearLayoutManager)) {
-            throw new RuntimeException("Layout must be an instance of LinearLayoutManager");
+        if (!(layout instanceof LinearLayoutManager || layout instanceof StaggeredGridLayoutManager)) {
+            throw new RuntimeException("Layout must be an instance of LinearLayoutManager or StaggeredGridLayoutManager");
         }
     }
 
@@ -268,26 +269,51 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         if (newPos == NO_POSITION) {
             return;
         }
-
-        LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
+        LinearLayoutManager linearlayoutManager = null;
+        StaggeredGridLayoutManager staggeredGridLayoutManager = null;
+        if (getLayoutManager() instanceof LinearLayoutManager) {
+            linearlayoutManager = (LinearLayoutManager) getLayoutManager();
+        } else {
+            staggeredGridLayoutManager = (StaggeredGridLayoutManager) getLayoutManager();
+        }
         if (shouldChangeItemPosition(newPos)) {
             if (mDisableReorderWhenDragging) {
                 mAdapter.setDropTargetId(mAdapter.getItemId(newPos));
                 mAdapter.notifyDataSetChanged();
             } else {
-                int pos = layoutManager.findFirstVisibleItemPosition();
-                View posView = layoutManager.findViewByPosition(pos);
-                mAdapter.changeItemPosition(mDragItemPosition, newPos);
-                mDragItemPosition = newPos;
+                int pos = 0;
+                if (linearlayoutManager != null) {
+                    pos = linearlayoutManager.findFirstVisibleItemPosition();
+                    View posView = linearlayoutManager.findViewByPosition(pos);
+                    mAdapter.changeItemPosition(mDragItemPosition, newPos);
+                    mDragItemPosition = newPos;
 
-                // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
-                if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
-                    int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
-                    layoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
-                } else {
-                    int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
-                    layoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
+                    // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
+                    if (linearlayoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                        int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
+                        linearlayoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
+                    } else {
+                        int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
+                        linearlayoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
+                    }
+                } else if (staggeredGridLayoutManager != null) {
+                    int[] positions = null;
+                    positions = staggeredGridLayoutManager.findFirstVisibleItemPositions(null);
+                    pos = positions[0];
+                    View posView = staggeredGridLayoutManager.findViewByPosition(pos);
+                    mAdapter.changeItemPosition(mDragItemPosition, newPos);
+                    mDragItemPosition = newPos;
+                    // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
+                    if (staggeredGridLayoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                        int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
+                        staggeredGridLayoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
+                    } else {
+                        int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
+                        staggeredGridLayoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
+                    }
                 }
+
+
             }
         }
 
@@ -301,7 +327,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         ViewHolder firstChild = findViewHolderForLayoutPosition(0);
 
         // Check if first or last item has been reached
-        if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+        if ((checkLinearLayoutManagerOrientation(linearlayoutManager) != null && checkLinearLayoutManagerOrientation(linearlayoutManager)
+                || checkStaggeredGridLayoutManagerOrientation(staggeredGridLayoutManager) != null && checkStaggeredGridLayoutManagerOrientation(staggeredGridLayoutManager))) {
             if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
                 lastItemReached = true;
             }
@@ -318,7 +345,8 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
         }
 
         // Start auto scroll if at the edge
-        if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+        if (checkLinearLayoutManagerOrientation(linearlayoutManager) != null && checkLinearLayoutManagerOrientation(linearlayoutManager)
+                || checkStaggeredGridLayoutManagerOrientation(staggeredGridLayoutManager) != null && checkStaggeredGridLayoutManagerOrientation(staggeredGridLayoutManager)) {
             if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
             } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
@@ -334,6 +362,30 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             } else {
                 mAutoScroller.stopAutoScroll();
             }
+        }
+    }
+
+    private Boolean checkLinearLayoutManagerOrientation(LinearLayoutManager linearLayoutManager) {
+        if (linearLayoutManager != null) {
+            if (linearLayoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    private Boolean checkStaggeredGridLayoutManagerOrientation(StaggeredGridLayoutManager staggeredGridLayoutManager) {
+        if (staggeredGridLayoutManager != null) {
+            if (staggeredGridLayoutManager.getOrientation() == StaggeredGridLayoutManager.VERTICAL) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return null;
         }
     }
 
