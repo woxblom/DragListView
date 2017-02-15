@@ -167,50 +167,9 @@ List and Grid layouts are used as example in the sample project.
         }
     }
 
-## Used in apps
-
-[Projectplace](https://play.google.com/store/apps/details?id=com.projectplace.octopi)<br/>
-Addresses the daily work & project collaboration needs of everyone in one tool.
-
-[App Organizer](https://play.google.com/store/apps/details?id=com.wox.app_organizer.ui)<br/>
-Helps you manage and order your apps.
-
-[Scan It - Book Scanner](https://play.google.com/store/apps/details?id=com.diotek.scanit)<br/>
-Put your heavy physical books onto your smartphone.
-
-[EzCCS](https://play.google.com/store/apps/details?id=com.scottsware.ezccsa&hl=en)<br/>
-For United Pilots and Flight Attendants that use CCS. Fast one-click access CCS. OFFLINE of viewing of CCS pages.
-
-[Super Simple Shopping List](https://play.google.com/store/apps/details?id=com.bitwize10.supersimpleshoppinglist)<br/>
-One of the simplest shopping list apps available!
-
-[Muscle Memory](https://play.google.com/store/apps/details?id=com.binaryshrub.musclememory)<br/>
-Will take the mess out of tracking your workouts.
-
-[NEO Bookmark](https://play.google.com/store/apps/details?id=com.seyeonsoft.neobookmark.lite)<br/>
-With the NEO bookmark, you can see categories and bookmarks at a glance.
-
-[BMX Guide](https://play.google.com/store/apps/details?id=com.florianschaeffner.bmxguide)<br/>
-Store your landed and marked BMX tricks in your personal trick book.
-
-[Scheda Palestra](https://play.google.com/store/apps/details?id=it.ermete.mercurio.schedapalestra)<br/>
-Italian fitness application.
-
-[Paperplane - Travel Planning](https://play.google.com/store/apps/details?id=com.paperplane)<br/>
-An intuitive travel planning app.
-
-[DogHero](https://play.google.com/store/apps/details?id=br.com.doghero.astro)<br/>
-Hosting dogs in your area.
-
-[Photo Studio](https://play.google.com/store/apps/details?id=com.kvadgroup.photostudio)<br/>
-Photo Studio is a powerful all-in-one image processing application for photographers of any level.
-
 ## License
 
-If you use DragItemRecyclerView code in your application please inform the author about it (*email: woxthebox@gmail.com*) like this:
-> **Subject:** DragListView usage notification<br />
-> **Text:** I use DragListView in {application_name} - {http://link_to_google_play}.
-> I [allow | don't allow] you to mention my app in section "Applications using DragListView" on GitHub.
+If you feel like it then drop me a mail at woxthebox@gmail.com and tell me what app you have included this lib in. It is always fun to hear!
 
     Copyright 2014 Magnus Woxblom
 
