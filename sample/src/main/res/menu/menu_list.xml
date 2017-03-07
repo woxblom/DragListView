@@ -37,4 +37,12 @@
         android:id="@+id/action_grid_horizontal"
         android:title="@string/action_grid_horizontal"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_staggered_vertical"
+        android:title="@string/action_staggered_vertical"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_staggered_horizontal"
+        android:title="@string/action_staggered_horizontal"
+        app:showAsAction="never"/>
 </menu>

@@ -23,5 +23,6 @@
     <string name="action_list">List (drag on touch image icon)</string>
     <string name="action_grid_vertical">Grid vertical (drag on long press)</string>
     <string name="action_grid_horizontal">Grid horizontal (drag on long press)</string>
-
+    <string name="action_staggered_vertical">Staggered vertical (drag on long press)</string>
+    <string name="action_staggered_horizontal">Staggered horizontal (drag on long press)</string>
 </resources>

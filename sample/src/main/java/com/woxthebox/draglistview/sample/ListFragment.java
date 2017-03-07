@@ -26,6 +26,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -140,6 +141,12 @@ public class ListFragment extends Fragment {
             case R.id.action_grid_horizontal:
                 setupGridHorizontalRecyclerView();
                 return true;
+            case R.id.action_staggered_vertical:
+                setupStaggeredVerticalRecyclerView();
+                return true;
+            case R.id.action_staggered_horizontal:
+                setupStaggeredHorizontalRecyclerView();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -168,7 +175,22 @@ public class ListFragment extends Fragment {
         mDragListView.setCanDragHorizontally(true);
         mDragListView.setCustomDragItem(null);
     }
+    private void setupStaggeredVerticalRecyclerView() {
+        mDragListView.setLayoutManager(new StaggeredGridLayoutManager(4,StaggeredGridLayoutManager.VERTICAL));
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
+        mDragListView.setAdapter(listAdapter, true);
+        mDragListView.setCanDragHorizontally(true);
+        mDragListView.setCustomDragItem(null);
 
+    }
+
+    private void setupStaggeredHorizontalRecyclerView() {
+        mDragListView.setLayoutManager(new StaggeredGridLayoutManager(4,StaggeredGridLayoutManager.HORIZONTAL));
+        ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.grid_item, R.id.item_layout, true);
+        mDragListView.setAdapter(listAdapter, true);
+        mDragListView.setCanDragHorizontally(true);
+        mDragListView.setCustomDragItem(null);
+    }
     private static class MyDragItem extends DragItem {
 
         public MyDragItem(Context context, int layoutId) {
