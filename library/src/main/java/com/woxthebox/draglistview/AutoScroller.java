@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2014 Magnus Woxblom
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,16 +19,16 @@ package com.woxthebox.draglistview;
 import android.content.Context;
 import android.os.Handler;
 
-public class AutoScroller {
-    public enum AutoScrollMode {
+class AutoScroller {
+    enum AutoScrollMode {
         POSITION, COLUMN
     }
 
-    public enum ScrollDirection {
+    enum ScrollDirection {
         UP, DOWN, LEFT, RIGHT
     }
 
-    public interface AutoScrollListener {
+    interface AutoScrollListener {
         void onAutoScrollPositionBy(int dx, int dy);
 
         void onAutoScrollColumnBy(int columns);
@@ -45,24 +45,24 @@ public class AutoScroller {
     private long mLastScrollTime;
     private AutoScrollMode mAutoScrollMode = AutoScrollMode.POSITION;
 
-    public AutoScroller(Context context, AutoScrollListener listener) {
+    AutoScroller(Context context, AutoScrollListener listener) {
         mListener = listener;
         mScrollSpeed = (int) (context.getResources().getDisplayMetrics().density * SCROLL_SPEED_DP);
     }
 
-    public void setAutoScrollMode(AutoScrollMode autoScrollMode) {
+    void setAutoScrollMode(AutoScrollMode autoScrollMode) {
         mAutoScrollMode = autoScrollMode;
     }
 
-    public boolean isAutoScrolling() {
+    boolean isAutoScrolling() {
         return mIsAutoScrolling;
     }
 
-    public void stopAutoScroll() {
+    void stopAutoScroll() {
         mIsAutoScrolling = false;
     }
 
-    public void startAutoScroll(ScrollDirection direction) {
+    void startAutoScroll(ScrollDirection direction) {
         switch (direction) {
             case UP:
                 startAutoScrollPositionBy(0, mScrollSpeed);

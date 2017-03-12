@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2014 Magnus Woxblom
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import com.woxthebox.draglistview.swipe.ListSwipeHelper;
 
 public class DragListView extends FrameLayout {
 
@@ -72,6 +74,7 @@ public class DragListView extends FrameLayout {
     private DragListListener mDragListListener;
     private DragListCallback mDragListCallback;
     private DragItem mDragItem;
+    private ListSwipeHelper mSwipeHelper;
     private float mTouchX;
     private float mTouchY;
 
@@ -162,21 +165,29 @@ public class DragListView extends FrameLayout {
         recyclerView.setDragItemCallback(new DragItemRecyclerView.DragItemCallback() {
             @Override
             public boolean canDragItemAtPosition(int dragPosition) {
-                if (mDragListCallback != null) {
-                    return mDragListCallback.canDragItemAtPosition(dragPosition);
-                }
-                return true;
+                return mDragListCallback == null || mDragListCallback.canDragItemAtPosition(dragPosition);
             }
 
             @Override
             public boolean canDropItemAtPosition(int dropPosition) {
-                if (mDragListCallback != null) {
-                    return mDragListCallback.canDropItemAtPosition(dropPosition);
-                }
-                return true;
+                return mDragListCallback == null || mDragListCallback.canDropItemAtPosition(dropPosition);
             }
         });
         return recyclerView;
+    }
+
+    public void setSwipeListener(ListSwipeHelper.OnSwipeListener swipeListener) {
+        if (mSwipeHelper == null) {
+            mSwipeHelper = new ListSwipeHelper(getContext().getApplicationContext(), swipeListener);
+        } else {
+            mSwipeHelper.setSwipeListener(swipeListener);
+        }
+
+        // Always detach first so we don't get double listeners
+        mSwipeHelper.detachFromRecyclerView();
+        if (swipeListener != null) {
+            mSwipeHelper.attachToRecyclerView(mRecyclerView);
+        }
     }
 
     public RecyclerView getRecyclerView() {

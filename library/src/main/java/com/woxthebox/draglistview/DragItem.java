@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2014 Magnus Woxblom
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,7 +98,7 @@ public class DragItem {
         return mDragView;
     }
 
-    void show() {
+    private void show() {
         mDragView.setVisibility(View.VISIBLE);
     }
 
@@ -195,7 +195,7 @@ public class DragItem {
         updatePosition();
     }
 
-    void updatePosition() {
+    private void updatePosition() {
         if (mCanDragHorizontally) {
             mDragView.setX(mPosX + mOffsetX + mAnimationDx - mDragView.getMeasuredWidth() / 2);
         }

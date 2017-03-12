@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2014 Magnus Woxblom
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,8 +45,18 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         return mItemList;
     }
 
+    public int getPositionForItem(T item) {
+        int count = getItemCount();
+        for (int i = 0; i < count; i++) {
+            if (mItemList.get(i) == item) {
+                return i;
+            }
+        }
+        return RecyclerView.NO_POSITION;
+    }
+
     public Object removeItem(int pos) {
-        if (mItemList != null && mItemList.size() > pos) {
+        if (mItemList != null && mItemList.size() > pos && pos >= 0) {
             Object item = mItemList.remove(pos);
             notifyItemRemoved(pos);
             return item;
@@ -142,6 +152,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                         if (mDragStartCallback.startDrag(itemView, mItemId)) {
                             return true;
                         }
+
                         if (itemView == mGrabView) {
                             return onItemLongClicked(view);
                         }
@@ -159,6 +170,7 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
                         if (event.getAction() == MotionEvent.ACTION_DOWN && mDragStartCallback.startDrag(itemView, mItemId)) {
                             return true;
                         }
+
                         if (!mDragStartCallback.isDragging() && itemView == mGrabView) {
                             return onItemTouch(view, event);
                         }

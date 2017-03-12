@@ -265,7 +265,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
     private void updateDragPositionAndScroll() {
         View view = findChildView(mDragItem.getX(), mDragItem.getY());
         int newPos = getChildLayoutPosition(view);
-        if (newPos == NO_POSITION) {
+        if (newPos == NO_POSITION || view == null) {
             return;
         }
 

@@ -1,5 +1,6 @@
 # DragListView
 DragListView can be used when you want to be able to re-order items in a list, grid or a board.
+It also supports horizontal swiping of items in a list.
 
 Youtube demo video<br>
 [![Android drag and drop list and board](http://img.youtube.com/vi/tNgevYpyA9E/0.jpg)](https://www.youtube.com/watch?v=tNgevYpyA9E)
@@ -9,6 +10,7 @@ Youtube demo video<br>
 * Add custom animations when the drag is starting and ending.
 * Get a callback when a drag is started and ended with the position.
 * Disable and enable drag and drop
+* Swipe list items
 
 ## Download lib with gradle
 
@@ -17,7 +19,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.3'
+        compile 'com.github.woxthebox:draglistview:1.4'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -32,18 +34,18 @@ List and Grid layouts are used as example in the sample project.
 
         mDragListView = (DragListView) view.findViewById(R.id.drag_list_view);
         mDragListView.setDragListListener(new DragListView.DragListListener() {
-                    @Override
-                    public void onItemDragStarted(int position) {
-                        Toast.makeText(getActivity(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
-                    }
+            @Override
+            public void onItemDragStarted(int position) {
+                Toast.makeText(getActivity(), "Start - position: " + position, Toast.LENGTH_SHORT).show();
+            }
 
-                    @Override
-                    public void onItemDragEnded(int fromPosition, int toPosition) {
-                        if (fromPosition != toPosition) {
-                            Toast.makeText(getActivity(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+            @Override
+            public void onItemDragEnded(int fromPosition, int toPosition) {
+                if (fromPosition != toPosition) {
+                    Toast.makeText(getActivity(), "End - position: " + toPosition, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         mDragListView.setLayoutManager(new LinearLayoutManager(getActivity()));
         ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.list_item, R.id.image, false);
@@ -58,18 +60,18 @@ List and Grid layouts are used as example in the sample project.
 
         // Set a callback so you can decide exactly which positions that is allowed to drag from and drop to
         mDragListView.setDragListCallback(new DragListView.DragListCallbackAdapter() {
-                    @Override
-                    public boolean canDragItemAtPosition(int dragPosition) {
-                        // Can not drag item at position 5
-                        return dragPosition != 5;
-                    }
+            @Override
+            public boolean canDragItemAtPosition(int dragPosition) {
+                // Can not drag item at position 5
+                return dragPosition != 5;
+            }
 
-                    @Override
-                    public boolean canDropItemAtPosition(int dropPosition) {
-                        // Can not drop item at position 2
-                        return dropPosition != 2;
-                    }
-                });
+            @Override
+            public boolean canDropItemAtPosition(int dropPosition) {
+                // Can not drop item at position 2
+                return dropPosition != 2;
+            }
+        });
 
   A custom drag item can be provided to change the visual appearance of the dragging item.
 
@@ -95,6 +97,54 @@ List and Grid layouts are used as example in the sample project.
 
         mDragListView.setDisableReorderWhenDragging(true);
         mDragListView.setDropTargetDrawables(myBackgroundDrawable, myForeGroundDrawable);
+
+  To enable swiping of list items then just set a swipe listener on the DragListView.
+
+        mDragListView.setSwipeListener(new ListSwipeHelper.OnSwipeListenerAdapter() {
+            @Override
+            public void onItemSwipeStarted(ListSwipeItem item) {
+                mRefreshLayout.setEnabled(false);
+            }
+
+            @Override
+            public void onItemSwipeEnded(ListSwipeItem item, ListSwipeItem.SwipeDirection swipedDirection) {
+                mRefreshLayout.setEnabled(true);
+
+                // Swipe to delete on left
+                if (swipedDirection == ListSwipeItem.SwipeDirection.LEFT) {
+                    Pair<Long, String> adapterItem = (Pair<Long, String>) item.getTag();
+                    int pos = mDragListView.getAdapter().getPositionForItem(adapterItem);
+                    mDragListView.getAdapter().removeItem(pos);
+                }
+            }
+        });
+
+   It is also possible to configure how the swiping should work on individual items by changing supported SwipeDirection and the SwipeInStyle.
+
+        public enum SwipeDirection {
+            LEFT, RIGHT, LEFT_AND_RIGHT, NONE
+        }
+
+        public enum SwipeInStyle {
+            APPEAR, SLIDE
+        }
+
+        swipeItem.setSwipeInStyle(SwipeInStyle.SLIDE)
+        swipeItem.setSupportedSwipeDirection(SwipeDirection.LEFT)
+
+  The swipe item is setup from xml like this. Check out the sample app to see the details. The important thing here is to set the swipeViewId, leftViewId and rightViewId.
+
+      <com.woxthebox.draglistview.swipe.ListSwipeItem
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          app:leftViewId="@+id/item_left"
+          app:rightViewId="@+id/item_right"
+          app:swipeViewId="@+id/item_layout">
+          ...
+          ...
+      </com.woxthebox.draglistview.swipe.ListSwipeItem>
 
   For a board, which is a number of horizontal columns with lists, then use BoardView. For an example with custom animations
   check the sample code. A custom header view can also be used when adding a column. This can be any view and will be attached to
