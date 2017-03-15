@@ -75,14 +75,14 @@ public class ListSwipeHelper extends RecyclerView.OnScrollListener implements Re
 
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-        resetSwipeViews(null);
+        resetSwipedViews(null);
     }
 
-    private void resetSwipeViews(View exception) {
+    public void resetSwipedViews(View exceptionView) {
         int childCount = mRecyclerView.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View view = mRecyclerView.getChildAt(i);
-            if (view instanceof ListSwipeItem && view != exception) {
+            if (view instanceof ListSwipeItem && view != exceptionView) {
                 ((ListSwipeItem) view).resetSwipe(true);
             }
         }
@@ -106,7 +106,7 @@ public class ListSwipeHelper extends RecyclerView.OnScrollListener implements Re
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             if (endingSwipeView.isSwipeStarted()) {
-                                resetSwipeViews(endingSwipeView);
+                                resetSwipedViews(endingSwipeView);
                             }
 
                             if (mSwipeListener != null) {
@@ -115,7 +115,7 @@ public class ListSwipeHelper extends RecyclerView.OnScrollListener implements Re
                         }
                     });
                 } else {
-                    resetSwipeViews(null);
+                    resetSwipedViews(null);
                 }
                 mSwipeView = null;
                 mRecyclerView.requestDisallowInterceptTouchEvent(false);

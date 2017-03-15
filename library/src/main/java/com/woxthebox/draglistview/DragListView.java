@@ -190,6 +190,17 @@ public class DragListView extends FrameLayout {
         }
     }
 
+    /**
+     * Resets the swipe state of all list item views except the one that is passed as an exception view.
+     *
+     * @param exceptionView This view will not be reset.
+     */
+    public void resetSwipedViews(View exceptionView) {
+        if (mSwipeHelper != null) {
+            mSwipeHelper.resetSwipedViews(exceptionView);
+        }
+    }
+
     public RecyclerView getRecyclerView() {
         return mRecyclerView;
     }
