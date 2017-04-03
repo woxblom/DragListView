@@ -28,7 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 
-class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
+public class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScrollListener {
 
     public interface DragItemListener {
         void onDragStarted(int itemPosition, float x, float y);
@@ -101,7 +101,7 @@ class DragItemRecyclerView extends RecyclerView implements AutoScroller.AutoScro
             }
 
             private void drawDecoration(Canvas c, RecyclerView parent, Drawable drawable) {
-                if (mAdapter.getDropTargetId() == NO_ID || drawable == null) {
+                if (mAdapter == null || mAdapter.getDropTargetId() == NO_ID || drawable == null) {
                     return;
                 }
 
