@@ -21,7 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -211,9 +211,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     @Override
     public void setLayoutManager(LayoutManager layout) {
         super.setLayoutManager(layout);
-        if (!(layout instanceof LinearLayoutManager)) {
-            throw new RuntimeException("Layout must be an instance of LinearLayoutManager");
-        }
+        LayoutWrapper.checkLayoutManager(layout);
     }
 
     @Override
@@ -270,26 +268,26 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         if (newPos == NO_POSITION || view == null) {
             return;
         }
-
-        LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
+        LayoutWrapper layoutWrapper=new LayoutWrapper(getLayoutManager());
         if (shouldChangeItemPosition(newPos)) {
             if (mDisableReorderWhenDragging) {
                 mAdapter.setDropTargetId(mAdapter.getItemId(newPos));
                 mAdapter.notifyDataSetChanged();
             } else {
-                int pos = layoutManager.findFirstVisibleItemPosition();
-                View posView = layoutManager.findViewByPosition(pos);
+                int pos = layoutWrapper.findFirstVisibleItemPosition();
+                View posView = layoutWrapper.getLayoutManager().findViewByPosition(pos);
                 mAdapter.changeItemPosition(mDragItemPosition, newPos);
                 mDragItemPosition = newPos;
 
                 // Since notifyItemMoved scrolls the list we need to scroll back to where we were after the position change.
-                if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+                if (layoutWrapper.getOrientation() == OrientationHelper.VERTICAL) {
                     int topMargin = ((MarginLayoutParams) posView.getLayoutParams()).topMargin;
-                    layoutManager.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
+                    layoutWrapper.scrollToPositionWithOffset(pos, posView.getTop() - topMargin);
                 } else {
                     int leftMargin = ((MarginLayoutParams) posView.getLayoutParams()).leftMargin;
-                    layoutManager.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
+                    layoutWrapper.scrollToPositionWithOffset(pos, posView.getLeft() - leftMargin);
                 }
+
             }
         }
 
@@ -303,7 +301,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         ViewHolder firstChild = findViewHolderForLayoutPosition(0);
 
         // Check if first or last item has been reached
-        if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+        if (layoutWrapper.getOrientation()==OrientationHelper.VERTICAL) {
             if (lastChild != null && lastChild.itemView.getBottom() <= bottom) {
                 lastItemReached = true;
             }
@@ -320,7 +318,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         }
 
         // Start auto scroll if at the edge
-        if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
+        if (layoutWrapper.getOrientation()==OrientationHelper.VERTICAL) {
             if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
             } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
