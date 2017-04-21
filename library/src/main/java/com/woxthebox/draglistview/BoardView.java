@@ -19,6 +19,8 @@ package com.woxthebox.draglistview;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.support.annotation.IntegerRes;
+import android.support.annotation.LayoutRes;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,6 +28,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -534,7 +537,16 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {
-        final DragItemRecyclerView recyclerView = new DragItemRecyclerView(getContext());
+        return addColumnList(adapter, header, hasFixedItemSize, null);
+    }
+
+    public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize, @LayoutRes Integer recyclerViewLayoutId) {
+        final DragItemRecyclerView recyclerView;
+        if (recyclerViewLayoutId == null) {
+            recyclerView = new DragItemRecyclerView(getContext());
+        } else {
+            recyclerView = (DragItemRecyclerView) LayoutInflater.from(getContext()).inflate(recyclerViewLayoutId, this, false);
+        }
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
         recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
