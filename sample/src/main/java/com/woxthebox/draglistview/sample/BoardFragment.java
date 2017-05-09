@@ -72,7 +72,7 @@ public class BoardFragment extends Fragment {
             }
 
             @Override
-            public void onDragItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
+            public void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
                 Toast.makeText(mBoardView.getContext(), "Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show();
             }
 

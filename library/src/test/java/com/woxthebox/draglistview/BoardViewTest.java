@@ -62,7 +62,7 @@ public class BoardViewTest {
 
         createColumnsAndDrag(adapter);
 
-        verify(boardListener).onDragItemChangedPosition(anyInt(), anyInt(), anyInt(), anyInt());
+        verify(boardListener).onItemChangedPosition(anyInt(), anyInt(), anyInt(), anyInt());
     }
 
     @Test
@@ -76,7 +76,7 @@ public class BoardViewTest {
         when(adapter.getPositionForItemId(firstItemId)).thenReturn(firstItemPosition);
         column.onDragging(0, 0);
 
-        verify(boardListener).onDragItemChangedPosition(0, 0, 0, firstItemPosition);
+        verify(boardListener).onItemChangedPosition(0, 0, 0, firstItemPosition);
     }
 
     private DragItemRecyclerView createColumnsAndDrag(DragItemAdapter adapter) {

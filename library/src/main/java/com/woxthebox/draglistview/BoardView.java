@@ -36,12 +36,14 @@ import android.widget.Scroller;
 
 import java.util.ArrayList;
 
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
+
 public class BoardView extends HorizontalScrollView implements AutoScroller.AutoScrollListener {
 
     public interface BoardListener {
         void onItemDragStarted(int column, int row);
 
-        void onDragItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow);
+        void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow);
 
         void onItemChangedColumn(int oldColumn, int newColumn);
 
@@ -68,8 +70,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private int mDragStartRow;
     private boolean mHasLaidOut;
     private boolean mDragEnabled = true;
-    private Integer mLastDragColumn;
-    private Integer mLastDragRow;
+    private int mLastDragColumn = NO_POSITION;
+    private int mLastDragRow = NO_POSITION;
 
     public BoardView(Context context) {
         super(context);
@@ -560,20 +562,20 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
             @Override
             public void onDragging(int itemPosition, float x, float y) {
-                Integer column = getColumnOfList(recyclerView);
-                Integer row = itemPosition;
-                boolean positionChanged = !column.equals(mLastDragColumn) || !row.equals(mLastDragRow);
+                int column = getColumnOfList(recyclerView);
+                int row = itemPosition;
+                boolean positionChanged = column != mLastDragColumn || row != mLastDragRow;
                 if (mBoardListener != null && positionChanged) {
                     mLastDragColumn = column;
                     mLastDragRow = row;
-                    mBoardListener.onDragItemChangedPosition(mDragStartColumn, mDragStartRow, getColumnOfList(recyclerView), row);
+                    mBoardListener.onItemChangedPosition(mDragStartColumn, mDragStartRow, column, row);
                 }
             }
 
             @Override
             public void onDragEnded(int newItemPosition) {
-                mLastDragColumn = null;
-                mLastDragRow = null;
+                mLastDragColumn = NO_POSITION;
+                mLastDragRow = NO_POSITION;
                 if (mBoardListener != null) {
                     mBoardListener.onItemDragEnded(mDragStartColumn, mDragStartRow, getColumnOfList(recyclerView), newItemPosition);
                 }
