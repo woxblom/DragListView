@@ -72,6 +72,11 @@ public class BoardFragment extends Fragment {
             }
 
             @Override
+            public void onDragItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
+                Toast.makeText(mBoardView.getContext(), "Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
             public void onItemChangedColumn(int oldColumn, int newColumn) {
                 TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
                 itemCount1.setText(Integer.toString(mBoardView.getAdapter(oldColumn).getItemCount()));
