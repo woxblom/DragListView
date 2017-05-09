@@ -537,16 +537,9 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {
-        return addColumnList(adapter, header, hasFixedItemSize, null);
-    }
-
-    public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize, @LayoutRes Integer recyclerViewLayoutId) {
-        final DragItemRecyclerView recyclerView;
-        if (recyclerViewLayoutId == null) {
-            recyclerView = new DragItemRecyclerView(getContext());
-        } else {
-            recyclerView = (DragItemRecyclerView) LayoutInflater.from(getContext()).inflate(recyclerViewLayoutId, this, false);
-        }
+        final DragItemRecyclerView recyclerView = (DragItemRecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.drag_item_recycler_view, this, false);
+        recyclerView.setHorizontalScrollBarEnabled(false);
+        recyclerView.setVerticalScrollBarEnabled(false);
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
         recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
