@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -269,6 +270,22 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         int newPos = getChildLayoutPosition(view);
         if (newPos == NO_POSITION || view == null) {
             return;
+        }
+
+        // If using a LinearLayoutManager and the new view has a bigger height we need to check if passing centerY as well.
+        // If not doing this extra check the bigger item will move back again when dragging slowly over it.
+        boolean linearLayoutManager = getLayoutManager() instanceof LinearLayoutManager && !(getLayoutManager() instanceof GridLayoutManager);
+        if (linearLayoutManager) {
+            MarginLayoutParams params = (MarginLayoutParams) view.getLayoutParams();
+            int viewHeight = view.getMeasuredHeight() + params.topMargin + params.bottomMargin;
+            int viewCenterY = view.getTop() - params.topMargin + viewHeight / 2;
+            boolean dragDown = mDragItemPosition < getChildLayoutPosition(view);
+            boolean movedPassedCenterY = dragDown ? mDragItem.getY() > viewCenterY : mDragItem.getY() < viewCenterY;
+
+            // If new height is bigger then current and not passed centerY then reset back to current position
+            if (viewHeight > mDragItem.getDragItemView().getMeasuredHeight() && !movedPassedCenterY) {
+                newPos = mDragItemPosition;
+            }
         }
 
         LinearLayoutManager layoutManager = (LinearLayoutManager) getLayoutManager();
