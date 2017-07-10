@@ -64,6 +64,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private BoardListener mBoardListener;
     private boolean mSnapToColumnWhenScrolling = true;
     private boolean mSnapToColumnWhenDragging = true;
+    private boolean mSnapToColumnInLandscape = false;
     private float mTouchX;
     private float mTouchY;
     private int mColumnWidth;
@@ -324,12 +325,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     private boolean snapToColumnWhenScrolling() {
         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        return mSnapToColumnWhenScrolling && isPortrait;
+        return mSnapToColumnWhenScrolling && (isPortrait || mSnapToColumnInLandscape);
     }
 
     private boolean snapToColumnWhenDragging() {
         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        return mSnapToColumnWhenDragging && isPortrait;
+        return mSnapToColumnWhenDragging && (isPortrait || mSnapToColumnInLandscape);
     }
 
     private boolean isDragging() {
@@ -511,6 +512,15 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      */
     public void setSnapToColumnWhenDragging(boolean snapToColumn) {
         mSnapToColumnWhenDragging = snapToColumn;
+        mAutoScroller.setAutoScrollMode(snapToColumnWhenDragging() ? AutoScroller.AutoScrollMode.COLUMN : AutoScroller.AutoScrollMode
+                .POSITION);
+    }
+
+    /**
+     * @param snapToColumnInLandscape true if dragging should snap to columns when dragging towards the edge also in landscape mode.
+     */
+    public void setSnapToColumnInLandscape(boolean snapToColumnInLandscape) {
+        mSnapToColumnInLandscape = snapToColumnInLandscape;
         mAutoScroller.setAutoScrollMode(snapToColumnWhenDragging() ? AutoScroller.AutoScrollMode.COLUMN : AutoScroller.AutoScrollMode
                 .POSITION);
     }
