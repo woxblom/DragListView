@@ -19,7 +19,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.4.5'
+        compile 'com.github.woxthebox:draglistview:1.4.6'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -148,12 +148,15 @@ List and Grid layouts are used as example in the sample project.
 
   For a board, which is a number of horizontal columns with lists, then use BoardView. For an example with custom animations
   check the sample code. A custom header view can also be used when adding a column. This can be any view and will be attached to
-  the top of the column.
+  the top of the column. There are many different features that you can toggle on the BoardView as seen below. You read about them
+  in the java doc of each method.
 
         mBoardView = (BoardView) view.findViewById(R.id.board_view);
         mBoardView.setSnapToColumnsWhenScrolling(true);
         mBoardView.setSnapToColumnWhenDragging(true);
         mBoardView.setSnapDragItemToTouch(true);
+        mBoardView.setSnapToColumnInLandscape(false);
+        mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
               @Override
               public void onItemDragStarted(int column, int row) {
