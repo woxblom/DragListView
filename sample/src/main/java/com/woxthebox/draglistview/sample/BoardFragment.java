@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2014 Magnus Woxblom
  * <p/>
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,6 +65,8 @@ public class BoardFragment extends Fragment {
         mBoardView.setSnapToColumnWhenDragging(true);
         mBoardView.setSnapDragItemToTouch(true);
         mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
+        mBoardView.setSnapToColumnInLandscape(false);
+        mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
             public void onItemDragStarted(int column, int row) {
@@ -79,9 +81,9 @@ public class BoardFragment extends Fragment {
             @Override
             public void onItemChangedColumn(int oldColumn, int newColumn) {
                 TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
-                itemCount1.setText(Integer.toString(mBoardView.getAdapter(oldColumn).getItemCount()));
+                itemCount1.setText(String.valueOf(mBoardView.getAdapter(oldColumn).getItemCount()));
                 TextView itemCount2 = (TextView) mBoardView.getHeaderView(newColumn).findViewById(R.id.item_count);
-                itemCount2.setText(Integer.toString(mBoardView.getAdapter(newColumn).getItemCount()));
+                itemCount2.setText(String.valueOf(mBoardView.getAdapter(newColumn).getItemCount()));
             }
 
             @Override
@@ -100,6 +102,7 @@ public class BoardFragment extends Fragment {
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
 
+        addColumnList();
         addColumnList();
         addColumnList();
         addColumnList();
@@ -166,7 +169,7 @@ public class BoardFragment extends Fragment {
                 //mBoardView.removeItem(column, 0);
                 //mBoardView.moveItem(0, 0, 1, 3, false);
                 //mBoardView.replaceItem(0, 0, item1, true);
-                ((TextView) header.findViewById(R.id.item_count)).setText("" + mItemArray.size());
+                ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
 
@@ -176,7 +179,7 @@ public class BoardFragment extends Fragment {
 
     private static class MyDragItem extends DragItem {
 
-        public MyDragItem(Context context, int layoutId) {
+        MyDragItem(Context context, int layoutId) {
             super(context, layoutId);
         }
 

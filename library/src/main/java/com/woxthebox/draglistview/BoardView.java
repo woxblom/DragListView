@@ -19,6 +19,8 @@ package com.woxthebox.draglistview;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,6 +53,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
     }
 
+    public enum ColumnSnapPosition {
+        LEFT, CENTER, RIGHT
+    }
+
     private static final int SCROLL_ANIMATION_DURATION = 325;
     private Scroller mScroller;
     private AutoScroller mAutoScroller;
@@ -65,6 +71,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private boolean mSnapToColumnWhenScrolling = true;
     private boolean mSnapToColumnWhenDragging = true;
     private boolean mSnapToColumnInLandscape = false;
+    private ColumnSnapPosition mSnapPosition = ColumnSnapPosition.CENTER;
+    private int mCurrentColumn;
     private float mTouchX;
     private float mTouchY;
     private int mColumnWidth;
@@ -74,6 +82,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private boolean mDragEnabled = true;
     private int mLastDragColumn = NO_POSITION;
     private int mLastDragRow = NO_POSITION;
+    private SavedState mSavedState;
 
     public BoardView(Context context) {
         super(context);
@@ -123,10 +132,26 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         super.onLayout(changed, l, t, r, b);
         // Snap to closes column after first layout.
         // This is needed so correct column is scrolled to after a rotation.
-        if (!mHasLaidOut && snapToColumnWhenScrolling()) {
-            scrollToColumn(getClosestColumn(), false);
+        if (!mHasLaidOut && mSavedState != null) {
+            mCurrentColumn = mSavedState.currentColumn;
+            scrollToColumn(mCurrentColumn, false);
+            mSavedState = null;
         }
         mHasLaidOut = true;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mSavedState = ss;
+        requestLayout();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        return new SavedState(superState, getClosestSnapColumn());
     }
 
     @Override
@@ -181,7 +206,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     if (snapToColumnWhenScrolling()) {
-                        scrollToColumn(getClosestColumn(), true);
+                        scrollToColumn(getClosestSnapColumn(), true);
                     }
                     break;
             }
@@ -307,14 +332,28 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         return 0;
     }
 
-    private int getClosestColumn() {
-        int middlePosX = getScrollX() + getMeasuredWidth() / 2;
+    private int getClosestSnapColumn() {
         int column = 0;
         int minDiffX = Integer.MAX_VALUE;
         for (int i = 0; i < mLists.size(); i++) {
-            RecyclerView list = mLists.get(i);
-            int listPosX = ((View) list.getParent()).getLeft();
-            int diffX = Math.abs(listPosX + mColumnWidth / 2 - middlePosX);
+            View listParent = (View) mLists.get(i).getParent();
+
+            int diffX = 0;
+            switch (mSnapPosition) {
+                case LEFT:
+                    int leftPosX = getScrollX();
+                    diffX = Math.abs(listParent.getLeft() - leftPosX);
+                    break;
+                case CENTER:
+                    int middlePosX = getScrollX() + getMeasuredWidth() / 2;
+                    diffX = Math.abs(listParent.getLeft()  + mColumnWidth / 2 - middlePosX);
+                    break;
+                case RIGHT:
+                    int rightPosX = getScrollX() + getMeasuredWidth();
+                    diffX = Math.abs(listParent.getRight() - rightPosX);
+                    break;
+            }
+
             if (diffX < minDiffX) {
                 minDiffX = diffX;
                 column = i;
@@ -447,7 +486,19 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
 
         View parent = (View) mLists.get(column).getParent();
-        int newX = parent.getLeft() - (getMeasuredWidth() - parent.getMeasuredWidth()) / 2;
+        int newX = 0;
+        switch (mSnapPosition) {
+            case LEFT:
+                newX = parent.getLeft();
+                break;
+            case CENTER:
+                newX = parent.getLeft() - (getMeasuredWidth() - parent.getMeasuredWidth()) / 2;
+                break;
+            case RIGHT:
+                newX = parent.getRight() - getMeasuredWidth();
+                break;
+        }
+
         int maxScroll = mRootLayout.getMeasuredWidth() - getMeasuredWidth();
         newX = newX < 0 ? 0 : newX;
         newX = newX > maxScroll ? maxScroll : newX;
@@ -460,6 +511,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 scrollTo(newX, getScrollY());
             }
         }
+        mCurrentColumn = column;
     }
 
     public void clearBoard() {
@@ -526,6 +578,13 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
+     * @param snapPosition determines what position a column will snap to. LEFT, CENTER or RIGHT.
+     */
+    public void setColumnSnapPosition(ColumnSnapPosition snapPosition) {
+        mSnapPosition = snapPosition;
+    }
+
+    /**
      * @param snapToTouch true if the drag item should snap to touch position when a drag is started.
      */
     public void setSnapDragItemToTouch(boolean snapToTouch) {
@@ -576,12 +635,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             @Override
             public void onDragging(int itemPosition, float x, float y) {
                 int column = getColumnOfList(recyclerView);
-                int row = itemPosition;
-                boolean positionChanged = column != mLastDragColumn || row != mLastDragRow;
+                boolean positionChanged = column != mLastDragColumn || itemPosition != mLastDragRow;
                 if (mBoardListener != null && positionChanged) {
                     mLastDragColumn = column;
-                    mLastDragRow = row;
-                    mBoardListener.onItemChangedPosition(mDragStartColumn, mDragStartRow, column, row);
+                    mLastDragRow = itemPosition;
+                    mBoardListener.onItemChangedPosition(mDragStartColumn, mDragStartRow, column, itemPosition);
                 }
             }
 
@@ -625,23 +683,35 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {
         private float mStartScrollX;
+        private int mStartColumn;
 
         @Override
         public boolean onDown(MotionEvent e) {
             mStartScrollX = getScrollX();
+            mStartColumn = mCurrentColumn;
             return super.onDown(e);
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             // Calc new column to scroll to
-            int currentColumn = getCurrentColumn(e2.getX() + getScrollX());
-            int newColumn;
-            if (velocityX < 0) {
-                newColumn = getScrollX() >= mStartScrollX ? currentColumn + 1 : currentColumn;
-            } else {
-                newColumn = getScrollX() <= mStartScrollX ? currentColumn - 1 : currentColumn;
+            int closestColumn = getClosestSnapColumn();
+            int newColumn = closestColumn;
+
+            // This can happen if you start to drag in one direction and then fling in the other direction.
+            // We should then switch column in the fling direction.
+            boolean wrongSnapDirection = newColumn > mStartColumn && velocityX > 0 || newColumn < mStartColumn && velocityX < 0;
+
+            if (mStartScrollX == getScrollX()) {
+                newColumn = mStartColumn;
+            } else if (mStartColumn == closestColumn || wrongSnapDirection) {
+                if (velocityX < 0) {
+                    newColumn = closestColumn + 1;
+                } else {
+                    newColumn = closestColumn - 1;
+                }
             }
+
             if (newColumn < 0 || newColumn > mLists.size() - 1) {
                 newColumn = newColumn < 0 ? 0 : mLists.size() - 1;
             }
@@ -650,5 +720,40 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             scrollToColumn(newColumn, true);
             return true;
         }
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    static class SavedState extends BaseSavedState {
+        public int currentColumn;
+
+        private SavedState(Parcelable superState, int currentColumn) {
+            super(superState);
+            this.currentColumn = currentColumn;
+        }
+
+        public SavedState(Parcel source) {
+            super(source);
+            currentColumn = source.readInt();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(currentColumn);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }
