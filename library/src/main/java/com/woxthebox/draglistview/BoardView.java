@@ -248,8 +248,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     @Override
     public void onAutoScrollColumnBy(int columns) {
         if (isDragging()) {
-            DragItemRecyclerView currentList = getCurrentRecyclerView(getWidth() / 2 + getScrollX());
-            int newColumn = getColumnOfList(currentList) + columns;
+            int newColumn = mCurrentColumn + columns;
             if (columns != 0 && newColumn >= 0 && newColumn < mLists.size()) {
                 scrollToColumn(newColumn, true);
             }
