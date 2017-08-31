@@ -75,7 +75,7 @@ public class BoardFragment extends Fragment {
 
             @Override
             public void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
-                Toast.makeText(mBoardView.getContext(), "Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(mBoardView.getContext(), "Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -91,6 +91,19 @@ public class BoardFragment extends Fragment {
                 if (fromColumn != toColumn || fromRow != toRow) {
                     Toast.makeText(mBoardView.getContext(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+        mBoardView.setBoardCallback(new BoardView.BoardCallback() {
+            @Override
+            public boolean canDragItemAtPosition(int column, int dragPosition) {
+                // Add logic here to prevent an item to be dragged
+                return true;
+            }
+
+            @Override
+            public boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
+                // Add logic here to prevent an item to be dropped
+                return true;
             }
         });
         return view;

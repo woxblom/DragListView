@@ -19,7 +19,7 @@ Youtube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.4.7'
+        compile 'com.github.woxthebox:draglistview:1.4.8'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -158,25 +158,38 @@ List and Grid layouts are used as example in the sample project.
         mBoardView.setSnapToColumnInLandscape(false);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
-              @Override
-              public void onItemDragStarted(int column, int row) {
-                  Toast.makeText(getActivity(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
-              }
+            @Override
+            public void onItemDragStarted(int column, int row) {
+                Toast.makeText(getActivity(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
+            }
 
-              @Override
-              public void onItemChangedColumn(int oldColumn, int newColumn) {
-                  TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
-                  itemCount1.setText("" + mBoardView.getAdapter(oldColumn).getItemCount());
-                  TextView itemCount2 = (TextView) mBoardView.getHeaderView(newColumn).findViewById(R.id.item_count);
-                  itemCount2.setText("" + mBoardView.getAdapter(newColumn).getItemCount());
-              }
+            @Override
+            public void onItemChangedColumn(int oldColumn, int newColumn) {
+                TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
+                itemCount1.setText("" + mBoardView.getAdapter(oldColumn).getItemCount());
+                TextView itemCount2 = (TextView) mBoardView.getHeaderView(newColumn).findViewById(R.id.item_count);
+                itemCount2.setText("" + mBoardView.getAdapter(newColumn).getItemCount());
+            }
 
-              @Override
-              public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
-                  if (fromColumn != toColumn || fromRow != toRow) {
-                      Toast.makeText(getActivity(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
-                  }
-              }
+            @Override
+            public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
+                if (fromColumn != toColumn || fromRow != toRow) {
+                  Toast.makeText(getActivity(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        mBoardView.setBoardCallback(new BoardView.BoardCallback() {
+            @Override
+            public boolean canDragItemAtPosition(int column, int dragPosition) {
+                // Add logic here to prevent an item to be dragged
+                return true;
+            }
+
+            @Override
+            public boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
+                // Add logic here to prevent an item to be dropped
+                return true;
+            }
         });
         ...
         mBoardView.addColumnList(listAdapter, header, false);

@@ -53,6 +53,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
     }
 
+    public interface BoardCallback {
+        boolean canDragItemAtPosition(int column, int row);
+
+        boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow);
+    }
+
     public enum ColumnSnapPosition {
         LEFT, CENTER, RIGHT
     }
@@ -68,6 +74,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private DragItemRecyclerView mCurrentRecyclerView;
     private DragItem mDragItem;
     private BoardListener mBoardListener;
+    private BoardCallback mBoardCallback;
     private boolean mSnapToColumnWhenScrolling = true;
     private boolean mSnapToColumnWhenDragging = true;
     private boolean mSnapToColumnInLandscape = false;
@@ -265,14 +272,19 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             int oldColumn = getColumnOfList(mCurrentRecyclerView);
             int newColumn = getColumnOfList(currentList);
             long itemId = mCurrentRecyclerView.getDragItemId();
-            Object item = mCurrentRecyclerView.removeDragItemAndEnd();
-            if (item != null) {
-                mCurrentRecyclerView = currentList;
-                mCurrentRecyclerView.addDragItemAndStart(getListTouchY(mCurrentRecyclerView), item, itemId);
-                mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
 
-                if (mBoardListener != null) {
-                    mBoardListener.onItemChangedColumn(oldColumn, newColumn);
+            // Check if it is ok to drop the item in the new column first
+            int newPosition = currentList.getDragPositionForY(getListTouchY(currentList));
+            if (mBoardListener == null || mBoardCallback.canDropItemAtPosition(mDragStartColumn, mDragStartRow, newColumn, newPosition)) {
+                Object item = mCurrentRecyclerView.removeDragItemAndEnd();
+                if (item != null) {
+                    mCurrentRecyclerView = currentList;
+                    mCurrentRecyclerView.addDragItemAndStart(getListTouchY(mCurrentRecyclerView), item, itemId);
+                    mDragItem.setOffset(((View) mCurrentRecyclerView.getParent()).getLeft(), mCurrentRecyclerView.getTop());
+
+                    if (mBoardListener != null) {
+                        mBoardListener.onItemChangedColumn(oldColumn, newColumn);
+                    }
                 }
             }
         }
@@ -594,6 +606,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mBoardListener = listener;
     }
 
+    public void setBoardCallback(BoardCallback callback) {
+        mBoardCallback = callback;
+    }
+
     public void setCustomDragItem(DragItem dragItem) {
         DragItem newDragItem;
         if (dragItem != null) {
@@ -649,6 +665,19 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 if (mBoardListener != null) {
                     mBoardListener.onItemDragEnded(mDragStartColumn, mDragStartRow, getColumnOfList(recyclerView), newItemPosition);
                 }
+            }
+        });
+        recyclerView.setDragItemCallback(new DragItemRecyclerView.DragItemCallback() {
+            @Override
+            public boolean canDragItemAtPosition(int dragPosition) {
+                int column = getColumnOfList(recyclerView);
+                return mBoardCallback == null || mBoardCallback.canDragItemAtPosition(column, dragPosition);
+            }
+
+            @Override
+            public boolean canDropItemAtPosition(int dropPosition) {
+                int column = getColumnOfList(recyclerView);
+                return mBoardCallback == null || mBoardCallback.canDropItemAtPosition(mDragStartColumn, mDragStartRow, column, dropPosition);
             }
         });
 

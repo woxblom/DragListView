@@ -460,7 +460,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         invalidate();
     }
 
-    void addDragItemAndStart(float y, Object item, long itemId) {
+    int getDragPositionForY(float y) {
         View child = findChildView(0, y);
         int pos;
         if (child == null && getChildCount() > 0) {
@@ -476,6 +476,11 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         if (pos == NO_POSITION) {
             pos = 0;
         }
+        return pos;
+    }
+
+    void addDragItemAndStart(float y, Object item, long itemId) {
+        int pos = getDragPositionForY(y);
 
         mDragState = DragState.DRAG_STARTED;
         mDragItemId = itemId;
