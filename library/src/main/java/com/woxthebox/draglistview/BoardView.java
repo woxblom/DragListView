@@ -771,6 +771,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
             dest.writeInt(currentColumn);
         }
 
