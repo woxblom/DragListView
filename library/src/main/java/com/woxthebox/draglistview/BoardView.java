@@ -275,7 +275,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
             // Check if it is ok to drop the item in the new column first
             int newPosition = currentList.getDragPositionForY(getListTouchY(currentList));
-            if (mBoardListener == null || mBoardCallback.canDropItemAtPosition(mDragStartColumn, mDragStartRow, newColumn, newPosition)) {
+            if (mBoardCallback == null || mBoardCallback.canDropItemAtPosition(mDragStartColumn, mDragStartRow, newColumn, newPosition)) {
                 Object item = mCurrentRecyclerView.removeDragItemAndEnd();
                 if (item != null) {
                     mCurrentRecyclerView = currentList;
