@@ -37,7 +37,6 @@ class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHo
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
         mDragOnLongPress = dragOnLongPress;
-        setHasStableIds(true);
         setItemList(list);
     }
 
@@ -56,7 +55,7 @@ class ItemAdapter extends DragItemAdapter<Pair<Long, String>, ItemAdapter.ViewHo
     }
 
     @Override
-    public long getItemId(int position) {
+    public long getUniqueItemId(int position) {
         return mItemList.get(position).first;
     }
 

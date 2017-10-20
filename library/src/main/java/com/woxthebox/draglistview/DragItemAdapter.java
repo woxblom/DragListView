@@ -36,6 +36,15 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
     private long mDropTargetId = RecyclerView.NO_ID;
     protected List<T> mItemList;
 
+    /**
+     * @return a unique id for an item at the specific position.
+     */
+    public abstract long getUniqueItemId(int position);
+
+    public DragItemAdapter() {
+        setHasStableIds(true);
+    }
+
     public void setItemList(List<T> itemList) {
         mItemList = itemList;
         notifyDataSetChanged();
@@ -94,6 +103,11 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
             }
         }
         return RecyclerView.NO_POSITION;
+    }
+
+    @Override
+    public final long getItemId(int position) {
+        return getUniqueItemId(position);
     }
 
     @Override
