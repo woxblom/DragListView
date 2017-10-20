@@ -27,7 +27,6 @@ Add this to proguard rules, otherwise animations won't work correctly
     -keep class com.woxthebox.draglistview.** { *; }
 
 ## Usage
-**NOTE: The adapter must use stable ids.
 List and Grid layouts are used as example in the sample project.
 
   For list and grid view use the DragListView.
@@ -203,9 +202,15 @@ List and Grid layouts are used as example in the sample project.
         mLayoutId = layoutId;
         mGrabHandleId = grabHandleId;
         mDragOnLongPress = dragOnLongPress;
-        setHasStableIds(true);
         setItemList(list);
     }
+
+  The adapter must provide unique ids for each item with the implementation of the abstract method below.
+
+    /**
+     * @return a unique id for an item at the specific position.
+     */
+     public abstract long getUniqueItemId(int position);
 
   Your ViewHolder should extend DragItemAdapter.ViewHolder and you must supply an id of the view that should respond to a drag.
   You also need to provide a boolean to the super constructor to decide if you want the drag to happen on long press or directly when touching the item.
