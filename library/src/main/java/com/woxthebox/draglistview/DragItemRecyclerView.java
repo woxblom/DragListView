@@ -188,6 +188,12 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         return mDragItemId;
     }
 
+    public int getPosition(float x, float y){
+        View view = findChildView(x,y);
+        int pos = getChildLayoutPosition(view);
+        return pos;
+    }
+
     @Override
     public void setClipToPadding(boolean clipToPadding) {
         super.setClipToPadding(clipToPadding);
