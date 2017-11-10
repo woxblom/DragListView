@@ -212,6 +212,11 @@ public class DragListView extends FrameLayout {
         return null;
     }
 
+    public int getPosition(float x, float y){
+        int pos = mRecyclerView.getPosition(x,y);
+        return pos;
+    }
+
     public void setAdapter(DragItemAdapter adapter, boolean hasFixedItemSize) {
         mRecyclerView.setHasFixedSize(hasFixedItemSize);
         mRecyclerView.setAdapter(adapter);
