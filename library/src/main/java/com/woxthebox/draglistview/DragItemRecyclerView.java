@@ -231,7 +231,11 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     public void onAutoScrollColumnBy(int columns) {
     }
 
-    private View findChildView(float x, float y) {
+    /**
+     * Returns the child view under the specific x,y coordinate.
+     * This method will take margins of the child into account when finding it.
+     */
+    public View findChildView(float x, float y) {
         final int count = getChildCount();
         if (y <= 0 && count > 0) {
             return getChildAt(0);
