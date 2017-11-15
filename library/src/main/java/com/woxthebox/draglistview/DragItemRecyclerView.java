@@ -342,7 +342,7 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
 
         // Start auto scroll if at the edge
         if (layoutManager.getOrientation() == LinearLayoutManager.VERTICAL) {
-            if (mDragItem.getY() > getHeight() - view.getHeight() / 2 && !lastItemReached) {
+            if (mDragItem.getY() > getHeight() - view.getHeight() * 2 && !lastItemReached) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.UP);
             } else if (mDragItem.getY() < view.getHeight() / 2 && !firstItemReached) {
                 mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.DOWN);
