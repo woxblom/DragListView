@@ -293,6 +293,10 @@ public class DragListView extends FrameLayout {
         mRecyclerView.addItemDecoration(decor);
     }
 
+    public void addItemDecoration(RecyclerView.ItemDecoration decor, int index){
+        mRecyclerView.addItemDecoration(decor, index);
+    }
+
     /**
      * Set if items should not reorder automatically when dragging. If reorder is disabled, drop target
      * drawables can be set with {@link #setDropTargetDrawables} which will highlight the current item that
