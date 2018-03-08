@@ -237,7 +237,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             }
 
             ViewCompat.postInvalidateOnAnimation(this);
-        } else {
+        } else if (!snapToColumnWhenScrolling()) {
             super.computeScroll();
         }
     }
@@ -357,7 +357,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                     break;
                 case CENTER:
                     int middlePosX = getScrollX() + getMeasuredWidth() / 2;
-                    diffX = Math.abs(listParent.getLeft()  + mColumnWidth / 2 - middlePosX);
+                    diffX = Math.abs(listParent.getLeft() + mColumnWidth / 2 - middlePosX);
                     break;
                 case RIGHT:
                     int rightPosX = getScrollX() + getMeasuredWidth();
