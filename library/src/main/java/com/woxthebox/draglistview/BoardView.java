@@ -43,20 +43,44 @@ import static android.support.v7.widget.RecyclerView.NO_POSITION;
 
 public class BoardView extends HorizontalScrollView implements AutoScroller.AutoScrollListener {
 
+    public interface BoardCallback {
+        boolean canDragItemAtPosition(int column, int row);
+
+        boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow);
+    }
+
     public interface BoardListener {
         void onItemDragStarted(int column, int row);
+
+        void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
 
         void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow);
 
         void onItemChangedColumn(int oldColumn, int newColumn);
 
-        void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow);
+        void onFocusedColumnChanged(int oldColumn, int newColumn);
     }
 
-    public interface BoardCallback {
-        boolean canDragItemAtPosition(int column, int row);
+    public static abstract class BoardListenerAdapter implements BoardListener {
+        @Override
+        public void onItemDragStarted(int column, int row) {
+        }
 
-        boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow);
+        @Override
+        public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
+        }
+
+        @Override
+        public void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
+        }
+
+        @Override
+        public void onItemChangedColumn(int oldColumn, int newColumn) {
+        }
+
+        @Override
+        public void onFocusedColumnChanged(int oldColumn, int newColumn) {
+        }
     }
 
     public enum ColumnSnapPosition {
@@ -141,8 +165,13 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         // This is needed so correct column is scrolled to after a rotation.
         if (!mHasLaidOut && mSavedState != null) {
             mCurrentColumn = mSavedState.currentColumn;
-            scrollToColumn(mCurrentColumn, false);
             mSavedState = null;
+            post(new Runnable() {
+                @Override
+                public void run() {
+                    scrollToColumn(mCurrentColumn, false);
+                }
+            });
         }
         mHasLaidOut = true;
     }
@@ -158,7 +187,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     @Override
     protected Parcelable onSaveInstanceState() {
         Parcelable superState = super.onSaveInstanceState();
-        return new SavedState(superState, getClosestSnapColumn());
+        return new SavedState(superState, snapToColumnWhenScrolling() ? mCurrentColumn : getClosestSnapColumn());
     }
 
     @Override
@@ -522,7 +551,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 scrollTo(newX, getScrollY());
             }
         }
+
+        int oldColumn = mCurrentColumn;
         mCurrentColumn = column;
+        if (mBoardListener != null && oldColumn != mCurrentColumn) {
+            mBoardListener.onFocusedColumnChanged(oldColumn, mCurrentColumn);
+        }
     }
 
     public void clearBoard() {
@@ -553,6 +587,16 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 list.setDragEnabled(mDragEnabled);
             }
         }
+    }
+
+    /**
+     * @return The index of the currently focused column. If column snapping is not enabled this will always return 0.
+     */
+    public int getFocusedColumn() {
+        if (!snapToColumnWhenScrolling()) {
+            return 0;
+        }
+        return mCurrentColumn;
     }
 
     /**
