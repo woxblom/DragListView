@@ -163,6 +163,18 @@ List and Grid layouts are used as example in the sample project.
             }
 
             @Override
+            public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
+                if (fromColumn != toColumn || fromRow != toRow) {
+                    Toast.makeText(getActivity(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
+                Toast.makeText(mBoardView.getContext(), "Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
             public void onItemChangedColumn(int oldColumn, int newColumn) {
                 TextView itemCount1 = (TextView) mBoardView.getHeaderView(oldColumn).findViewById(R.id.item_count);
                 itemCount1.setText("" + mBoardView.getAdapter(oldColumn).getItemCount());
@@ -171,10 +183,8 @@ List and Grid layouts are used as example in the sample project.
             }
 
             @Override
-            public void onItemDragEnded(int fromColumn, int fromRow, int toColumn, int toRow) {
-                if (fromColumn != toColumn || fromRow != toRow) {
-                  Toast.makeText(getActivity(), "End - column: " + toColumn + " row: " + toRow, Toast.LENGTH_SHORT).show();
-                }
+            public void onFocusedColumnChanged(int oldColumn, int newColumn) {
+                Toast.makeText(getContext(), "Focused column changed from " + oldColumn + " to " + newColumn, Toast.LENGTH_SHORT).show();
             }
         });
         mBoardView.setBoardCallback(new BoardView.BoardCallback() {
