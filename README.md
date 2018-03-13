@@ -19,7 +19,7 @@ YouTube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.5.2'
+        compile 'com.github.woxthebox:draglistview:1.5.3'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
