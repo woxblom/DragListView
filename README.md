@@ -3,7 +3,7 @@ DragListView can be used when you want to be able to re-order items in a list, g
 It also supports horizontal swiping of items in a list.
 
 YouTube demo video<br>
-[![Android drag and drop list and board](http://img.youtube.com/vi/tNgevYpyA9E/0.jpg)](https://www.youtube.com/watch?v=DbKqENKCio0)
+[![Android drag and drop list and board](http://img.youtube.com/vi/Hxc7l06xhv4/0.jpg)](https://www.youtube.com/watch?v=Hxc7l06xhv4)
 
 ## Features
 * Re-order items in a list, grid or board by dragging and dropping with nice animations.
