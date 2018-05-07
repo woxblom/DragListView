@@ -19,7 +19,7 @@ YouTube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.6.0'
+        compile 'com.github.woxthebox:draglistview:1.6.1'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -216,14 +216,14 @@ List and Grid layouts are used as example in the sample project.
             }
         });
         ...
-        mBoardView.addColumnList(listAdapter, header, false);
+        mBoardView.addColumn(listAdapter, header, null, false);
 
   To enable dragging and reordering of columns you need to provide a column drag view when adding the column. It is the view that will
   start the column drag process when long pressed on. You can also implement a custom column drag item to control the visuals and animations.
   Check out the sample app to see how it is done. If no custom drag item is used a screenshot of the column will be used instead.
 
     mBoardView.setCustomColumnDragItem(new MyColumnDragItem(getActivity(), R.layout.column_drag_layout));
-    mBoardView.addColumnList(listAdapter, header, columnDragView, false);
+    mBoardView.addColumn(listAdapter, header, columnDragView, false);
 
   For your adapter, extend DragItemAdapter and call setItemList() with a List<T> type. setItemList() can be called anytime later to change the list.
 

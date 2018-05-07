@@ -23,6 +23,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -773,16 +774,39 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
-     * Adds a column to the board.
+     * Inserts a column to the board at a specific index.
      *
      * @param adapter          Adapter with the items for the column.
-     * @param header           Header view that will be positioned above the column.
-     * @param columnDragView   View that will act as handle to drag and drop columns.
+     * @param index            Index where on the board to add the column.
+     * @param header           Header view that will be positioned above the column. Can be null.
+     * @param columnDragView   View that will act as handle to drag and drop columns. Can be null.
      * @param hasFixedItemSize If the items will have a fixed or dynamic size.
+     *
      * @return The created DragItemRecyclerView.
      */
-    public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, View columnDragView, boolean hasFixedItemSize) {
-        final DragItemRecyclerView recyclerView = addColumnList(adapter, header, hasFixedItemSize);
+    public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, index, header, hasFixedItemSize);
+        setupColumnDragListener(columnDragView, recyclerView);
+        return recyclerView;
+    }
+
+    /**
+     * Adds a column at the last index of the board.
+     *
+     * @param adapter          Adapter with the items for the column.
+     * @param header           Header view that will be positioned above the column. Can be null.
+     * @param columnDragView   View that will act as handle to drag and drop columns. Can be null.
+     * @param hasFixedItemSize If the items will have a fixed or dynamic size.
+     *
+     * @return The created DragItemRecyclerView.
+     */
+    public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, hasFixedItemSize);
+        setupColumnDragListener(columnDragView, recyclerView);
+        return recyclerView;
+    }
+
+    private void setupColumnDragListener(View columnDragView, final DragItemRecyclerView recyclerView ) {
         if (columnDragView != null) {
             columnDragView.setOnLongClickListener(new OnLongClickListener() {
                 @Override
@@ -792,10 +816,13 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 }
             });
         }
-        return recyclerView;
     }
 
-    public DragItemRecyclerView addColumnList(final DragItemAdapter adapter, final View header, boolean hasFixedItemSize) {
+    private DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, boolean hasFixedItemSize) {
+        if (index > getColumnCount()) {
+            throw new IllegalArgumentException("Index is out of bounds");
+        }
+
         final DragItemRecyclerView recyclerView = (DragItemRecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.drag_item_recycler_view, this, false);
         recyclerView.setId(getColumnCount());
         recyclerView.setHorizontalScrollBarEnabled(false);
@@ -876,8 +903,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
         layout.addView(recyclerView);
 
-        mLists.add(recyclerView);
-        mColumnLayout.addView(layout);
+        mLists.add(index, recyclerView);
+        mColumnLayout.addView(layout, index);
         return recyclerView;
     }
 

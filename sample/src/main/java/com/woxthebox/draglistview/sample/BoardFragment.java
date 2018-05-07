@@ -36,7 +36,6 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.woxthebox.draglistview.BoardView;
 import com.woxthebox.draglistview.DragItem;
@@ -139,11 +138,11 @@ public class BoardFragment extends Fragment {
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
 
-        addColumnList();
-        addColumnList();
-        addColumnList();
-        addColumnList();
-        addColumnList();
+        addColumn();
+        addColumn();
+        addColumn();
+        addColumn();
+        addColumn();
     }
 
     @Override
@@ -171,7 +170,7 @@ public class BoardFragment extends Fragment {
                 getActivity().invalidateOptionsMenu();
                 return true;
             case R.id.action_add_column:
-                addColumnList();
+                addColumn();
                 return true;
             case R.id.action_remove_column:
                 mBoardView.removeColumn(0);
@@ -183,7 +182,7 @@ public class BoardFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private void addColumnList() {
+    private void addColumn() {
         final ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
         int addItems = 15;
         for (int i = 0; i < addItems; i++) {
@@ -209,7 +208,7 @@ public class BoardFragment extends Fragment {
                 ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
-        mBoardView.addColumnList(listAdapter, header, header, false);
+        mBoardView.addColumn(listAdapter, header, header, false);
         mColumns++;
     }
 
