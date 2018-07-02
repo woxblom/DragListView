@@ -19,12 +19,12 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:recyclerview-v7:27.1.0'
-    testCompile 'org.robolectric:robolectric:3.3.2'
-    testCompile 'org.mockito:mockito-core:2.7.22'
-    testCompile 'junit:junit:4.12'
-    testCompile 'com.squareup.assertj:assertj-android:1.0.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:recyclerview-v7:27.1.1'
+    testImplementation 'org.robolectric:robolectric:3.3.2'
+    testImplementation 'org.mockito:mockito-core:2.7.22'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'com.squareup.assertj:assertj-android:1.0.0'
 }
 
 apply from: 'maven-publish.gradle'
