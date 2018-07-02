@@ -200,7 +200,7 @@ public class BoardFragment extends Fragment {
             public void onClick(View v) {
                 long id = sCreatedItems++;
                 Pair item = new Pair<>(id, "Test " + id);
-                mBoardView.addItem(column, 0, item, true);
+                mBoardView.addItem(mBoardView.getColumnOfHeader(v), 0, item, true);
                 //mBoardView.moveItem(4, 0, 0, true);
                 //mBoardView.removeItem(column, 0);
                 //mBoardView.moveItem(0, 0, 1, 3, false);

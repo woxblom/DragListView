@@ -499,6 +499,18 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         return mHeaders.get(column);
     }
 
+    /**
+     * @return The index of the column with a specific header. If the header can't be found -1 is returned.
+     */
+    public int getColumnOfHeader(View header) {
+        for (int i = 0; i < mHeaders.size(); i++) {
+            if (mHeaders.get(i) == header) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public void removeItem(int column, int row) {
         if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
             DragItemAdapter adapter = (DragItemAdapter) mLists.get(column).getAdapter();
@@ -646,7 +658,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
-     * @param width the width of columns in both portrait and landscape. This must be called before {@link #addColumnList} is
+     * @param width the width of columns in both portrait and landscape. This must be called before {@link #addColumn} is
      *              called for the width to take effect.
      */
     public void setColumnWidth(int width) {
@@ -897,10 +909,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setLayoutParams(new LayoutParams(mColumnWidth, LayoutParams.MATCH_PARENT));
-        if (header != null) {
-            layout.addView(header);
-            mHeaders.add(header);
+        View columnHeader = header;
+        if (header == null) {
+            columnHeader = new View(getContext());
+            columnHeader.setVisibility(View.GONE);
         }
+        layout.addView(columnHeader);
+        mHeaders.add(columnHeader);
+
         layout.addView(recyclerView);
 
         mLists.add(index, recyclerView);
