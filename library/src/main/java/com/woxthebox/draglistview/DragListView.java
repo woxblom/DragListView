@@ -228,6 +228,21 @@ public class DragListView extends FrameLayout {
         });
     }
 
+    public void swapAdapter(DragItemAdapter adapter, boolean removeAndRecycleExisting) {
+        mRecyclerView.swapAdapter(adapter, removeAndRecycleExisting);
+        adapter.setDragStartedListener(new DragItemAdapter.DragStartCallback() {
+            @Override
+            public boolean startDrag(View itemView, long itemId) {
+                return mRecyclerView.startDrag(itemView, itemId, mTouchX, mTouchY);
+            }
+
+            @Override
+            public boolean isDragging() {
+                return mRecyclerView.isDragging();
+            }
+        });
+    }
+
     public void setLayoutManager(RecyclerView.LayoutManager layout) {
         mRecyclerView.setLayoutManager(layout);
     }

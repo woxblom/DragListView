@@ -204,8 +204,21 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
                 throw new RuntimeException("Adapter must have stable ids");
             }
         }
-
         super.setAdapter(adapter);
+        mAdapter = (DragItemAdapter) adapter;
+    }
+
+    @Override
+    public void swapAdapter(Adapter adapter, boolean r) {
+        if (!isInEditMode()) {
+            if (!(adapter instanceof DragItemAdapter)) {
+                throw new RuntimeException("Adapter must extend DragItemAdapter");
+            }
+            if (!adapter.hasStableIds()) {
+                throw new RuntimeException("Adapter must have stable ids");
+            }
+        }
+        super.swapAdapter(adapter, r);
         mAdapter = (DragItemAdapter) adapter;
     }
 
