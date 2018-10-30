@@ -35,7 +35,7 @@ public class BoardViewTest {
     private long firstItemId;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         adapter = mock(DragItemAdapter.class);
         when(adapter.hasStableIds()).thenReturn(true);
 
@@ -50,7 +50,7 @@ public class BoardViewTest {
 
     @Test
     public void getRecyclerView_afterAddingColumnList_createsNewRecyclerView() {
-        subject.addColumnList(adapter, mock(View.class), false);
+        subject.addColumn(adapter, mock(View.class), null, false);
 
         assertThat(subject.getRecyclerView(0)).isNotNull();
     }
@@ -81,7 +81,7 @@ public class BoardViewTest {
 
     private DragItemRecyclerView createColumnsAndDrag(DragItemAdapter adapter) {
         when(adapter.removeItem(anyInt())).thenReturn(mock(Object.class));
-        DragItemRecyclerView column = subject.addColumnList(adapter, null, false);
+        DragItemRecyclerView column = subject.addColumn(adapter, null, null,false);
         View view = mock(View.class);
         when(view.getWidth()).thenReturn(1);
         when(view.getHeight()).thenReturn(1);
