@@ -813,8 +813,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * @return The created DragItemRecyclerView.
      */
     public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
+        return addColumn(adapter, header, columnDragView, hasFixedItemSize, true);
+    }
+
+    public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, boolean canDrag) {
         final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, hasFixedItemSize);
-        setupColumnDragListener(columnDragView, recyclerView);
+        if(canDrag) setupColumnDragListener(columnDragView, recyclerView);
         return recyclerView;
     }
 
