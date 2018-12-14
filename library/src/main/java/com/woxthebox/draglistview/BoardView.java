@@ -71,7 +71,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
         void onColumnDragChangedPosition(int oldPosition, int newPosition);
 
-        void onColumnDragEnded(int position);
+        void onColumnDragEnded(int fromPosition, int toPosition);
     }
 
     public static abstract class BoardListenerAdapter implements BoardListener {
@@ -104,7 +104,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
 
         @Override
-        public void onColumnDragEnded(int position) {
+        public void onColumnDragEnded(int fromPosition, int toPosition) {
         }
     }
 
@@ -142,6 +142,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private boolean mDragEnabled = true;
     private int mLastDragColumn = NO_POSITION;
     private int mLastDragRow = NO_POSITION;
+    private int mDragColumnStartPosition;
     private SavedState mSavedState;
 
     public BoardView(Context context) {
@@ -759,7 +760,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         columnView.setAlpha(0);
 
         if (mBoardListener != null) {
-            mBoardListener.onColumnDragStarted(getColumnOfList(mCurrentRecyclerView));
+            mDragColumnStartPosition = getColumnOfList(mCurrentRecyclerView);
+            mBoardListener.onColumnDragStarted(mDragColumnStartPosition);
         }
     }
 
@@ -772,7 +774,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
                 mRootLayout.removeView(mDragColumn.getDragItemView());
 
                 if (mBoardListener != null) {
-                    mBoardListener.onColumnDragEnded(getColumnOfList(mCurrentRecyclerView));
+                    mBoardListener.onColumnDragEnded(mDragColumnStartPosition, getColumnOfList(mCurrentRecyclerView));
                 }
             }
         });
