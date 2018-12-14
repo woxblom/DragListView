@@ -29,6 +29,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -49,6 +50,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         boolean canDragItemAtPosition(int column, int row);
 
         boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow);
+
+        boolean canDragColumnAtPosition(int index);
+
+        boolean canDropColumnAtPosition(int oldIndex, int newIndex);
     }
 
     public interface BoardListener {
@@ -129,6 +134,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private float mTouchY;
     private float mDragColumnStartScrollX;
     private int mColumnWidth;
+    private SparseIntArray mColumnsWidth = new SparseIntArray();
+    private SparseIntArray mColumnsBackground = new SparseIntArray();
     private int mDragStartColumn;
     private int mDragStartRow;
     private boolean mHasLaidOut;
@@ -329,8 +336,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private void updateScrollPosition() {
         if (isDraggingColumn()) {
             DragItemRecyclerView currentList = getCurrentRecyclerView(mTouchX + getScrollX());
-            if (mCurrentRecyclerView != currentList) {
-                moveColumn(getColumnOfList(mCurrentRecyclerView), getColumnOfList(currentList));
+            int oldIndex = getColumnOfList(mCurrentRecyclerView);
+            int newIndex = getColumnOfList(currentList);
+            if (mBoardCallback == null || mBoardCallback.canDropColumnAtPosition(oldIndex, newIndex)) {
+                if (mCurrentRecyclerView != currentList) {
+                    moveColumn(oldIndex, newIndex);
+                }
             }
             // Need to subtract with scrollX at the beginning of the column drag because of how drag item position is calculated
             mDragColumn.setPosition(mTouchX + getScrollX() - mDragColumnStartScrollX, mTouchY);
@@ -665,6 +676,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mColumnWidth = width;
     }
 
+    public void setColumnWidth(int index, int width) {
+        mColumnsWidth.put(index, width);
+    }
+
+    public void setColumnBackground(int index, int resid) {
+        mColumnsBackground.put(index, resid);
+    }
+
     /**
      * @param snapToColumn true if scrolling should snap to columns. Only applies to portrait mode.
      */
@@ -813,12 +832,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * @return The created DragItemRecyclerView.
      */
     public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
-        return addColumn(adapter, header, columnDragView, hasFixedItemSize, true);
-    }
-
-    public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, boolean canDrag) {
-        final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, hasFixedItemSize);
-        if(canDrag) setupColumnDragListener(columnDragView, recyclerView);
+        int index = getColumnCount();
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, index, header, hasFixedItemSize);
+        if (mBoardCallback == null || mBoardCallback.canDragColumnAtPosition(index)) {
+            setupColumnDragListener(columnDragView, recyclerView);
+        }
         return recyclerView;
     }
 
@@ -912,7 +930,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
         LinearLayout layout = new LinearLayout(getContext());
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setLayoutParams(new LayoutParams(mColumnWidth, LayoutParams.MATCH_PARENT));
+        layout.setLayoutParams(new LayoutParams(mColumnsWidth.get(index, mColumnWidth), LayoutParams.MATCH_PARENT));
         View columnHeader = header;
         if (header == null) {
             columnHeader = new View(getContext());
@@ -921,9 +939,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         layout.addView(columnHeader);
         mHeaders.add(columnHeader);
 
+        recyclerView.setPadding(mColumnsWidth.get(index, mColumnWidth)-mColumnWidth, 0, 0, 0);
+        recyclerView.setBackgroundResource(mColumnsBackground.get(index));
         layout.addView(recyclerView);
-
         mLists.add(index, recyclerView);
+
         mColumnLayout.addView(layout, index);
         return recyclerView;
     }
