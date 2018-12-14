@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
@@ -29,6 +30,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -135,7 +137,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private float mDragColumnStartScrollX;
     private int mColumnWidth;
     private SparseIntArray mColumnsWidth = new SparseIntArray();
-    private SparseIntArray mColumnsBackground = new SparseIntArray();
+    private SparseArray<Drawable> mColumnsBackground = new SparseArray<>();
     private int mDragStartColumn;
     private int mDragStartRow;
     private boolean mHasLaidOut;
@@ -681,8 +683,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mColumnsWidth.put(index, width);
     }
 
-    public void setColumnBackground(int index, int resid) {
-        mColumnsBackground.put(index, resid);
+    public void setColumnBackground(int index, Drawable drawable) {
+        mColumnsBackground.put(index, drawable);
     }
 
     /**
@@ -942,7 +944,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mHeaders.add(columnHeader);
 
         recyclerView.setPadding(mColumnsWidth.get(index, mColumnWidth)-mColumnWidth, 0, 0, 0);
-        recyclerView.setBackgroundResource(mColumnsBackground.get(index));
+        recyclerView.setBackgroundDrawable(mColumnsBackground.get(index));
         layout.addView(recyclerView);
         mLists.add(index, recyclerView);
 
