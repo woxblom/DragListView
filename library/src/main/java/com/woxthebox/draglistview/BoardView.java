@@ -511,6 +511,12 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         return -1;
     }
 
+    boolean reverseDirection = false;
+
+    public void reverse(boolean reverseDirection) {
+        this.reverseDirection = reverseDirection;
+    }
+
     public void removeItem(int column, int row) {
         if (!isDragging() && mLists.size() > column && mLists.get(column).getAdapter().getItemCount() > row) {
             DragItemAdapter adapter = (DragItemAdapter) mLists.get(column).getAdapter();
@@ -841,8 +847,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setVerticalScrollBarEnabled(false);
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
-        recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        if(reverseDirection) {
+            recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1.0f));
+            layoutManager.setReverseLayout(true);
+        }else {
+            recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        }
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(hasFixedItemSize);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
@@ -914,10 +926,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             columnHeader = new View(getContext());
             columnHeader.setVisibility(View.GONE);
         }
-        layout.addView(columnHeader);
+        if(reverseDirection){
+            layout.addView(recyclerView);
+            layout.addView(columnHeader);
+        }else{
+            layout.addView(columnHeader);
+            layout.addView(recyclerView);
+        }
         mHeaders.add(columnHeader);
-
-        layout.addView(recyclerView);
 
         mLists.add(index, recyclerView);
         mColumnLayout.addView(layout, index);
