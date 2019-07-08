@@ -23,9 +23,12 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -717,7 +720,9 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      */
     public void setCustomDragItem(DragItem dragItem) {
         DragItem newDragItem = dragItem != null ? dragItem : new DragItem(getContext());
-        newDragItem.setSnapToTouch(mDragItem.isSnapToTouch());
+        if (dragItem == null) {
+            newDragItem.setSnapToTouch(true);
+        }
         mDragItem = newDragItem;
         mRootLayout.removeViewAt(1);
         mRootLayout.addView(mDragItem.getDragItemView());
@@ -727,7 +732,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * Set a custom drag item to control the visuals and animations when dragging a column.
      */
     public void setCustomColumnDragItem(DragItem dragItem) {
-        mDragColumn = dragItem != null ? dragItem : new DragItem(getContext());
+        DragItem newDragItem = dragItem != null ? dragItem : new DragItem(getContext());
+        if (dragItem == null) {
+            newDragItem.setSnapToTouch(false);
+        }
+        mDragColumn = newDragItem;
     }
 
     private void startDragColumn(DragItemRecyclerView recyclerView, float posX, float posY) {
@@ -797,7 +806,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * @return The created DragItemRecyclerView.
      */
     public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
-        final DragItemRecyclerView recyclerView = insertColumn(adapter, index, header, hasFixedItemSize);
+        return insertColumn(adapter, index, header, columnDragView, hasFixedItemSize, new LinearLayoutManager(getContext()));
+    }
+
+    public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, @NonNull RecyclerView.LayoutManager layoutManager) {
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, index, header, hasFixedItemSize, layoutManager);
         setupColumnDragListener(columnDragView, recyclerView);
         return recyclerView;
     }
@@ -813,7 +826,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * @return The created DragItemRecyclerView.
      */
     public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
-        final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, hasFixedItemSize);
+        return addColumn(adapter, header, columnDragView, hasFixedItemSize, new LinearLayoutManager(getContext()));
+    }
+
+    public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, @NonNull RecyclerView.LayoutManager layoutManager) {
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, hasFixedItemSize, layoutManager);
         setupColumnDragListener(columnDragView, recyclerView);
         return recyclerView;
     }
@@ -830,7 +847,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
     }
 
-    private DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, boolean hasFixedItemSize) {
+    private DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, boolean hasFixedItemSize, RecyclerView.LayoutManager layoutManager) {
         if (index > getColumnCount()) {
             throw new IllegalArgumentException("Index is out of bounds");
         }
@@ -842,7 +859,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
         recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(hasFixedItemSize);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {

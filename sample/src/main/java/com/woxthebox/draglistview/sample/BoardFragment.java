@@ -24,6 +24,8 @@ import androidx.fragment.app.Fragment;
 import androidx.core.util.Pair;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -47,6 +49,7 @@ public class BoardFragment extends Fragment {
     private static int sCreatedItems = 0;
     private BoardView mBoardView;
     private int mColumns;
+    private boolean mGridLayout;
 
     public static BoardFragment newInstance() {
         return new BoardFragment();
@@ -66,8 +69,6 @@ public class BoardFragment extends Fragment {
         mBoardView.setSnapToColumnsWhenScrolling(true);
         mBoardView.setSnapToColumnWhenDragging(true);
         mBoardView.setSnapDragItemToTouch(true);
-        mBoardView.setCustomDragItem(new MyDragItem(getActivity(), R.layout.column_item));
-        mBoardView.setCustomColumnDragItem(new MyColumnDragItem(getActivity(), R.layout.column_drag_layout));
         mBoardView.setSnapToColumnInLandscape(false);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
@@ -135,14 +136,8 @@ public class BoardFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle("Board");
-
-        addColumn();
-        addColumn();
-        addColumn();
-        addColumn();
-        addColumn();
+        resetBoard();
     }
 
     @Override
@@ -156,6 +151,8 @@ public class BoardFragment extends Fragment {
         super.onPrepareOptionsMenu(menu);
         menu.findItem(R.id.action_disable_drag).setVisible(mBoardView.isDragEnabled());
         menu.findItem(R.id.action_enable_drag).setVisible(!mBoardView.isDragEnabled());
+        menu.findItem(R.id.action_grid).setVisible(!mGridLayout);
+        menu.findItem(R.id.action_list).setVisible(mGridLayout);
     }
 
     @Override
@@ -167,6 +164,16 @@ public class BoardFragment extends Fragment {
                 return true;
             case R.id.action_enable_drag:
                 mBoardView.setDragEnabled(true);
+                getActivity().invalidateOptionsMenu();
+                return true;
+            case R.id.action_grid:
+                mGridLayout = true;
+                resetBoard();
+                getActivity().invalidateOptionsMenu();
+                return true;
+            case R.id.action_list:
+                mGridLayout = false;
+                resetBoard();
                 getActivity().invalidateOptionsMenu();
                 return true;
             case R.id.action_add_column:
@@ -182,6 +189,17 @@ public class BoardFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    private void resetBoard() {
+        mBoardView.clearBoard();
+        mBoardView.setCustomDragItem(mGridLayout ? null : new MyDragItem(getActivity(), R.layout.column_item));
+        mBoardView.setCustomColumnDragItem(mGridLayout ? null : new MyColumnDragItem(getActivity(), R.layout.column_drag_layout));
+        addColumn();
+        addColumn();
+        addColumn();
+        addColumn();
+        addColumn();
+    }
+
     private void addColumn() {
         final ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
         int addItems = 15;
@@ -191,7 +209,7 @@ public class BoardFragment extends Fragment {
         }
 
         final int column = mColumns;
-        final ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.item_layout, true);
+        final ItemAdapter listAdapter = new ItemAdapter(mItemArray, mGridLayout ? R.layout.grid_item : R.layout.column_item, R.id.item_layout, true);
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
         ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
         ((TextView) header.findViewById(R.id.item_count)).setText("" + addItems);
@@ -208,7 +226,7 @@ public class BoardFragment extends Fragment {
                 ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
-        mBoardView.addColumn(listAdapter, header, header, false);
+        mBoardView.addColumn(listAdapter, header, header, false, mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext()));
         mColumns++;
     }
 
