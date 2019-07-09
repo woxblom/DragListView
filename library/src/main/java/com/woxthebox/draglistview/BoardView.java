@@ -366,7 +366,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
 
         boolean isPortrait = getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
-        float scrollEdge = getResources().getDisplayMetrics().widthPixels * (isPortrait ? 0.18f : 0.14f);
+        float scrollEdge = getResources().getDisplayMetrics().widthPixels * (isPortrait ? 0.06f : 0.14f);
         if (mTouchX > getWidth() - scrollEdge && getScrollX() < mColumnLayout.getWidth()) {
             mAutoScroller.startAutoScroll(AutoScroller.ScrollDirection.LEFT);
         } else if (mTouchX < scrollEdge && getScrollX() > 0) {
