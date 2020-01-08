@@ -13,8 +13,10 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<com.woxthebox.draglistview.BoardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.woxthebox.draglistview.BoardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/board_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"/>
+    android:layout_height="match_parent"
+    app:boardEdges="@dimen/boardEdges"
+    app:columnsInterval="@dimen/columnIntervals" />

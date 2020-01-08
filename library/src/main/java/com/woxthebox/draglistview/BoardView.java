@@ -21,16 +21,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.view.ViewCompat;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -41,6 +34,13 @@ import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
@@ -132,6 +132,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private float mTouchY;
     private float mDragColumnStartScrollX;
     private int mColumnWidth;
+    private int mColumnsInterval = 0;
+    private int mBoardEdge = 0;
     private int mDragStartColumn;
     private int mDragStartRow;
     private boolean mHasLaidOut;
@@ -146,10 +148,21 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     public BoardView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(attrs);
     }
 
     public BoardView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(attrs);
+    }
+
+    private void init(AttributeSet attrs) {
+        TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.BoardView);
+
+        mColumnsInterval = a.getDimensionPixelSize(R.styleable.BoardView_columnsInterval, 0);
+        mBoardEdge = a.getDimensionPixelSize(R.styleable.BoardView_boardEdges, 0);
+
+        a.recycle();
     }
 
     @Override
@@ -669,6 +682,22 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
+     * @param columnsInterval the interval between columns in pixels.
+     */
+    public void setColumnsInterval(int columnsInterval) {
+        mColumnsInterval = columnsInterval;
+        updateBoardSpaces();
+    }
+
+    /**
+     * @param boardEdge the extra space in pixels on the start and on the end of columns.
+     */
+    public void setBoardEdge(int boardEdge) {
+        mBoardEdge = boardEdge;
+        updateBoardSpaces();
+    }
+
+    /**
      * @param snapToColumn true if scrolling should snap to columns. Only applies to portrait mode.
      */
     public void setSnapToColumnsWhenScrolling(boolean snapToColumn) {
@@ -780,6 +809,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         mColumnLayout.removeViewAt(fromIndex);
         mColumnLayout.addView(column1, toIndex);
 
+        updateBoardSpaces();
+
         mColumnLayout.addOnLayoutChangeListener(new OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
@@ -806,11 +837,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * @return The created DragItemRecyclerView.
      */
     public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
-        return insertColumn(adapter, index, header, columnDragView, hasFixedItemSize, new LinearLayoutManager(getContext()));
+        ItemsParameters itemsParameters = new ItemsParameters.Builder(new LinearLayoutManager(getContext()))
+                                          .setHasFixedSize(hasFixedItemSize)
+                                          .build();
+        return insertColumn(adapter, index, header, columnDragView, itemsParameters);
     }
 
-    public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, @NonNull RecyclerView.LayoutManager layoutManager) {
-        final DragItemRecyclerView recyclerView = insertColumn(adapter, index, header, hasFixedItemSize, layoutManager);
+    public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, @NonNull ItemsParameters itemsParameters) {
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, index, header, itemsParameters);
         setupColumnDragListener(columnDragView, recyclerView);
         return recyclerView;
     }
@@ -826,11 +860,14 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
      * @return The created DragItemRecyclerView.
      */
     public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize) {
-        return addColumn(adapter, header, columnDragView, hasFixedItemSize, new LinearLayoutManager(getContext()));
+        ItemsParameters itemsParameters = new ItemsParameters.Builder(new LinearLayoutManager(getContext()))
+                                          .setHasFixedSize(hasFixedItemSize)
+                                          .build();
+        return addColumn(adapter, header, columnDragView, itemsParameters);
     }
 
-    public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, @NonNull RecyclerView.LayoutManager layoutManager) {
-        final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, hasFixedItemSize, layoutManager);
+    public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, @NonNull ItemsParameters itemsParameters) {
+        final DragItemRecyclerView recyclerView = insertColumn(adapter, getColumnCount(), header, itemsParameters);
         setupColumnDragListener(columnDragView, recyclerView);
         return recyclerView;
     }
@@ -847,7 +884,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         }
     }
 
-    private DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, boolean hasFixedItemSize, RecyclerView.LayoutManager layoutManager) {
+    private DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @NonNull ItemsParameters itemsParameters) {
         if (index > getColumnCount()) {
             throw new IllegalArgumentException("Index is out of bounds");
         }
@@ -859,8 +896,11 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
         recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(hasFixedItemSize);
+
+        recyclerView.setLayoutManager(itemsParameters.getLayoutManager());
+        recyclerView.setBackgroundColor(itemsParameters.getBackgroundColor());
+        recyclerView.setHasFixedSize(itemsParameters.isHasFixedSize());
+
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setDragItemListener(new DragItemRecyclerView.DragItemListener() {
             @Override
@@ -938,7 +978,25 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
         mLists.add(index, recyclerView);
         mColumnLayout.addView(layout, index);
+
+        updateBoardSpaces();
+
         return recyclerView;
+    }
+
+    private void updateBoardSpaces() {
+        int childCount = mColumnLayout.getChildCount();
+        for (int childPosition = 0; childPosition < childCount; childPosition++) {
+            View child = mColumnLayout.getChildAt(childPosition);
+
+            if (childPosition == 0) {
+                child.setPadding(mBoardEdge, 0, mColumnsInterval, 0);
+            } else if (childPosition == childCount - 1) {
+                child.setPadding(0, 0, mBoardEdge, 0);
+            } else {
+                child.setPadding(0, 0, mColumnsInterval, 0);
+            }
+        }
     }
 
     private class GestureListener extends GestureDetector.SimpleOnGestureListener {

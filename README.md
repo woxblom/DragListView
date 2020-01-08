@@ -218,6 +218,27 @@ List and Grid layouts are used as example in the sample project.
         ...
         mBoardView.addColumn(listAdapter, header, null, false);
 
+  To set custom column width you can use the method below.
+    /**
+     * @param width the width of columns in both portrait and landscape. This must be called before {@link #addColumn} is
+     *              called for the width to take effect.
+     */
+     public void setColumnWidth(int width)
+
+  To add a column with a custom layout manager or to set background color behind column items you could use addColumn method with ItemsParameters model.
+
+        LinearLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+        int backgroundColor = ContextCompat.getColor(getContext(), R.color.column_background);
+
+        ItemsParameters itemsParameters = new ItemsParameters.Builder(layoutManager)
+                                      .setHasFixedSize(false)
+                                      .setColumnBackgroundColor(backgroundColor)
+                                      .build();
+        mBoardView.addColumn(listAdapter, header, header, itemsParameters);
+
+  To add interval between columns you can use BoardView parameter "columnsInterval" or indicate it programmatically via method "setColumnsInterval(int columnsInterval)" where interval should be indicated in pixels.
+  The space before the first column and after the last one can be added by parameter "boardEdges" or programmatically via method "setBoardEdge(int boardEdge)" where space should be indicated in pixels as well.
+
   To enable dragging and reordering of columns you need to provide a column drag view when adding the column. It is the view that will
   start the column drag process when long pressed on. You can also implement a custom column drag item to control the visuals and animations.
   Check out the sample app to see how it is done. If no custom drag item is used a screenshot of the column will be used instead.

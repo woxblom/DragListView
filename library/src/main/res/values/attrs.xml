@@ -5,4 +5,9 @@
         <attr name="leftViewId" format="integer"/>
         <attr name="rightViewId" format="integer"/>
     </declare-styleable>
+
+    <declare-styleable name="BoardView">
+        <attr name="boardEdges" format="dimension"/>
+        <attr name="columnsInterval" format="dimension"/>
+    </declare-styleable>
 </resources>

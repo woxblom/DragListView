@@ -18,8 +18,11 @@ package com.woxthebox.draglistview.sample;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.core.util.Pair;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +44,8 @@ import android.widget.TextView;
 
 import com.woxthebox.draglistview.BoardView;
 import com.woxthebox.draglistview.DragItem;
+import com.woxthebox.draglistview.ItemsParameters;
+import com.woxthebox.draglistview.ViewUtils;
 
 import java.util.ArrayList;
 
@@ -208,7 +213,6 @@ public class BoardFragment extends Fragment {
             mItemArray.add(new Pair<>(id, "Item " + id));
         }
 
-        final int column = mColumns;
         final ItemAdapter listAdapter = new ItemAdapter(mItemArray, mGridLayout ? R.layout.grid_item : R.layout.column_item, R.id.item_layout, true);
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
         ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
@@ -226,7 +230,13 @@ public class BoardFragment extends Fragment {
                 ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
-        mBoardView.addColumn(listAdapter, header, header, false, mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext()));
+        LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
+        int backgroundColor = ContextCompat.getColor(getContext(), R.color.column_background);
+        ItemsParameters itemsParameters = new ItemsParameters.Builder(layoutManager)
+                                      .setHasFixedSize(false)
+                                      .setColumnBackgroundColor(backgroundColor)
+                                      .build();
+        mBoardView.addColumn(listAdapter, header, header, itemsParameters);
         mColumns++;
     }
 
@@ -246,6 +256,14 @@ public class BoardFragment extends Fragment {
             View dragHeader = dragView.findViewById(R.id.drag_header);
             ScrollView dragScrollView = dragView.findViewById(R.id.drag_scroll_view);
             LinearLayout dragLayout = dragView.findViewById(R.id.drag_list);
+
+            Drawable clickedRecyclerBackground = ViewUtils.getBackgroundDrawable(clickedRecyclerView);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                dragLayout.setBackground(clickedRecyclerBackground);
+            } else {
+                dragLayout.setBackgroundDrawable(clickedRecyclerBackground);
+            }
+
             dragLayout.removeAllViews();
 
             ((TextView) dragHeader.findViewById(R.id.text)).setText(((TextView) clickedHeader.findViewById(R.id.text)).getText());
