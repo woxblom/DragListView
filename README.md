@@ -216,7 +216,7 @@ List and Grid layouts are used as example in the sample project.
             }
         });
         ...
-        mBoardView.addColumn(listAdapter, header, null, false);
+        mBoardView.addColumn(columnProperties);
 
   To set custom column width you can use the method below.
     /**
@@ -225,16 +225,21 @@ List and Grid layouts are used as example in the sample project.
      */
      public void setColumnWidth(int width)
 
-  To add a column with a custom layout manager or to set background color behind column items you could use addColumn method with ItemsParameters model.
+  Methods addColumn and insert column which returns the column view are indicated as deprecated and will be removed in future versions. Instead of them, to add or insert a column you should use ColumnProperties instance, where you can set all necessary parameters to this column.
 
-        LinearLayoutManager layoutManager = new GridLayoutManager(getContext(), 4);
+        LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
         int backgroundColor = ContextCompat.getColor(getContext(), R.color.column_background);
 
-        ItemsParameters itemsParameters = new ItemsParameters.Builder(layoutManager)
-                                      .setHasFixedSize(false)
-                                      .setColumnBackgroundColor(backgroundColor)
+        ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
+                                      .setLayoutManager(layoutManager)
+                                      .setHasFixedItemSize(false)
+                                      .setColumnBackgroundColor(Color.TRANSPARENT)
+                                      .setItemsSectionBackgroundColor(backgroundColor)
+                                      .setHeader(header)
+                                      .setColumnDrugView(header)
                                       .build();
-        mBoardView.addColumn(listAdapter, header, header, itemsParameters);
+
+        mBoardView.addColumn(columnProperties);
 
   To add interval between columns you can use BoardView parameter "columnsInterval" or indicate it programmatically via method "setColumnsInterval(int columnsInterval)" where interval should be indicated in pixels.
   The space before the first column and after the last one can be added by parameter "boardEdges" or programmatically via method "setBoardEdge(int boardEdge)" where space should be indicated in pixels as well.

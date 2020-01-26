@@ -20,7 +20,9 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -53,12 +55,14 @@ public class DragItem {
     }
 
     public void onBindDragView(View clickedView, View dragView) {
-        Drawable clickedViewBackground = ViewUtils.getBackgroundDrawable(clickedView);
+        Bitmap bitmap = Bitmap.createBitmap(clickedView.getWidth(), clickedView.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        clickedView.draw(canvas);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            dragView.setBackground(clickedViewBackground);
+            dragView.setBackground(new BitmapDrawable(clickedView.getResources(), bitmap));
         } else {
             //noinspection deprecation
-            dragView.setBackgroundDrawable(clickedViewBackground);
+            dragView.setBackgroundDrawable(new BitmapDrawable(clickedView.getResources(), bitmap));
         }
     }
 

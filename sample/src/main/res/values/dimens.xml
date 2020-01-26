@@ -3,6 +3,6 @@
 
     <!-- Margins -->
     <dimen name="columnIntervals">8dp</dimen>
-    <dimen name="boardEdges">12dp</dimen>
+    <dimen name="boardEdges">24dp</dimen>
 
 </resources>

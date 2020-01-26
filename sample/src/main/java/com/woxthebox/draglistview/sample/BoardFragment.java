@@ -18,18 +18,9 @@ package com.woxthebox.draglistview.sample;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.core.util.Pair;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,10 +33,20 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
+import androidx.core.view.ViewCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.woxthebox.draglistview.BoardView;
+import com.woxthebox.draglistview.ColumnProperties;
 import com.woxthebox.draglistview.DragItem;
-import com.woxthebox.draglistview.ItemsParameters;
-import com.woxthebox.draglistview.ViewUtils;
 
 import java.util.ArrayList;
 
@@ -74,7 +75,7 @@ public class BoardFragment extends Fragment {
         mBoardView.setSnapToColumnsWhenScrolling(true);
         mBoardView.setSnapToColumnWhenDragging(true);
         mBoardView.setSnapDragItemToTouch(true);
-        mBoardView.setSnapToColumnInLandscape(false);
+        mBoardView.setSnapToColumnInLandscape(true);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
@@ -232,11 +233,17 @@ public class BoardFragment extends Fragment {
         });
         LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
         int backgroundColor = ContextCompat.getColor(getContext(), R.color.column_background);
-        ItemsParameters itemsParameters = new ItemsParameters.Builder(layoutManager)
-                                      .setHasFixedSize(false)
-                                      .setColumnBackgroundColor(backgroundColor)
+
+        ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
+                                      .setLayoutManager(layoutManager)
+                                      .setHasFixedItemSize(false)
+                                      .setColumnBackgroundColor(Color.TRANSPARENT)
+                                      .setItemsSectionBackgroundColor(backgroundColor)
+                                      .setHeader(header)
+                                      .setColumnDrugView(header)
                                       .build();
-        mBoardView.addColumn(listAdapter, header, header, itemsParameters);
+
+        mBoardView.addColumn(columnProperties);
         mColumns++;
     }
 
@@ -257,11 +264,14 @@ public class BoardFragment extends Fragment {
             ScrollView dragScrollView = dragView.findViewById(R.id.drag_scroll_view);
             LinearLayout dragLayout = dragView.findViewById(R.id.drag_list);
 
-            Drawable clickedRecyclerBackground = ViewUtils.getBackgroundDrawable(clickedRecyclerView);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                dragLayout.setBackground(clickedRecyclerBackground);
-            } else {
-                dragLayout.setBackgroundDrawable(clickedRecyclerBackground);
+            Drawable clickedColumnBackground = clickedLayout.getBackground();
+            if (clickedColumnBackground != null) {
+                ViewCompat.setBackground(dragView, clickedColumnBackground);
+            }
+
+            Drawable clickedRecyclerBackground = clickedRecyclerView.getBackground();
+            if (clickedRecyclerBackground != null) {
+                ViewCompat.setBackground(dragLayout, clickedRecyclerBackground);
             }
 
             dragLayout.removeAllViews();
