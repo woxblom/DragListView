@@ -240,7 +240,7 @@ public class BoardFragment extends Fragment {
                                       .setColumnBackgroundColor(Color.TRANSPARENT)
                                       .setItemsSectionBackgroundColor(backgroundColor)
                                       .setHeader(header)
-                                      .setColumnDrugView(header)
+                                      .setColumnDragView(header)
                                       .build();
 
         mBoardView.addColumn(columnProperties);

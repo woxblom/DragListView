@@ -241,7 +241,7 @@ List and Grid layouts are used as example in the sample project.
 
         mBoardView.addColumn(columnProperties);
 
-  To add interval between columns you can use BoardView parameter "columnsInterval" or indicate it programmatically via method "setColumnsInterval(int columnsInterval)" where interval should be indicated in pixels.
+  To add spacing between columns you can use BoardView parameter "columnSpacing" or indicate it programmatically via method "setColumnSpacing(int columnSpacing)" where the space should be indicated in pixels.
   The space before the first column and after the last one can be added by parameter "boardEdges" or programmatically via method "setBoardEdge(int boardEdge)" where space should be indicated in pixels as well.
 
   To enable dragging and reordering of columns you need to provide a column drag view when adding the column. It is the view that will

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 Lisovyi Dmytro
+ * <p/>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.woxthebox.draglistview;
 
 import android.graphics.Color;
@@ -61,7 +77,7 @@ public class ColumnProperties {
         return mItemDecorations;
     }
 
-    boolean isHasFixedItemSize() {
+    boolean hasFixedItemSize() {
         return mHasFixedItemSize;
     }
 
@@ -147,7 +163,7 @@ public class ColumnProperties {
          * @return instance of the {@link Builder}
          */
         public Builder setHasFixedItemSize(boolean hasFixedItemSize) {
-            this.mHasFixedItemSize = hasFixedItemSize;
+            mHasFixedItemSize = hasFixedItemSize;
             return this;
         }
 
@@ -194,7 +210,7 @@ public class ColumnProperties {
          *
          * @return instance of the {@link Builder}
          */
-        public Builder setColumnDrugView(@Nullable View columnDragView) {
+        public Builder setColumnDragView(@Nullable View columnDragView) {
             mColumnDragView = columnDragView;
             return this;
         }
@@ -211,8 +227,8 @@ public class ColumnProperties {
                     mHasFixedItemSize,
                     mColumnBackgroundColor,
                     mItemsSectionBackgroundColor,
-                    mHeader,
-                    mColumnDragView);
+                    mColumnDragView,
+                    mHeader);
         }
     }
 }

@@ -133,7 +133,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private float mTouchY;
     private float mDragColumnStartScrollX;
     private int mColumnWidth;
-    private int mColumnsInterval = 0;
+    private int mColumnSpacing = 0;
     private int mBoardEdge = 0;
     private int mDragStartColumn;
     private int mDragStartRow;
@@ -160,7 +160,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private void init(AttributeSet attrs) {
         TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.BoardView);
 
-        mColumnsInterval = a.getDimensionPixelSize(R.styleable.BoardView_columnsInterval, 0);
+        mColumnSpacing = a.getDimensionPixelSize(R.styleable.BoardView_columnSpacing, 0);
         mBoardEdge = a.getDimensionPixelSize(R.styleable.BoardView_boardEdges, 0);
 
         a.recycle();
@@ -687,10 +687,10 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     }
 
     /**
-     * @param columnsInterval the interval between columns in pixels.
+     * @param columnSpacing the interval between columns in pixels.
      */
-    public void setColumnsInterval(int columnsInterval) {
-        mColumnsInterval = columnsInterval;
+    public void setColumnSpacing(int columnSpacing) {
+        mColumnSpacing = columnSpacing;
         updateBoardSpaces();
     }
 
@@ -854,7 +854,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     public DragItemRecyclerView insertColumn(final DragItemAdapter adapter, int index, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, @NonNull RecyclerView.LayoutManager layoutManager) {
         ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(adapter)
                 .setHeader(header)
-                .setColumnDrugView(columnDragView)
+                .setColumnDragView(columnDragView)
                 .setHasFixedItemSize(hasFixedItemSize)
                 .setLayoutManager(layoutManager)
                 .build();
@@ -893,7 +893,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     public DragItemRecyclerView addColumn(final DragItemAdapter adapter, final @Nullable View header, @Nullable View columnDragView, boolean hasFixedItemSize, @NonNull RecyclerView.LayoutManager layoutManager) {
         ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(adapter)
                 .setHeader(header)
-                .setColumnDrugView(columnDragView)
+                .setColumnDragView(columnDragView)
                 .setHasFixedItemSize(hasFixedItemSize)
                 .setLayoutManager(layoutManager)
                 .build();
@@ -926,7 +926,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         RecyclerView.LayoutManager layoutManager = columnProperties.getLayoutManager();
         recyclerView.setLayoutManager(layoutManager != null ? layoutManager : new LinearLayoutManager(getContext()));
         recyclerView.setBackgroundColor(columnProperties.getItemsSectionBackgroundColor());
-        recyclerView.setHasFixedSize(columnProperties.isHasFixedItemSize());
+        recyclerView.setHasFixedSize(columnProperties.hasFixedItemSize());
 
         List<RecyclerView.ItemDecoration> itemDecorations = columnProperties.getItemDecorations();
         for (int i = 0; i < itemDecorations.size(); i++) {
@@ -1035,7 +1035,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
     private void updateBoardSpaces() {
         int columnCount = getColumnCount();
-        int oneSideIntervalSpace = mColumnsInterval / 2;
+        int oneSideIntervalSpace = mColumnSpacing / 2;
 
         for (int childPosition = 0; childPosition < columnCount; childPosition++) {
             View child = mColumnLayout.getChildAt(childPosition);
