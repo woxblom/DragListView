@@ -75,7 +75,7 @@ public class BoardFragment extends Fragment {
         mBoardView.setSnapToColumnsWhenScrolling(true);
         mBoardView.setSnapToColumnWhenDragging(true);
         mBoardView.setSnapDragItemToTouch(true);
-        mBoardView.setSnapToColumnInLandscape(true);
+        mBoardView.setSnapToColumnInLandscape(false);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
@@ -232,13 +232,11 @@ public class BoardFragment extends Fragment {
             }
         });
         LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
-        int backgroundColor = ContextCompat.getColor(getContext(), R.color.column_background);
-
         ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
                                       .setLayoutManager(layoutManager)
                                       .setHasFixedItemSize(false)
                                       .setColumnBackgroundColor(Color.TRANSPARENT)
-                                      .setItemsSectionBackgroundColor(backgroundColor)
+                                      .setItemsSectionBackgroundColor(Color.TRANSPARENT)
                                       .setHeader(header)
                                       .setColumnDragView(header)
                                       .build();

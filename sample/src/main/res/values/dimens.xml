@@ -16,7 +16,7 @@
 <resources>
 
     <!-- Margins -->
-    <dimen name="columnSpacing">8dp</dimen>
-    <dimen name="boardEdges">24dp</dimen>
+    <dimen name="columnSpacing">0dp</dimen>
+    <dimen name="boardEdges">0dp</dimen>
 
 </resources>
