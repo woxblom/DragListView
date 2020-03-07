@@ -17,7 +17,7 @@
 package com.woxthebox.draglistview.sample;
 
 import androidx.annotation.NonNull;
-import android.util.Pair;
+import androidx.core.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
