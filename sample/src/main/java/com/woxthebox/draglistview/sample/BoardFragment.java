@@ -19,12 +19,12 @@ package com.woxthebox.draglistview.sample;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import android.util.Pair;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,9 +36,11 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.woxthebox.draglistview.BoardView;
 import com.woxthebox.draglistview.DragItem;
+import com.woxthebox.draglistview.DragItemAdapter;
 
 import java.util.ArrayList;
 
@@ -70,9 +72,14 @@ public class BoardFragment extends Fragment {
         mBoardView.setCustomColumnDragItem(new MyColumnDragItem(getActivity(), R.layout.column_drag_layout));
         mBoardView.setSnapToColumnInLandscape(false);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
+        mBoardView.setColumnWidth(500);
+        mBoardView.setColumnWidth(0, 800);
+        mBoardView.setColumnBackground(0, getActivity().getResources().getDrawable(R.drawable.ic_launcher));
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
             public void onItemDragStarted(int column, int row) {
+                DragItemAdapter adapter = mBoardView.getAdapter(column);
+                adapter.getItemList().get(row);
                 //Toast.makeText(getContext(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
             }
 
@@ -112,7 +119,7 @@ public class BoardFragment extends Fragment {
             }
 
             @Override
-            public void onColumnDragEnded(int position) {
+            public void onColumnDragEnded(int fromPosition, int toPosition) {
                 //Toast.makeText(getContext(), "Column drag ended at " + position, Toast.LENGTH_SHORT).show();
             }
         });
@@ -127,6 +134,16 @@ public class BoardFragment extends Fragment {
             public boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
                 // Add logic here to prevent an item to be dropped
                 return true;
+            }
+
+            @Override
+            public boolean canDragColumnAtPosition(int index) {
+                return index!=2;
+            }
+
+            @Override
+            public boolean canDropColumnAtPosition(int oldIndex, int newIndex) {
+                return newIndex>1;
             }
         });
         return view;
@@ -184,28 +201,37 @@ public class BoardFragment extends Fragment {
 
     private void addColumn() {
         final ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
-        int addItems = 15;
+        int addItems = 6;
         for (int i = 0; i < addItems; i++) {
             long id = sCreatedItems++;
             mItemArray.add(new Pair<>(id, "Item " + id));
         }
 
         final int column = mColumns;
-        final ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.item_layout, true);
+        final ItemAdapter listAdapter = new ItemAdapter(mItemArray, R.layout.column_item, R.id.image, false);
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
         ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
         ((TextView) header.findViewById(R.id.item_count)).setText("" + addItems);
+        header.findViewById(R.id.item_count).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(getContext(), "Part clicked", Toast.LENGTH_LONG).show();
+            }
+        });
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long id = sCreatedItems++;
-                Pair item = new Pair<>(id, "Test " + id);
-                mBoardView.addItem(mBoardView.getColumnOfHeader(v), 0, item, true);
-                //mBoardView.moveItem(4, 0, 0, true);
-                //mBoardView.removeItem(column, 0);
-                //mBoardView.moveItem(0, 0, 1, 3, false);
-                //mBoardView.replaceItem(0, 0, item1, true);
-                ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
+                mBoardView.scrollToColumn(mBoardView.getColumnOfHeader(v), true);
+
+
+//                long id = sCreatedItems++;
+//                Pair item = new Pair<>(id, "Test " + id);
+//                mBoardView.addItem(mBoardView.getColumnOfHeader(v), 0, item, true);
+//                //mBoardView.moveItem(4, 0, 0, true);
+//                //mBoardView.removeItem(column, 0);
+//                //mBoardView.moveItem(0, 0, 1, 3, false);
+//                //mBoardView.replaceItem(0, 0, item1, true);
+//                ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
         mBoardView.addColumn(listAdapter, header, header, false);
