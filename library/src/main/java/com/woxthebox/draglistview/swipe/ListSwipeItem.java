@@ -21,11 +21,13 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.RelativeLayout;
+
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.woxthebox.draglistview.R;
 
@@ -53,6 +55,8 @@ public class ListSwipeItem extends RelativeLayout {
     private float mSwipeTranslationX;
     private float mStartSwipeTranslationX;
     private float mFlingSpeed;
+    private Float mMaximumRightTranslationX;
+    private Float mMaximumLeftTranslationX;
     private boolean mSwipeStarted;
     private int mSwipeViewId;
     private int mLeftViewId;
@@ -140,6 +144,24 @@ public class ListSwipeItem extends RelativeLayout {
         return SwipeDirection.NONE;
     }
 
+    @Nullable
+    public Float getMaximumLeftTranslationX() {
+        return mMaximumLeftTranslationX;
+    }
+
+    public void setMaximumLeftTranslationX(@Nullable Float maximumLeftTranslationX) {
+        mMaximumLeftTranslationX = maximumLeftTranslationX;
+    }
+
+    @Nullable
+    public Float getMaximumRightTranslationX() {
+        return mMaximumRightTranslationX;
+    }
+
+    public void setMaximumRightTranslationX(@Nullable Float maximumTranslationX) {
+        mMaximumRightTranslationX = maximumTranslationX;
+    }
+
     boolean isAnimating() {
         return mSwipeState == SwipeState.ANIMATING;
     }
@@ -166,26 +188,43 @@ public class ListSwipeItem extends RelativeLayout {
         mSwipeTranslationX = Math.min(mSwipeTranslationX, getMeasuredWidth());
         mSwipeTranslationX = Math.max(mSwipeTranslationX, -getMeasuredWidth());
 
-        mSwipeView.setTranslationX(mSwipeTranslationX);
-        if (mSwipeListener != null) {
-            mSwipeListener.onItemSwiping(this, mSwipeTranslationX);
+        if (mSwipeInStyle != SwipeInStyle.SLIDE) {
+            executeTranslationX();
         }
 
         if (mSwipeTranslationX < 0) {
             if (mSwipeInStyle == SwipeInStyle.SLIDE) {
-                mRightView.setTranslationX(getMeasuredWidth() + mSwipeTranslationX);
+                float translationX = getMeasuredWidth() + mSwipeTranslationX;
+                if (mMaximumRightTranslationX == null || translationX > mMaximumRightTranslationX) {
+                    mRightView.setTranslationX(translationX);
+                    executeTranslationX();
+                }
             }
             mRightView.setVisibility(View.VISIBLE);
             mLeftView.setVisibility(View.INVISIBLE);
         } else if (mSwipeTranslationX > 0) {
             if (mSwipeInStyle == SwipeInStyle.SLIDE) {
-                mLeftView.setTranslationX(-getMeasuredWidth() + mSwipeTranslationX);
+                float translationX = -getMeasuredWidth() + mSwipeTranslationX;
+                if (mMaximumLeftTranslationX == null || translationX < -mMaximumLeftTranslationX) {
+                    mLeftView.setTranslationX(translationX);
+                    executeTranslationX();
+                }
             }
             mLeftView.setVisibility(View.VISIBLE);
             mRightView.setVisibility(View.INVISIBLE);
         } else {
+            if (mSwipeInStyle == SwipeInStyle.SLIDE) {
+                executeTranslationX();
+            }
             mRightView.setVisibility(View.INVISIBLE);
             mLeftView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void executeTranslationX() {
+        mSwipeView.setTranslationX(mSwipeTranslationX);
+        if (mSwipeListener != null) {
+            mSwipeListener.onItemSwiping(this, mSwipeTranslationX);
         }
     }
 
