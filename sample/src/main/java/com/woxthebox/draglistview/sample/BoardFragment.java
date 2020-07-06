@@ -91,6 +91,14 @@ public class BoardFragment extends Fragment {
             }
 
             @Override
+            public void onItemChangingToChild(int position, int currentColumn) {
+            }
+
+            @Override
+            public void onItemChangingToParent(int position, int currentColumn) {
+            }
+
+            @Override
             public void onItemChangedPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
                 //Toast.makeText(mBoardView.getContext(), "Position changed - column: " + newColumn + " row: " + newRow, Toast.LENGTH_SHORT).show();
             }

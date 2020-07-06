@@ -75,6 +75,16 @@ public abstract class DragItemAdapter<T, VH extends DragItemAdapter.ViewHolder> 
         return null;
     }
 
+    public Object removeItem(Object object) {
+        if (mItemList != null && object != null && mItemList.contains(object)) {
+            int pos = mItemList.indexOf(object);
+            Object item = mItemList.remove(object);
+            notifyItemRemoved(pos);
+            return item;
+        }
+        return null;
+    }
+
     public void addItem(int pos, T item) {
         if (mItemList != null && mItemList.size() >= pos) {
             mItemList.add(pos, item);

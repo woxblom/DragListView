@@ -45,12 +45,19 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         boolean canDropItemAtPosition(int dropPosition);
     }
 
+    public interface DragItemToChildItemListener {
+        void onDraggingToChildTask(int itemPosition);
+
+        void onDraggingToParentTask(int itemPosition);
+    }
+
     private enum DragState {
         DRAG_STARTED, DRAGGING, DRAG_ENDED
     }
 
     private AutoScroller mAutoScroller;
     private DragItemListener mListener;
+    private DragItemToChildItemListener mDragItemToChildItemListener;
     private DragItemCallback mDragCallback;
     private DragState mDragState = DragState.DRAG_ENDED;
     private DragItemAdapter mAdapter;
@@ -68,6 +75,8 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     private boolean mScrollingEnabled = true;
     private boolean mDisableReorderWhenDragging;
     private boolean mDragEnabled = true;
+    private boolean mItemDraggingChanged;
+    private Object mItemDragging;
 
     public DragItemRecyclerView(Context context) {
         super(context);
@@ -244,6 +253,10 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     public void onAutoScrollColumnBy(int columns) {
     }
 
+    public void itemDraggingChanged() {
+        mItemDraggingChanged = true;
+    }
+
     /**
      * Returns the child view under the specific x,y coordinate.
      * This method will take margins of the child into account when finding it.
@@ -264,6 +277,10 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         }
 
         return null;
+    }
+
+    void setDragItemToChildItemListener(DragItemToChildItemListener dragItemToChildItemListener) {
+        mDragItemToChildItemListener = dragItemToChildItemListener;
     }
 
     private boolean shouldChangeItemPosition(int newPos) {
@@ -418,6 +435,13 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         if (mListener != null) {
             mListener.onDragging(mDragItemPosition, x, y);
         }
+
+        if (mDragItem.getDragItemView().getX() > mDragItem.getRealDragView().getWidth() / 6) {
+            mDragItemToChildItemListener.onDraggingToChildTask(mDragItemPosition);
+        } else {
+            mDragItemToChildItemListener.onDraggingToParentTask(mDragItemPosition);
+        }
+
         invalidate();
     }
 
@@ -464,6 +488,13 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
     }
 
     private void onDragItemAnimationEnd() {
+        if (mListener != null) {
+            mListener.onDragEnded(mDragItemPosition);
+        }
+        if (mItemDraggingChanged) {
+            mAdapter.removeItem(mItemDragging);
+        }
+        mItemDraggingChanged = false;
         mAdapter.setDragItemId(NO_ID);
         mAdapter.setDropTargetId(NO_ID);
         mAdapter.notifyDataSetChanged();
@@ -498,13 +529,16 @@ public class DragItemRecyclerView extends RecyclerView implements AutoScroller.A
         return pos;
     }
 
-    void addDragItemAndStart(float y, Object item, long itemId) {
+    void addDragItemAndStart(float y, Object item, long itemId, boolean itemDraggingChanged) {
         int pos = getDragPositionForY(y);
+
+        mItemDraggingChanged = itemDraggingChanged;
 
         mDragState = DragState.DRAG_STARTED;
         mDragItemId = itemId;
         mAdapter.setDragItemId(mDragItemId);
         mAdapter.addItem(pos, item);
+        mItemDragging = item;
         mDragItemPosition = pos;
 
         mHoldChangePosition = true;
