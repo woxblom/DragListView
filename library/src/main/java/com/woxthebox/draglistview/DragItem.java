@@ -33,6 +33,8 @@ public class DragItem {
     private View mDragView;
     private View mRealDragView;
 
+    private float mRealStartX;
+    private float mRealStartY;
     private float mOffsetX;
     private float mOffsetY;
     private float mPosX;
@@ -42,6 +44,7 @@ public class DragItem {
     private float mAnimationDx;
     private float mAnimationDy;
     private boolean mCanDragHorizontally = true;
+    private boolean mCanDragVertically = true;
     private boolean mSnapToTouch = true;
 
     DragItem(Context context) {
@@ -86,6 +89,14 @@ public class DragItem {
         mCanDragHorizontally = canDragHorizontally;
     }
 
+    boolean canDragVertically() {
+        return mCanDragVertically;
+    }
+
+    void setCanDragVertically(boolean canDragVertically) {
+        mCanDragVertically = canDragVertically;
+    }
+
     boolean isSnapToTouch() {
         return mSnapToTouch;
     }
@@ -122,17 +133,17 @@ public class DragItem {
         onMeasureDragView(startFromView, mDragView);
         onStartDragAnimation(mDragView);
 
-        float startX = startFromView.getX() - (mDragView.getMeasuredWidth() - startFromView.getMeasuredWidth()) / 2f + mDragView
+        mRealStartX = startFromView.getX() - (mDragView.getMeasuredWidth() - startFromView.getMeasuredWidth()) / 2f + mDragView
                 .getMeasuredWidth() / 2f;
-        float startY = startFromView.getY() - (mDragView.getMeasuredHeight() - startFromView.getMeasuredHeight()) / 2f + mDragView
+        mRealStartY = startFromView.getY() - (mDragView.getMeasuredHeight() - startFromView.getMeasuredHeight()) / 2f + mDragView
                 .getMeasuredHeight() / 2f;
 
         if (mSnapToTouch) {
             mPosTouchDx = 0;
             mPosTouchDy = 0;
             setPosition(touchX, touchY);
-            setAnimationDx(startX - touchX);
-            setAnimationDY(startY - touchY);
+            setAnimationDx(mRealStartX - touchX);
+            setAnimationDY(mRealStartY - touchY);
 
             PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("AnimationDx", mAnimationDx, 0);
             PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("AnimationDY", mAnimationDy, 0);
@@ -141,8 +152,8 @@ public class DragItem {
             anim.setDuration(ANIMATION_DURATION);
             anim.start();
         } else {
-            mPosTouchDx = startX - touchX;
-            mPosTouchDy = startY - touchY;
+            mPosTouchDx = mRealStartX - touchX;
+            mPosTouchDy = mRealStartY - touchY;
             setPosition(touchX, touchY);
         }
     }
@@ -196,8 +207,20 @@ public class DragItem {
     }
 
     void setPosition(float touchX, float touchY) {
-        mPosX = touchX + mPosTouchDx;
-        mPosY = touchY + mPosTouchDy;
+        if (mCanDragHorizontally) {
+            mPosX = touchX + mPosTouchDx;
+        } else {
+            mPosX = mRealStartX;
+            mDragView.setX(mPosX - mDragView.getMeasuredWidth() / 2f);
+        }
+
+        if (mCanDragVertically) {
+            mPosY = touchY + mPosTouchDy;
+        } else {
+            mPosY = mRealStartY;
+            mDragView.setY(mPosY - mDragView.getMeasuredHeight() / 2f);
+        }
+
         updatePosition();
     }
 
@@ -211,8 +234,10 @@ public class DragItem {
         if (mCanDragHorizontally) {
             mDragView.setX(mPosX + mOffsetX + mAnimationDx - mDragView.getMeasuredWidth() / 2f);
         }
+        if (mCanDragVertically) {
+            mDragView.setY(mPosY + mOffsetY + mAnimationDy - mDragView.getMeasuredHeight() / 2f);
+        }
 
-        mDragView.setY(mPosY + mOffsetY + mAnimationDy - mDragView.getMeasuredHeight() / 2f);
         mDragView.invalidate();
     }
 }
