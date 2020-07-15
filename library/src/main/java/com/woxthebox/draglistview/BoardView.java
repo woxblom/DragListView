@@ -119,6 +119,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
     private LinearLayout mColumnLayout;
     private ArrayList<DragItemRecyclerView> mLists = new ArrayList<>();
     private ArrayList<View> mHeaders = new ArrayList<>();
+    private ArrayList<View> mFooters = new ArrayList<>();
     private DragItemRecyclerView mCurrentRecyclerView;
     private DragItem mDragItem;
     private DragItem mDragColumn;
@@ -517,12 +518,28 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         return mHeaders.get(column);
     }
 
+    public View getFooterView(int column) {
+        return mFooters.get(column);
+    }
+
     /**
      * @return The index of the column with a specific header. If the header can't be found -1 is returned.
      */
     public int getColumnOfHeader(View header) {
         for (int i = 0; i < mHeaders.size(); i++) {
             if (mHeaders.get(i) == header) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * @return The index of the column with a specific footer. If the footer can't be found -1 is returned.
+     */
+    public int getColumnOfFooter(View footer) {
+        for (int i = 0; i < mFooters.size(); i++) {
+            if (mFooters.get(i) == footer) {
                 return i;
             }
         }
@@ -642,6 +659,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         for (int i = count - 1; i >= 0; i--) {
             mColumnLayout.removeViewAt(i);
             mHeaders.remove(i);
+            mFooters.remove(i);
             mLists.remove(i);
         }
     }
@@ -650,6 +668,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         if (column >= 0 && mLists.size() > column) {
             mColumnLayout.removeViewAt(column);
             mHeaders.remove(column);
+            mFooters.remove(column);
             mLists.remove(column);
             updateBoardSpaces();
         }
@@ -808,6 +827,8 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
 
         View header = mHeaders.remove(fromIndex);
         mHeaders.add(toIndex, header);
+        View footer = mFooters.remove(fromIndex);
+        mFooters.add(toIndex, footer);
 
         final View column1 = mColumnLayout.getChildAt(fromIndex);
         final View column2 = mColumnLayout.getChildAt(toIndex);
@@ -921,7 +942,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setVerticalScrollBarEnabled(false);
         recyclerView.setMotionEventSplittingEnabled(false);
         recyclerView.setDragItem(mDragItem);
-        recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT));
+        recyclerView.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1));
 
         RecyclerView.LayoutManager layoutManager = columnProperties.getLayoutManager();
         recyclerView.setLayoutManager(layoutManager != null ? layoutManager : new LinearLayoutManager(getContext()));
@@ -1012,10 +1033,17 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         layout.addView(recyclerView);
         mLists.add(index, recyclerView);
 
+        View columnFooter = columnProperties.getFooter();
+        if (columnFooter == null) {
+            columnFooter = new View(getContext());
+            columnFooter.setVisibility(View.GONE);
+        }
+        layout.addView(columnFooter);
+        mFooters.add(columnFooter);
+
         mColumnLayout.addView(layout, index);
 
         updateBoardSpaces();
-
         setupColumnDragListener(columnProperties.getColumnDragView(), recyclerView);
 
         return recyclerView;

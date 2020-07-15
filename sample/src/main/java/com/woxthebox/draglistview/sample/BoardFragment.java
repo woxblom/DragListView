@@ -231,15 +231,21 @@ public class BoardFragment extends Fragment {
                 ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
+
+        final View footer = View.inflate(getActivity(), R.layout.column_header, null);
+        ((TextView) footer.findViewById(R.id.text)).setText("Column " + (mColumns + 1) + " footer");
+        ((TextView) footer.findViewById(R.id.item_count)).setText(null);
+
         LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
         ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
-                                      .setLayoutManager(layoutManager)
-                                      .setHasFixedItemSize(false)
-                                      .setColumnBackgroundColor(Color.TRANSPARENT)
-                                      .setItemsSectionBackgroundColor(Color.TRANSPARENT)
-                                      .setHeader(header)
-                                      .setColumnDragView(header)
-                                      .build();
+                .setLayoutManager(layoutManager)
+                .setHasFixedItemSize(false)
+                .setColumnBackgroundColor(Color.TRANSPARENT)
+                .setItemsSectionBackgroundColor(Color.TRANSPARENT)
+                .setHeader(header)
+                .setFooter(footer)
+                .setColumnDragView(header)
+                .build();
 
         mBoardView.addColumn(columnProperties);
         mColumns++;
@@ -256,9 +262,11 @@ public class BoardFragment extends Fragment {
         public void onBindDragView(View clickedView, View dragView) {
             LinearLayout clickedLayout = (LinearLayout) clickedView;
             View clickedHeader = clickedLayout.getChildAt(0);
+            View clickedFooter = clickedLayout.getChildAt(2);
             RecyclerView clickedRecyclerView = (RecyclerView) clickedLayout.getChildAt(1);
 
             View dragHeader = dragView.findViewById(R.id.drag_header);
+            View dragFooter = dragView.findViewById(R.id.drag_footer);
             ScrollView dragScrollView = dragView.findViewById(R.id.drag_scroll_view);
             LinearLayout dragLayout = dragView.findViewById(R.id.drag_list);
 
@@ -276,6 +284,9 @@ public class BoardFragment extends Fragment {
 
             ((TextView) dragHeader.findViewById(R.id.text)).setText(((TextView) clickedHeader.findViewById(R.id.text)).getText());
             ((TextView) dragHeader.findViewById(R.id.item_count)).setText(((TextView) clickedHeader.findViewById(R.id.item_count)).getText());
+            ((TextView) dragFooter.findViewById(R.id.text)).setText(((TextView) clickedFooter.findViewById(R.id.text)).getText());
+            ((TextView) dragFooter.findViewById(R.id.item_count)).setText(((TextView) clickedFooter.findViewById(R.id.item_count)).getText());
+
             for (int i = 0; i < clickedRecyclerView.getChildCount(); i++) {
                 View view = View.inflate(dragView.getContext(), R.layout.column_item, null);
                 ((TextView) view.findViewById(R.id.text)).setText(((TextView) clickedRecyclerView.getChildAt(i).findViewById(R.id.text)).getText());

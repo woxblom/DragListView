@@ -45,6 +45,7 @@ public class ColumnProperties {
     private int mColumnBackgroundColor;
     private int mItemsSectionBackgroundColor;
     private View mHeader;
+    private View mFooter;
     private View mColumnDragView;
 
     private ColumnProperties(DragItemAdapter adapter,
@@ -54,7 +55,8 @@ public class ColumnProperties {
                              int columnBackgroundColor,
                              int itemsSectionBackgroundColor,
                              View columnDragView,
-                             View header) {
+                             View header,
+                             View footer) {
         mDragItemAdapter = adapter;
         mLayoutManager = layoutManager;
         mItemDecorations = itemDecorations;
@@ -62,6 +64,7 @@ public class ColumnProperties {
         mColumnBackgroundColor = columnBackgroundColor;
         mItemsSectionBackgroundColor = itemsSectionBackgroundColor;
         mHeader = header;
+        mFooter = footer;
         mColumnDragView = columnDragView;
     }
 
@@ -93,6 +96,10 @@ public class ColumnProperties {
         return mHeader;
     }
 
+    View getFooter() {
+        return mFooter;
+    }
+
     View getColumnDragView() {
         return mColumnDragView;
     }
@@ -109,6 +116,7 @@ public class ColumnProperties {
         private int mColumnBackgroundColor = Color.TRANSPARENT;
         private int mItemsSectionBackgroundColor = Color.TRANSPARENT;
         private View mHeader = null;
+        private View mFooter = null;
         private View mColumnDragView = null;
 
         private Builder(@NonNull DragItemAdapter adapter) {
@@ -204,6 +212,18 @@ public class ColumnProperties {
         }
 
         /**
+         * Sets footer view that will be positioned below the column
+         *
+         * @param footer View that will be positioned below the column. Default value is null.
+         *
+         * @return instance of the {@link Builder}
+         */
+        public Builder setFooter(@Nullable View footer) {
+            mFooter = footer;
+            return this;
+        }
+
+        /**
          * Sets View that will act as handle to drag and drop columns. Can be null.
          *
          * @param columnDragView View that will act as handle to drag and drop columns. Default value is null.
@@ -228,7 +248,8 @@ public class ColumnProperties {
                     mColumnBackgroundColor,
                     mItemsSectionBackgroundColor,
                     mColumnDragView,
-                    mHeader);
+                    mHeader,
+                    mFooter);
         }
     }
 }
