@@ -76,7 +76,6 @@ public class BoardFragment extends Fragment {
         mBoardView.setSnapDragItemToTouch(true);
         mBoardView.setSnapToColumnInLandscape(false);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
-        mBoardView.setColumnWidth(500);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
             public void onItemDragStarted(int column, int row) {
@@ -235,15 +234,14 @@ public class BoardFragment extends Fragment {
             public void onClick(View v) {
                 mBoardView.scrollToColumn(mBoardView.getColumnOfHeader(v), true);
 
-
-//                long id = sCreatedItems++;
-//                Pair item = new Pair<>(id, "Test " + id);
-//                mBoardView.addItem(mBoardView.getColumnOfHeader(v), 0, item, true);
-//                //mBoardView.moveItem(4, 0, 0, true);
-//                //mBoardView.removeItem(column, 0);
-//                //mBoardView.moveItem(0, 0, 1, 3, false);
-//                //mBoardView.replaceItem(0, 0, item1, true);
-//                ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
+                long id = sCreatedItems++;
+                Pair item = new Pair<>(id, "Test " + id);
+                mBoardView.addItem(mBoardView.getColumnOfHeader(v), 0, item, true);
+                //mBoardView.moveItem(4, 0, 0, true);
+                //mBoardView.removeItem(column, 0);
+                //mBoardView.moveItem(0, 0, 1, 3, false);
+                //mBoardView.replaceItem(0, 0, item1, true);
+                ((TextView) header.findViewById(R.id.item_count)).setText(String.valueOf(mItemArray.size()));
             }
         });
 
@@ -253,14 +251,7 @@ public class BoardFragment extends Fragment {
 
         LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
 
-        ColumnProperties.Builder builder = ColumnProperties.Builder.newBuilder(listAdapter);
-
-        if(mColumns==0) {
-            builder.setColumnWidth(800)
-                    .setColumnBackgroundDrawable(getActivity().getResources().getDrawable(R.drawable.ic_launcher));
-        }
-
-        ColumnProperties columnProperties = builder
+        ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
                 .setLayoutManager(layoutManager)
                 .setHasFixedItemSize(false)
                 .setColumnBackgroundColor(Color.TRANSPARENT)
