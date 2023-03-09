@@ -26,7 +26,8 @@
     <ScrollView
         android:id="@+id/drag_scroll_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:scrollbars="none">
         <LinearLayout
             android:id="@+id/drag_list"
@@ -34,5 +35,9 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"/>
     </ScrollView>
+
+    <include
+        android:id="@+id/drag_footer"
+        layout="@layout/column_header"/>
 
 </LinearLayout>

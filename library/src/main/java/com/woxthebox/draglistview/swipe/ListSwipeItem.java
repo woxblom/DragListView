@@ -57,6 +57,8 @@ public class ListSwipeItem extends RelativeLayout {
     private int mSwipeViewId;
     private int mLeftViewId;
     private int mRightViewId;
+    private float mMaxLeftTranslationX = Float.MAX_VALUE;
+    private float mMaxRightTranslationX = Float.MAX_VALUE;
     private SwipeDirection mSwipeDirection = SwipeDirection.LEFT_AND_RIGHT;
     private SwipeInStyle mSwipeInStyle = SwipeInStyle.APPEAR;
 
@@ -123,6 +125,42 @@ public class ListSwipeItem extends RelativeLayout {
         return mSwipeDirection;
     }
 
+    /**
+     * Set how far you can max drag the item to the left. Only positive values allowed.
+     * If passing in a negative value it will be converted to a positive value.
+     * Max value is the width of the view, if a higher values is passed the width will be used instead.
+     *
+     * @param maxTranslation    How many pixels you can drag the item to the left.
+     */
+    public void setMaxLeftTranslationX(float maxTranslation) {
+        mMaxLeftTranslationX = Math.abs(maxTranslation);
+    }
+
+    /**
+     * @return How many pixels you can drag the item to the left.
+     */
+    public float getMaxLeftTranslationX() {
+        return Math.min(mMaxLeftTranslationX, getMeasuredWidth());
+    }
+
+    /**
+     * Set how far you can max drag the item to the right. Only positive values allowed.
+     * If passing in a negative value it will be converted to a positive value.
+     * Max value is the width of the view, if a higher values is passed the width will be used instead.
+     *
+     * @param maxTranslation    How many pixels you can drag the item to the right.
+     */
+    public void setMaxRightTranslationX(float maxTranslation) {
+        mMaxRightTranslationX = Math.abs(maxTranslation);
+    }
+
+    /**
+     * @return How many pixels you can drag the item to the right.
+     */
+    public float getMaxRightTranslationX() {
+        return Math.min(mMaxRightTranslationX, getMeasuredWidth());
+    }
+
     void setSwipeListener(ListSwipeHelper.OnSwipeListener listener) {
         mSwipeListener = listener;
     }
@@ -132,9 +170,9 @@ public class ListSwipeItem extends RelativeLayout {
             return SwipeDirection.NONE;
         }
 
-        if (mSwipeView.getTranslationX() == -getMeasuredWidth()) {
+        if (mSwipeView.getTranslationX() == -getMaxLeftTranslationX()) {
             return SwipeDirection.LEFT;
-        } else if (mSwipeView.getTranslationX() == getMeasuredWidth()) {
+        } else if (mSwipeView.getTranslationX() == getMaxRightTranslationX()) {
             return SwipeDirection.RIGHT;
         }
         return SwipeDirection.NONE;
@@ -162,9 +200,11 @@ public class ListSwipeItem extends RelativeLayout {
             x = 0;
         }
 
-        mSwipeTranslationX = x;
-        mSwipeTranslationX = Math.min(mSwipeTranslationX, getMeasuredWidth());
-        mSwipeTranslationX = Math.max(mSwipeTranslationX, -getMeasuredWidth());
+        mSwipeTranslationX = Math.min(x, getMaxRightTranslationX());
+        mSwipeTranslationX = Math.max(mSwipeTranslationX, -getMaxLeftTranslationX());
+        if (mSwipeTranslationX == mSwipeView.getTranslationX()) {
+            return;
+        }
 
         mSwipeView.setTranslationX(mSwipeTranslationX);
         if (mSwipeListener != null) {

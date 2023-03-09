@@ -19,7 +19,7 @@ YouTube demo video<br>
     }
 
     dependencies {
-        compile 'com.github.woxthebox:draglistview:1.6.3'
+        compile 'com.github.woxthebox:draglistview:1.7.2'
     }
 
 Add this to proguard rules, otherwise animations won't work correctly
@@ -216,7 +216,33 @@ List and Grid layouts are used as example in the sample project.
             }
         });
         ...
-        mBoardView.addColumn(listAdapter, header, null, false);
+        mBoardView.addColumn(columnProperties);
+
+  To set custom column width you can use the method below.
+    /**
+     * @param width the width of columns in both portrait and landscape. This must be called before {@link #addColumn} is
+     *              called for the width to take effect.
+     */
+     public void setColumnWidth(int width)
+
+  Methods addColumn and insert column which returns the column view are indicated as deprecated and will be removed in future versions. Instead of them, to add or insert a column you should use ColumnProperties instance, where you can set all necessary parameters to this column.
+
+        LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
+        int backgroundColor = ContextCompat.getColor(getContext(), R.color.column_background);
+
+        ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
+                                      .setLayoutManager(layoutManager)
+                                      .setHasFixedItemSize(false)
+                                      .setColumnBackgroundColor(Color.TRANSPARENT)
+                                      .setItemsSectionBackgroundColor(backgroundColor)
+                                      .setHeader(header)
+                                      .setColumnDrugView(header)
+                                      .build();
+
+        mBoardView.addColumn(columnProperties);
+
+  To add spacing between columns you can use BoardView parameter "columnSpacing" or indicate it programmatically via method "setColumnSpacing(int columnSpacing)" where the space should be indicated in pixels.
+  The space before the first column and after the last one can be added by parameter "boardEdges" or programmatically via method "setBoardEdge(int boardEdge)" where space should be indicated in pixels as well.
 
   To enable dragging and reordering of columns you need to provide a column drag view when adding the column. It is the view that will
   start the column drag process when long pressed on. You can also implement a custom column drag item to control the visuals and animations.

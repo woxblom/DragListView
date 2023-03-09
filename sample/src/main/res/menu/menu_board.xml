@@ -26,6 +26,14 @@
         android:title="@string/action_enable_drag"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_grid"
+        android:title="Grid layout"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_list"
+        android:title="List layout"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_add_column"
         android:title="Add column"
         app:showAsAction="never"/>

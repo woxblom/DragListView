@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2017 Magnus Woxblom
+<!-- Copyright 2020 Dmytro Lisovyi
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,14 +14,9 @@
      limitations under the License.
 -->
 <resources>
-    <declare-styleable name="ListSwipeItem">
-        <attr name="swipeViewId" format="integer"/>
-        <attr name="leftViewId" format="integer"/>
-        <attr name="rightViewId" format="integer"/>
-    </declare-styleable>
 
-    <declare-styleable name="BoardView">
-        <attr name="boardEdges" format="dimension"/>
-        <attr name="columnSpacing" format="dimension"/>
-    </declare-styleable>
+    <!-- Margins -->
+    <dimen name="columnSpacing">0dp</dimen>
+    <dimen name="boardEdges">0dp</dimen>
+
 </resources>
