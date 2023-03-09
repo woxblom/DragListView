@@ -250,7 +250,6 @@ public class BoardFragment extends Fragment {
         ((TextView) footer.findViewById(R.id.item_count)).setText(null);
 
         LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
-
         ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
                 .setLayoutManager(layoutManager)
                 .setHasFixedItemSize(false)
