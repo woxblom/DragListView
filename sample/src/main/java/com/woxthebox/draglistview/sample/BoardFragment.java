@@ -32,12 +32,10 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
@@ -48,7 +46,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.woxthebox.draglistview.BoardView;
 import com.woxthebox.draglistview.ColumnProperties;
 import com.woxthebox.draglistview.DragItem;
-import com.woxthebox.draglistview.DragItemAdapter;
 
 import java.util.ArrayList;
 
@@ -83,8 +80,6 @@ public class BoardFragment extends Fragment {
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
             public void onItemDragStarted(int column, int row) {
-                DragItemAdapter adapter = mBoardView.getAdapter(column);
-                adapter.getItemList().get(row);
                 //Toast.makeText(getContext(), "Start - column: " + column + " row: " + row, Toast.LENGTH_SHORT).show();
             }
 
@@ -225,7 +220,7 @@ public class BoardFragment extends Fragment {
 
     private void addColumn() {
         final ArrayList<Pair<Long, String>> mItemArray = new ArrayList<>();
-        int addItems = 6;
+        int addItems = 15;
         for (int i = 0; i < addItems; i++) {
             long id = sCreatedItems++;
             mItemArray.add(new Pair<>(id, "Item " + id));
@@ -235,12 +230,6 @@ public class BoardFragment extends Fragment {
         final View header = View.inflate(getActivity(), R.layout.column_header, null);
         ((TextView) header.findViewById(R.id.text)).setText("Column " + (mColumns + 1));
         ((TextView) header.findViewById(R.id.item_count)).setText("" + addItems);
-        header.findViewById(R.id.item_count).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(getContext(), "Part clicked", Toast.LENGTH_LONG).show();
-            }
-        });
         header.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -731,14 +731,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         updateBoardSpaces();
     }
 
-    public void setColumnWidth(int index, int width) {
-        mColumnsWidth.put(index, width);
-    }
-
-    public void setColumnBackground(int index, Drawable drawable) {
-        mColumnsBackground.put(index, drawable);
-    }
-
     /**
      * @param snapToColumn true if scrolling should snap to columns. Only applies to portrait mode.
      */
@@ -1059,8 +1051,6 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         layout.addView(columnHeader);
         mHeaders.add(columnHeader);
 
-        recyclerView.setPadding(mColumnsWidth.get(index, mColumnWidth)-mColumnWidth, 0, 0, 0);
-        recyclerView.setBackgroundDrawable(mColumnsBackground.get(index));
         layout.addView(recyclerView);
         mLists.add(index, recyclerView);
 
