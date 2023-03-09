@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -1017,10 +1018,17 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
         recyclerView.setAdapter(adapter);
         recyclerView.setDragEnabled(mDragEnabled);
 
+        Drawable columnBackgroundDrawable = columnProperties.getColumnBackgroundDrawable();
+        recyclerView.setBackgroundDrawable(columnBackgroundDrawable);
+
+        Integer specificColumnWidth = columnProperties.getColumnWidth();
+        specificColumnWidth = specificColumnWidth!=null ? specificColumnWidth : mColumnWidth;
+        recyclerView.setPadding(specificColumnWidth-mColumnWidth, 0, 0, 0);
+
         LinearLayout layout = new LinearLayout(getContext());
         layout.setBackgroundColor(columnProperties.getColumnBackgroundColor());
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setLayoutParams(new LayoutParams(mColumnWidth, LayoutParams.MATCH_PARENT));
+        layout.setLayoutParams(new LayoutParams(specificColumnWidth, LayoutParams.MATCH_PARENT));
 
         View columnHeader = columnProperties.getHeader();
         if (columnHeader == null) {

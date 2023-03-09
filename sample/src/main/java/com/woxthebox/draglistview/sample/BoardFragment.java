@@ -77,6 +77,7 @@ public class BoardFragment extends Fragment {
         mBoardView.setSnapDragItemToTouch(true);
         mBoardView.setSnapToColumnInLandscape(false);
         mBoardView.setColumnSnapPosition(BoardView.ColumnSnapPosition.CENTER);
+        mBoardView.setColumnWidth(500);
         mBoardView.setBoardListener(new BoardView.BoardListener() {
             @Override
             public void onItemDragStarted(int column, int row) {
@@ -237,7 +238,15 @@ public class BoardFragment extends Fragment {
         ((TextView) footer.findViewById(R.id.item_count)).setText(null);
 
         LinearLayoutManager layoutManager = mGridLayout ? new GridLayoutManager(getContext(), 4) : new LinearLayoutManager(getContext());
-        ColumnProperties columnProperties = ColumnProperties.Builder.newBuilder(listAdapter)
+
+        ColumnProperties.Builder builder = ColumnProperties.Builder.newBuilder(listAdapter);
+
+        if(mColumns==0) {
+            builder.setColumnWidth(800)
+                    .setColumnBackgroundDrawable(getActivity().getResources().getDrawable(R.drawable.ic_launcher));
+        }
+
+        ColumnProperties columnProperties = builder
                 .setLayoutManager(layoutManager)
                 .setHasFixedItemSize(false)
                 .setColumnBackgroundColor(Color.TRANSPARENT)
