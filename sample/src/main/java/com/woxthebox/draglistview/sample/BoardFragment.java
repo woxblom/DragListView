@@ -120,7 +120,7 @@ public class BoardFragment extends Fragment {
             }
 
             @Override
-            public void onColumnDragEnded(int position) {
+            public void onColumnDragEnded(int fromPosition, int toPosition) {
                 //Toast.makeText(getContext(), "Column drag ended at " + position, Toast.LENGTH_SHORT).show();
             }
         });
@@ -134,6 +134,18 @@ public class BoardFragment extends Fragment {
             @Override
             public boolean canDropItemAtPosition(int oldColumn, int oldRow, int newColumn, int newRow) {
                 // Add logic here to prevent an item to be dropped
+                return true;
+            }
+
+            @Override
+            public boolean canDragColumnAtPosition(int index) {
+                // Add logic here to prevent a column to be dragged
+                return true;
+            }
+
+            @Override
+            public boolean canDropColumnAtPosition(int oldIndex, int newIndex) {
+                // Add logic here to prevent a column to be dropped
                 return true;
             }
         });
