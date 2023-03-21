@@ -14,7 +14,7 @@ ext {
             'https://github.com/elye/loaderviewlibrary/blob/master/LICENSE'
     PUBLISH_DEVELOPER_ID = 'woxthebox'
     PUBLISH_DEVELOPER_NAME = 'Magnus Woxblom'
-    PUBLISH_DEVELOPER_EMAIL = 'woxthebox@mail.com'
+    PUBLISH_DEVELOPER_EMAIL = 'woxthebox@gmail.com'
     PUBLISH_SCM_CONNECTION =
             'scm:git@github.com:woxthebox/DragListView.git'
     PUBLISH_SCM_DEVELOPER_CONNECTION =
