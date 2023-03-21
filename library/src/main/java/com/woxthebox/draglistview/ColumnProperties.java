@@ -17,6 +17,7 @@
 package com.woxthebox.draglistview;
 
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.annotation.ColorInt;
@@ -47,6 +48,8 @@ public class ColumnProperties {
     private View mHeader;
     private View mFooter;
     private View mColumnDragView;
+    private Integer mColumnWidth;
+    private Drawable mColumnBackgroundDrawable;
 
     private ColumnProperties(DragItemAdapter adapter,
                              LayoutManager layoutManager,
@@ -56,7 +59,9 @@ public class ColumnProperties {
                              int itemsSectionBackgroundColor,
                              View columnDragView,
                              View header,
-                             View footer) {
+                             View footer,
+                             Integer columnWidth,
+                             Drawable columnBackgroundDrawable) {
         mDragItemAdapter = adapter;
         mLayoutManager = layoutManager;
         mItemDecorations = itemDecorations;
@@ -66,6 +71,8 @@ public class ColumnProperties {
         mHeader = header;
         mFooter = footer;
         mColumnDragView = columnDragView;
+        mColumnWidth = columnWidth;
+        mColumnBackgroundDrawable = columnBackgroundDrawable;
     }
 
     @NonNull DragItemAdapter getDragItemAdapter() {
@@ -104,6 +111,14 @@ public class ColumnProperties {
         return mColumnDragView;
     }
 
+    Integer getColumnWidth() {
+        return mColumnWidth;
+    }
+
+    Drawable getColumnBackgroundDrawable() {
+        return mColumnBackgroundDrawable;
+    }
+
     /**
      * Builder for {@link ColumnProperties}.
      */
@@ -118,6 +133,8 @@ public class ColumnProperties {
         private View mHeader = null;
         private View mFooter = null;
         private View mColumnDragView = null;
+        private Integer mColumnWidth = null;
+        private Drawable mColumnBackgroundDrawable = null;
 
         private Builder(@NonNull DragItemAdapter adapter) {
             mDragItemAdapter = adapter;
@@ -236,6 +253,30 @@ public class ColumnProperties {
         }
 
         /**
+         * Sets the width for this specific column.
+         *
+         * @param columnWidth Width for this specific column.
+         *
+         * @return instance of the {@link Builder}
+         */
+        public Builder setColumnWidth(@Nullable Integer columnWidth) {
+            mColumnWidth = columnWidth;
+            return this;
+        }
+
+        /**
+         * Sets background drawable to the column.
+         *
+         * @param backgroundDrawable Drawable to set as background.
+         *
+         * @return instance of the {@link Builder}
+         */
+        public Builder setColumnBackgroundDrawable(@Nullable Drawable backgroundDrawable) {
+            mColumnBackgroundDrawable = backgroundDrawable;
+            return this;
+        }
+
+        /**
          * Builds a {@link ColumnProperties} with the settled parameters
          *
          * @return the {@link ColumnProperties} instance
@@ -249,7 +290,9 @@ public class ColumnProperties {
                     mItemsSectionBackgroundColor,
                     mColumnDragView,
                     mHeader,
-                    mFooter);
+                    mFooter,
+                    mColumnWidth,
+                    mColumnBackgroundDrawable);
         }
     }
 }
