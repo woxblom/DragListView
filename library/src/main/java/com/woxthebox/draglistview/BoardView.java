@@ -1046,7 +1046,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             columnHeader.setVisibility(View.GONE);
         }
         layout.addView(columnHeader);
-        mHeaders.add(columnHeader);
+        mHeaders.add(index, columnHeader);
 
         layout.addView(recyclerView);
         mLists.add(index, recyclerView);
@@ -1057,7 +1057,7 @@ public class BoardView extends HorizontalScrollView implements AutoScroller.Auto
             columnFooter.setVisibility(View.GONE);
         }
         layout.addView(columnFooter);
-        mFooters.add(columnFooter);
+        mFooters.add(index, columnFooter);
 
         mColumnLayout.addView(layout, index);
 
