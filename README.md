@@ -1,3 +1,5 @@
+# This library is no longer maintained, feel free to fork and continue the development if you want. Thanks!
+
 # DragListView
 DragListView can be used when you want to be able to re-order items in a list, grid or a board.
 It also supports horizontal swiping of items in a list.
